@@ -1,0 +1,204 @@
+---
+title: ジオメトリの表示
+description: Rhodoniteでジオメトリを表示する方法
+---
+
+import DocLayout from '../../../components/tutorials_layouts/DocLayout.astro';
+
+<DocLayout>
+
+## ジオメトリクラス群の構造
+
+実際の頂点データを格納するクラスはPrimitiveクラスです。複数のPrimitiveクラスをまとめるクラスとしてMeshクラスがあります。
+各PrimitiveクラスはMaterialクラスのインスタンスを所有します。
+
+```typescript
+const primitive = new Rn.Plane();
+primitive.generate({
+  width: 1, height: 1, uSpan: 1, vSpan: 1, isUVRepeat: false,
+  material: Rn.MaterialHelper.createPbrUberMaterial();
+});
+const mesh = new Mesh();
+mesh.addPrimitive(primitive);
+```
+
+## MeshComponentへの追加
+
+meshがセットアップできたら、Meshを持たせたいEntityのMeshComponentにmeshを追加します。
+
+```typescript
+const meshEntity = Rn.EntityHelper.createMeshEntity();
+const meshComponent = meshEntity.getMesh();
+meshComponent.setMesh(mesh);
+```
+
+## レンダーループを回す
+
+Rhodoniteの最も簡単な使い方では、ここまでのコーディングだけでRhodoniteエンジンが生成されたMeshとEntityを自動的に認識し、以下のレンダーループを回すだけでメッシュの描画が行われます。
+
+```typescript
+Rn.System.startRenderLoop(()=>{
+  Rn.System.processAuto();
+});
+```
+
+また、Rhodoniteに自動的にMeshを持つEntityを認識させるのではなく、明示的に指定することもできます。その場合は、ExpressionとRenderPassを使います。
+Expressionは一つのCG表現の単位と考えてください。Expressionは複数のRenderPassを持ちます。RenderPassはリアルタイムグラフィックスにおけるレンダーパスの概念に相当します。
+
+```typescript
+const renderPass = new Rn.RenderPass();
+renderPass.addEntities([meshEntity]);
+const expression = new Rn.Expression();
+expression.addRenderPasses([renderPass]);
+
+Rn.System.startRenderLoop(()=>{
+  Rn.System.process([expression]);
+});
+```
+
+## MeshHelperを使って簡単にMeshを生成する
+
+[MeshHelper](https://actnwit.github.io/RhodoniteTS/api/variables/MeshHelper.html)オブジェクトを使って、いくつかの基本形状を作ることができます。これらの関数は作成した基本形状のentityを返します。
+
+```typescript
+const cubeEntity = Rn.MeshHelper.createCube();
+cubeEntity.eulerAngles = Rn.Vector3.fromCopy3(90, 0, 0);
+cubeEntity.position = Rn.Vector3.fromCopy3(0, 3, 0);
+```
+
+以下の基本形状が用意されています。
+
+* Plane - [Rn.MeshHelper.createPlane()](https://github.com/actnwit/RhodoniteTS/blob/4219ddad/src/foundation/helpers/MeshHelper.ts#L14)
+* Grid - [Rn.MeshHelper.createGrid()](https://github.com/actnwit/RhodoniteTS/blob/4219ddad/src/foundation/helpers/MeshHelper.ts#L42)
+* Cube - [Rn.MeshHelper.createCube()](https://github.com/actnwit/RhodoniteTS/blob/4219ddad/src/foundation/helpers/MeshHelper.ts#L57)
+* Axis - [Rn.MeshHelper.createAxis()](https://github.com/actnwit/RhodoniteTS/blob/4219ddad/src/foundation/helpers/MeshHelper.ts#L88)
+* Joint - [Rn.MeshHelper.createJoint()](https://github.com/actnwit/RhodoniteTS/blob/4219ddad/src/foundation/helpers/MeshHelper.ts#L81)
+* Line - [Rn.MeshHelper.createLine()](https://github.com/actnwit/RhodoniteTS/blob/4219ddad/src/foundation/helpers/MeshHelper.ts#L29)
+* Sphere - [Rn.MeshHelper.creteSphere()](https://github.com/actnwit/RhodoniteTS/blob/4219ddad/src/foundation/helpers/MeshHelper.ts#L68)
+
+参考となるサンプルです。
+
+- [Primitives](https://github.com/actnwit/RhodoniteTS/blob/master/samples/test_e2e/Primitives/main.ts)
+
+![image](https://user-images.githubusercontent.com/3821214/205436440-8f9d271b-c083-41f4-8b61-04fe9b09eecc.png)
+
+### マテリアルを渡す
+
+各種生成関数では、引数にマテリアルを渡せます。
+
+```typescript
+const material = Rn.MaterialHelper.createClassicUberMaterial();
+material.setParameter(Rn.ShaderSemantics.DiffuseColorFactor, Rn.Vector4.fromCopy4(1, 0, 0, 1));
+const cube = Rn.MeshHelper.createCube({
+    material: material
+});
+```
+
+## 頂点データを自前で用意してPrimitiveオブジェクトを作る
+
+次のようにして、頂点データを定義することができます。
+定義した頂点データはPrimitiveクラスに設定します。
+
+```typescript
+function readyBasicVerticesData() {
+
+    const positions = new Float32Array([
+         0.0,  0.5, 0.0, // v0
+        -0.5, -0.5, 0.0, // v1
+         0.5, -0.5, 0.0  // v2
+    ]);
+
+    const colors = new Float32Array([
+        0.0, 0.0, 1.0,
+        0.0, 0.0, 1.0,
+        0.0, 0.0, 1.0,
+    ]);
+
+    const indices = new Uint32Array([
+        0, 1, 2
+    ]);
+
+    const primitive = Rn.Primitive.createPrimitive({
+        indices: indices,
+        attributeSemantics: [Rn.VertexAttribute.Position.XYZ, Rn.VertexAttribute.Color0.XYZ],
+        attributes: [positions, colors],
+        primitiveMode: Rn.PrimitiveMode.Triangles
+    });
+
+    return primitive;
+}
+```
+
+コード全体を以下に示します。
+
+```typescript
+function readyBasicVerticesData() {
+
+    const positions = new Float32Array([
+         0.0,  0.5, 0.0, // v0
+        -0.5, -0.5, 0.0, // v1
+         0.5, -0.5, 0.0  // v2
+    ]);
+
+    const colors = new Float32Array([
+        0.0, 0.0, 1.0,
+        0.0, 0.0, 1.0,
+        0.0, 0.0, 1.0,
+    ]);
+
+    const indices = new Uint32Array([
+        0, 1, 2
+    ]);
+
+    const primitive = Rn.Primitive.createPrimitive({
+        indices: indices,
+        attributeSemantics: [Rn.VertexAttribute.Position.XYZ, Rn.VertexAttribute.Color0.XYZ],
+        attributes: [positions, colors],
+        primitiveMode: Rn.PrimitiveMode.Triangles
+    });
+
+    return primitive;
+}
+
+const load = async function () {
+    const c = document.getElementById('world');
+    await Rn.System.init({
+      approach: Rn.ProcessApproach.DataTexture,
+      canvas: c
+    });
+
+    resizeCanvas();
+
+    window.addEventListener("resize", function(){
+        resizeCanvas();
+    });
+
+    function resizeCanvas() {
+        c.width = window.innerWidth;
+        c.height = window.innerHeight;
+        system.resizeCanvas(c.width, c.height);
+    }
+
+    const primitive = readyBasicVerticesData();
+
+    const originalMesh = new Rn.Mesh();
+    originalMesh.addPrimitive(primitive);
+
+    const firstEntity = Rn.EntityHelper.createMeshEntity();
+
+    const meshComponent = firstEntity.getMesh();
+    meshComponent.setMesh(originalMesh);
+
+    Rn.System.startRenderLoop(()=>{
+      Rn.System.processAuto();
+    });
+}
+
+document.body.onload = load;
+```
+
+jsfiddle版はこちらです。
+
+https://jsfiddle.net/emadurandal/xgw9e3y7/4/
+
+</DocLayout>

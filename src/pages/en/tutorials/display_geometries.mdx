@@ -1,0 +1,192 @@
+---
+title: Displaying Geometries
+description: How to display geometries in Rhodonite
+---
+
+import DocLayout from '../../../components/tutorials_layouts/DocLayout.astro';
+
+<DocLayout>
+
+## Structure of the geometry-related classes
+The class that stores the actual vertex data is the Primitive class.The Mesh class is the class that brings together multiple Primitive classes. Each Primitive class owns an instance of the Material class.
+
+```typescript
+const primitive = new Rn.Plane();
+primitive.generate({
+  width: 1, height: 1, uSpan: 1, vSpan: 1, isUVRepeat: false,
+  material: Rn.MaterialHelper.createPbrUberMaterial();
+});
+const mesh = new Mesh();
+mesh.addPrimitive(primitive);
+```
+
+## Adding to MeshComponent
+Once the mesh is set up, add the mesh to the MeshComponent of the Entity that wants to have the mesh.
+
+```typescript
+const meshEntity = Rn.EntityHelper.createMeshEntity();
+const meshComponent = meshEntity.getMesh();
+meshComponent.setMesh(mesh);
+```
+
+## Turning the render loop
+In the simplest use of Rhodonite, the Rhodonite engine automatically recognises the generated Mesh and Entity with just the coding up to this point, and the mesh is drawn by simply turning the following render loop.
+
+```typescript
+Rn.System.startRenderLoop(()=>{
+  Rn.System.processAuto();
+});
+```
+
+Alternatively, instead of having Rhodonite automatically recognise Entities with Mesh, you can specify it explicitly. In this case, use Expression and RenderPass. Think of an Expression as a single unit of CG representation; an Expression has multiple RenderPasses; a RenderPass corresponds to the concept of a RenderPass in real-time graphics.
+
+```typescript
+const renderPass = new Rn.RenderPass();
+renderPass.addEntities([meshEntity]);
+const expression = new Rn.Expression();
+expression.addRenderPasses([renderPass]);
+
+Rn.System.startRenderLoop(()=>{
+  Rn.System.process([expression]);
+});
+```
+
+## Basic Shapes
+
+Several basic shapes can be created using the MeshHelper class. These functions return the entities of the basic shapes created.
+
+```typescript
+  const cubeEntity = Rn.MeshHelper.createCube();
+  cubeEntity.rotate = Rn.Vector3.fromCopy3(90, 0, 0);
+  cubeEntity.translate = Rn.Vector3.fromCopy3(0, 3, 0);
+````
+
+The following basic shapes are available.
+
+* Plane - [Rn.MeshHelper.createPlane()](https://github.com/actnwit/RhodoniteTS/blob/4219ddad/src/foundation/helpers/MeshHelper.ts#L14)
+* Grid - [Rn.MeshHelper.createGrid()](https://github.com/actnwit/RhodoniteTS/blob/4219ddad/src/foundation/helpers/MeshHelper.ts#L42)
+* Cube - [Rn.MeshHelper.createCube()](https://github.com/actnwit/RhodoniteTS/blob/4219ddad/src/foundation/helpers/MeshHelper.ts#L57)
+* Axis - [Rn.MeshHelper.createAxis()](https://github.com/actnwit/RhodoniteTS/blob/4219ddad/src/foundation/helpers/MeshHelper.ts#L88)
+* Joint - [Rn.MeshHelper.createJoint()](https://github.com/actnwit/RhodoniteTS/blob/4219ddad/src/foundation/helpers/MeshHelper.ts#L81)
+* Line - [Rn.MeshHelper.createLine()](https://github.com/actnwit/RhodoniteTS/blob/4219ddad/src/foundation/helpers/MeshHelper.ts#L29)
+* Sphere - [Rn.MeshHelper.creteSphere()](https://github.com/actnwit/RhodoniteTS/blob/4219ddad/src/foundation/helpers/MeshHelper.ts#L68)
+
+
+Here is a sample for reference.
+
+- [Primitives](https://github.com/actnwit/RhodoniteTS/blob/master/samples/test_e2e/Primitives/main.ts)
+
+![image](https://user-images.githubusercontent.com/3821214/205436440-8f9d271b-c083-41f4-8b61-04fe9b09eecc.png)
+
+## If you prepare your own vertex data
+
+Vertex data can be defined as follows
+The defined vertex data is set to the Primitive class.
+
+
+```typescript
+function readyBasicVerticesData() {
+
+    const positions = new Float32Array([
+         0.0,  0.5, 0.0, // v0
+        -0.5, -0.5, 0.0, // v1
+         0.5, -0.5, 0.0  // v2
+    ]);
+
+    const colors = new Float32Array([
+        0.0, 0.0, 1.0,
+        0.0, 0.0, 1.0,
+        0.0, 0.0, 1.0,
+    ]);
+
+    const indices = new Uint32Array([
+        0, 1, 2
+    ]);
+
+    const primitive = Rn.Primitive.createPrimitive({
+        indices: indices,
+        attributeSemantics: [Rn.VertexAttribute.Position.XYZ, Rn.VertexAttribute.Color0.XYZ],
+        attributes: [positions, colors],
+        material: void 0,
+        primitiveMode: Rn.PrimitiveMode.Triangles
+    });
+
+    return primitive;
+}
+```
+
+
+The entire code is shown below.
+
+```typescript
+function readyBasicVerticesData() {
+
+    const positions = new Float32Array([
+         0.0,  0.5, 0.0, // v0
+        -0.5, -0.5, 0.0, // v1
+         0.5, -0.5, 0.0  // v2
+    ]);
+
+    const colors = new Float32Array([
+        0.0, 0.0, 1.0,
+        0.0, 0.0, 1.0,
+        0.0, 0.0, 1.0,
+    ]);
+
+    const indices = new Uint32Array([
+        0, 1, 2
+    ]);
+
+    const primitive = Rn.Primitive.createPrimitive({
+        indices: indices,
+        attributeSemantics: [Rn.VertexAttribute.Position.XYZ, Rn.VertexAttribute.Color0.XYZ],
+        attributes: [positions, colors],
+        material: void 0,
+        primitiveMode: Rn.PrimitiveMode.Triangles
+    });
+
+    return primitive;
+}
+
+const load = async function () {
+    const c = document.getElementById('world');
+    Rn.System.init({
+      approach: Rn.ProcessApproach.FastestWebGL2,
+      canvas: c,
+    });
+
+    resizeCanvas();
+
+    window.addEventListener("resize", function(){
+        resizeCanvas();
+    });
+
+    function resizeCanvas() {
+        c.width = window.innerWidth;
+        c.height = window.innerHeight;
+        system.resizeCanvas(c.width, c.height);
+    }
+
+    const primitive = readyBasicVerticesData();
+
+    const originalMesh = new Rn.Mesh();
+    originalMesh.addPrimitive(primitive);
+
+    const firstEntity = Rn.EntityHelper.createMeshEntity();
+
+    const meshComponent = firstEntity.getMesh();
+    meshComponent.setMesh(originalMesh);
+
+    Rn.System.startRenderLoop(()=>{
+      Rn.System.processAuto();
+    });
+}
+
+document.body.onload = load;
+```
+
+jsfiddle版はこちらです。
+
+https://jsfiddle.net/emadurandal/xgw9e3y7/4/
+
+</DocLayout>

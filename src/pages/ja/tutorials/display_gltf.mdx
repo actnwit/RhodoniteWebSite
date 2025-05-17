@@ -1,0 +1,61 @@
+---
+title: glTFの表示
+description: RhodoniteでglTFを表示する方法
+---
+
+import DocLayout from '../../../components/tutorials_layouts/DocLayout.astro';
+
+<DocLayout>
+
+RhodoniteでのglTFの表示のやり方を説明します。
+RhodoniteはglTF1とglTF2、VRMをサポートしています。
+
+## glTFのインポート方法
+
+### GltfImporterを使う
+一番簡単な方法は、GltfImporterクラスを使うことです。
+このクラスはglTF1とglTF2、VRMを自動的に判定して適切にロードします。
+このクラスのimportメソッドはawaitを使って呼び出すとIResult型のオブジェクトを返します。
+読み込みが成功している場合、getメソッドを使って中身のexpressionオブジェクトを取り出すことができます。
+このexpressionはそのままSystemクラスのprocessメソッドに渡して描画できます。
+
+```typescript
+const result = await Rn.GltfImporter.import(gltfUrl, loadOption);
+if (result.isOk()) {
+  const expression = result.get();
+}
+```
+
+成功したかのチェックが面倒な場合は、unwrapForce()メソッドで強制的に取り出すことも可能ですが、resultの結果がエラーだった場合は例外が発生します。
+
+```typescript
+const result = await Rn.GltfImporter.import(gltfUrl, loadOption);
+const expression = result.unwrapForce();
+```
+
+## Gltf1ImporterまたはGltf2Importerを使う
+
+バージョンを決めうちしたImporterもあります。Gltf1ImporterまたはGltf2Importerです。これらはexpressionではなく、[RnM2](https://github.com/actnwit/RhodoniteTS/blob/master/src/types/RnM2.ts)という独自形式のデータをResultオブジェクトに包んで返します。
+RnMはglTF2の各項目のインデックスで結ばれた論理的な接続関係を、実際のオブジェクトの参照として解決した状態のglTFデータです。
+これをModelConverterに渡すことで読み込んだglTFのシーングラフのルートのEntityを得ます。
+
+```typescript
+    const result = await Rn.Gltf2Importer.import(
+      '../../../assets/gltf/glTF-Sample-Models/2.0/BoxAnimated/glTF/BoxAnimated.gltf'
+    );
+    const rnm = result.unwrapForce();
+    const rootGroup = Rn.ModelConverter.convertToRhodoniteObject(rnm);
+
+    const expression = new Rn.Expression();
+    const renderPass = new Rn.RenderPass();
+    renderPass.addEntities([rootGroup]);
+    expression.addRenderPasses([renderPass]);
+```
+
+## 参考サンプル
+
+- [glTFImporter](https://github.com/actnwit/RhodoniteTS/tree/master/samples/test_e2e/GltfImporter-draco-extension)
+- [glTF1Importer Sample](https://github.com/actnwit/RhodoniteTS/tree/master/samples/test_e2e/Gltf1Importer)
+- [glTF2Importer Sample](https://github.com/actnwit/RhodoniteTS/tree/master/samples/test_e2e/Gltf2Importer)
+
+</DocLayout>

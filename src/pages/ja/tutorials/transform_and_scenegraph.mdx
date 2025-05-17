@@ -1,0 +1,74 @@
+---
+title: TransformとSceneGraph
+description: RhodoniteでTransformとSceneGraphを使う方法
+---
+
+import DocLayout from '../../../components/tutorials_layouts/DocLayout.astro';
+
+<DocLayout>
+
+## コンポーネントの取得
+
+Rhodoniteはコンポーネント志向のライブラリです。
+Entity（３D空間上の物体）に対する操作は、実際にはEntityが持つ各種のコンポーネントに対して行います。
+
+そのため、Entityからまずはコンポーネントを取得する必要があります。
+
+```typescript
+const cubeEntity = Rn.MeshHelper.createCube();
+const cubeTransformComponent = cubeEntity.getTransform();
+```
+
+## Transformコンポーネント
+
+トランスフォームコンポーネントを使うと、そのEntityに対するローカル座標における平行移動、スケール、回転を操作できます。
+
+```typescript
+const cubeTransformComponent = cubeEntity.getTransform();
+cubeTransformComponent.localPosition = Rn.Vector3.fromCopy3(0, 3, 0);
+cubeTransformComponent.localEulerAngles = Rn.Vector3.fromCopy3(90, 0, 0);
+cubeTransformComponent.localScale = Rn.Vector3.fromCopy3(2, 2, 2);
+```
+
+## SceneGraphコンポーネント
+
+SceneGraphコンポーネントでは、Entity同士の親子関係を構築できます。
+
+```typescript
+const groupEntity = Rn.EntityHelper.createGroupEntity();
+const cubeEntity = Rn.MeshHelper.createCube();
+const groupSceneGraphComponent = groupEntity.getSceneGraph();
+groupSceneGraphComponent.addChild(cubeEntity.getSceneGraph());
+```
+
+また、ワールド空間における平行移動、回転を操作できます。
+
+```typescript
+const groupEntity = Rn.EntityHelper.createGroupEntity();
+groupEntity.position = Rn.Vector3.fromCopy3(0, 3, 0);
+groupEntity.eulerAngles = Rn.Vector3.fromCopy3(90, 0, 0);
+```
+
+## TransformコンポーネントとSceneGraphコンポーネントのショートカットメソッド
+
+このように、本来はEntityに対するあらゆる操作において、まずは対応する機能のコンポーネントを取得する必要があります。
+ただし、TransformコンポーネントとSceneGraphコンポーネントについてはよく使われるため、ショートカットとして主要なメソッドがEntity自体にも存在します。
+
+```typescript
+const cubeEntity = Rn.MeshHelper.createCube();
+cubeEntity.localPosition = Rn.Vector3.fromCopy3(0, 3, 0);
+cubeEntity.localEulerAngles = Rn.Vector3.fromCopy3(90, 0, 0);
+cubeEntity.localScale = Rn.Vector3.fromCopy3(2, 2, 2);
+cubeEntity.position = Rn.Vector3.fromCopy3(0, 3, 0);
+cubeEntity.eulerAngles = Rn.Vector3.fromCopy3(90, 0, 0);
+
+const groupEntity = Rn.EntityHelper.createGroupEntity();
+groupEntity.addChild(cubeEntity.getSceneGraph());
+```
+
+用意されているそれぞれのショートカットメソッドについては以下のファイルから知ることができます。
+
+https://github.com/actnwit/RhodoniteTS/blob/master/src/foundation/components/Transform/ITransformEntity.ts
+https://github.com/actnwit/RhodoniteTS/blob/master/src/foundation/components/SceneGraph/ISceneGraphEntity.ts
+
+</DocLayout>

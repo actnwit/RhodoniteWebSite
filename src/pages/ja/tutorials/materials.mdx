@@ -1,0 +1,67 @@
+---
+title: Materialの作成
+description: RhodoniteでMaterialを作成する方法
+---
+
+import DocLayout from '../../../components/tutorials_layouts/DocLayout.astro';
+
+<DocLayout>
+
+## Materialの作成
+
+Rhodoniteには多くのマテリアルクラスがあります。これらを生成するには、ヘルパーオブジェクトである[MaterialHelper](https://actnwit.github.io/RhodoniteTS/api/variables/MaterialHelper.html)を使います。
+
+```typescript
+const material = Rn.MaterialHelper.createPbrUberMaterial()
+```
+
+## Materialへのシェーダーパラメーター設定
+
+シェーダーパラメータの設定は、そのシェーダーを保持している[Material](https://actnwit.github.io/RhodoniteTS/api/classes/Material.html)クラスに対して行います。
+
+```typescript
+material.setParameter(Rn.ShaderSemantics.BaseColorFactor, Rn.Vector4.fromCopy4(1, 1, 1, 1));
+```
+
+テクスチャをシェーダーに渡す場合は、以下のようにします。
+
+```typescript
+const rnTexture = new Rn.Texture();
+texture.generateTextureFromUri('/path/to/texture.png');
+
+const rnSampler = new Rn.Sampler({
+   magFilter: Rn.TextureParameter.Linear,
+   minFilter: Rn.TextureParameter.Linear,
+   wrapS: Rn.TextureParameter.ClampToEdge,
+   wrapT: Rn.TextureParameter.ClampToEdge,
+});
+rnSampler.create();
+
+material.setTextureParameter(Rn.ShaderSemantics.BaseColorTexture, rnTexture, rnSampler);
+```
+
+## Materialの適用
+
+作成したMaterialは[Primitive](https://actnwit.github.io/RhodoniteTS/api/classes/Primitive.html)や[MeshHelper](https://actnwit.github.io/RhodoniteTS/api/variables/MeshHelper.html)オブジェクトのメソッド群で使用することができます。
+それらのPrimitiveや[Mesh](https://actnwit.github.io/RhodoniteTS/api/classes/Mesh.html)は指定されたMaterialが適用されて描画されます。
+
+```typescript
+const primitive = Rn.Primitive.createPrimitive({
+  indices: indices,
+  attributeSemantics: [Rn.VertexAttribute.Position.XYZ],
+  attributes: [positions],
+  primitiveMode: Rn.PrimitiveMode.Lines,
+});
+primitive.material = mateiral;
+```
+
+```typescript
+const sphere = Rn.MeshHelper.createSphere({
+    radius: 1,
+    widthSegments: 10,
+    heightSegments: 10,
+    material: material
+  })
+```
+
+</DocLayout>

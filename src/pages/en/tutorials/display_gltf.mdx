@@ -1,0 +1,61 @@
+---
+title: Displaying glTF
+description: How to display glTF in Rhodonite
+---
+
+import DocLayout from '../../../components/tutorials_layouts/DocLayout.astro';
+
+<DocLayout>
+
+This section explains how to display glTF in Rhodonite.
+Rhodonite supports glTF1 and glTF2 and VRM.
+
+## How to import glTF
+
+### Using GltfImporter
+The easiest way is to use the GltfImporter class.
+This class automatically determines glTF1, glTF2, and VRM and loads them appropriately.
+The import method of this class returns an object of type IResult when called using await.
+If the loading is successful, the get method can be used to retrieve the expression object.
+This expression can be passed directly to the process method of the System class for drawing.
+
+```typescript
+const result = await Rn.GltfImporter.import(gltfUrl, loadOption);
+if (result.isOk()) {
+  const expression = result.get();
+}
+```
+
+If checking for success is too much trouble, you can force the retrieval with the unwrapForce() method, but if the result of result is an error, an exception will be raised.
+
+```typescript
+const result = await Rn.GltfImporter.import(gltfUrl, loadOption);
+const expression = result.unwrapForce();
+```
+
+## Use Gltf1Importer or Gltf2Importer
+
+There are also version-specific Importers, such as the Gltf1Importer or Gltf2Importer. These return data in a proprietary format called [RnM2](https://github.com/actnwit/RhodoniteTS/blob/master/src/types/RnM2.ts) in result object rather than expression.
+RnM2 is the glTF2 data in which the logical connection relationships between the indexes of the glTF items are resolved to references to the actual objects.
+This is passed to ModelConverter to obtain the Entity of the root of the scene graph of the read glTF.
+
+```typescript
+    const result = await Rn.Gltf2Importer.import(
+      '../../../assets/gltf/glTF-Sample-Models/2.0/BoxAnimated/glTF/BoxAnimated.gltf'
+    );
+    const rnm = result.unwrapForce();
+    const rootGroup = Rn.ModelConverter.convertToRhodoniteObject(rnm);
+
+    const expression = new Rn.Expression();
+    const renderPass = new Rn.RenderPass();
+    renderPass.addEntities([rootGroup]);
+    expression.addRenderPasses([renderPass]);
+```
+
+## Sample for reference
+
+- [glTFImporter](https://github.com/actnwit/RhodoniteTS/tree/master/samples/test_e2e/GltfImporter-draco-extension)
+- [glTF1Importer Sample](https://github.com/actnwit/RhodoniteTS/tree/master/samples/test_e2e/Gltf1Importer)
+- [glTF2Importer Sample](https://github.com/actnwit/RhodoniteTS/tree/master/samples/test_e2e/Gltf2Importer)
+
+</DocLayout>

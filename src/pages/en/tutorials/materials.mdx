@@ -1,0 +1,55 @@
+---
+title: Creating Materials
+description: How to create materials in Rhodonite
+---
+
+import DocLayout from '../../../components/tutorials_layouts/DocLayout.astro';
+
+<DocLayout>
+
+## Create Material
+
+Rhodonite has many material classes. To generate them, use the [MaterialHelper object](https://github.com/actnwit/RhodoniteTS/blob/4219ddad/src/foundation/helpers/MaterialHelper.ts#L1001).
+
+```typescript
+const material = Rn.MaterialHelper.createPbrUberMaterial()
+```
+
+## Setting shader parameters to Material
+
+Shader parameters are done for the Material class that holds the shader.
+
+```typescript
+material.setParameter(Rn.ShaderSemantics.BaseColorFactor, Rn.Vector4.fromCopy4(1, 1, 1, 1));
+````
+
+To pass the texture to the shader, do the following
+
+```typescript
+material.setTextureParameter(Rn.ShaderSemantics.BaseColorTexture, rnTexture);
+```
+
+## Apply Material
+
+The created materials can be used in Primitive and MeshHelper class methods.
+
+```typescript
+const primitive = Rn.Primitive.createPrimitive({
+  indices: indices,
+  attributeSemantics: [Rn.VertexAttribute.Position.XYZ],
+  attributes: [positions],
+  primitiveMode: Rn.PrimitiveMode.Lines,
+});
+primitive.material = mateiral;
+````
+
+````typescript
+const sphere = Rn.MeshHelper.createSphere({
+    radius: 1,
+    widthSegments: 10,
+    heightSegments: 10,
+    material: material
+  })
+````
+
+</DocLayout>
