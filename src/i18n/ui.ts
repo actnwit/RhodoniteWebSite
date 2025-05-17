@@ -1,6 +1,7 @@
 export const languages = {
   ja: '日本語',
   en: 'English',
+  tr: 'Türkçe',
 };
 
 export const defaultLang = 'ja';
@@ -38,6 +39,23 @@ export const ui = {
     'nav.docs': 'Documents',
     'nav.tutorials': 'Tutorials',
     'nav.api': 'API Reference',
+    'nav.github': 'GitHub',
+  },
+  tr: {
+    'hero.description': 'RhodoniteTS, WebGL2/WebGPU tabanlı yüksek performanslı bir 3D grafik kütüphanesidir. Modern TypeScript ile yazılmış olup sezgisel bir API sunar.',
+    'hero.docs': 'Dokümantasyonu Oku',
+    'hero.github': 'GitHub\'da Gör',
+    'hero.discord': 'Discord\'a Katıl',
+    'features.performance.title': 'Yüksek Performans',
+    'features.performance.description': 'WebGL2/WebGPU kullanılarak optimize edilmiş 3D görüntü işleme',
+    'features.typescript.title': 'TypeScript',
+    'features.typescript.description': 'Tür güvenliğinde geliştirici dostu API tasarımı',
+    'features.modern.title': 'Modern',
+    'features.modern.description': 'En yeni web teknolojilerini kullanan uygulama',
+    'nav.home': 'Ana Sayfa',
+    'nav.docs': 'Belgeler',
+    'nav.tutorials': 'Eğitimler',
+    'nav.api': 'API Referansı',
     'nav.github': 'GitHub',
   },
 } as const;
