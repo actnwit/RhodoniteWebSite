@@ -4,7 +4,7 @@ export const languages = {
   tr: 'Türkçe',
 };
 
-export const defaultLang = 'ja';
+export const defaultLang = 'en';
 
 export const ui = {
   ja: {
@@ -61,5 +61,7 @@ export const ui = {
     'nav.tutorials': 'Eğitimler',
     'nav.api': 'API Referansı',
     'nav.github': 'GitHub',
+    'editor.title': 'Rhodonite Editor',
+    'editor.description': 'Rhodonite\'yi resmi editör ile deneyin!',
   },
 } as const;
