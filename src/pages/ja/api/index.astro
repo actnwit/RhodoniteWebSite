@@ -1,0 +1,55 @@
+---
+import Layout from '../../../layouts/Layout.astro';
+import { getLangFromUrl, useTranslations } from '../../../i18n/utils';
+
+const lang = getLangFromUrl(Astro.url);
+const t = useTranslations(lang);
+---
+
+<Layout>
+  <div class="api-container">
+    <iframe src="https://actnwit.github.io/RhodoniteTS/api/" class="api-iframe"></iframe>
+  </div>
+</Layout>
+
+<style>
+  .api-container {
+    width: 100%;
+    height: calc(100vh - 72px); /* デフォルト値、JavaScriptで上書きされます */
+    overflow: hidden;
+  }
+
+  .api-iframe {
+    width: 100%;
+    height: 100%;
+    border: none;
+    display: block;
+  }
+</style>
+
+<script>
+  // ナビゲーションバーの高さを測り、iframeの高さを動的に調整する
+  function adjustIframeHeight() {
+    const navbar = document.querySelector('.navbar') as HTMLElement;
+    const apiContainer = document.querySelector('.api-container') as HTMLElement;
+
+    if (navbar && apiContainer) {
+      const navbarHeight = navbar.offsetHeight;
+      apiContainer.style.height = `calc(100vh - ${navbarHeight}px)`;
+      console.log(`ナビゲーションバーの高さ: ${navbarHeight}px`);
+    }
+  }
+
+  // 複数の方法で初期ロード時に実行を試みる
+  // 即時実行を試みる
+  adjustIframeHeight();
+
+  // DOMContentLoadedイベント
+  document.addEventListener('DOMContentLoaded', adjustIframeHeight);
+
+  // 少し遅延させて実行（バックアップ）
+  setTimeout(adjustIframeHeight, 100);
+
+  // ウィンドウサイズが変更されたときにも実行
+  window.addEventListener('resize', adjustIframeHeight);
+</script>
