@@ -6,29 +6,97 @@ import { getLangFromUrl } from '../i18n/utils';
 
 const currentLang = getLangFromUrl(Astro.url);
 const currentPath = Astro.url.pathname.split('/').slice(2).join('/');
+const currentLabel = languages[currentLang];
 console.log('LanguageSwitcher - Current path:', currentPath);
 ---
 
 <div class="language-switcher">
-  {Object.entries(languages).map(([lang, label]) => (
-    <a
-      href={`/${lang}/${currentPath}`}
-      class:list={[
-        'lang-link',
-        { active: currentLang === lang }
-      ]}
-    >
-      {label}
-    </a>
-  ))}
+  <button class="language-button" id="languageButton">
+    {currentLabel}
+    <span class="arrow">▼</span>
+  </button>
+  <div class="language-menu" id="languageMenu">
+    {Object.entries(languages).map(([lang, label]) => (
+      <a
+        href={`/${lang}/${currentPath}`}
+        class:list={[
+          'lang-link',
+          { active: currentLang === lang }
+        ]}
+      >
+        {label}
+      </a>
+    ))}
+  </div>
 </div>
+
+<script>
+  const button = document.getElementById('languageButton');
+  const menu = document.getElementById('languageMenu');
+  
+  if (button && menu) {
+    button.addEventListener('click', () => {
+      menu.classList.toggle('show');
+    });
+
+    // メニュー外をクリックしたら閉じる
+    document.addEventListener('click', (e) => {
+      if (!button.contains(e.target as Node) && !menu.contains(e.target as Node)) {
+        menu.classList.remove('show');
+      }
+    });
+  }
+</script>
 
 <style>
   .language-switcher {
-    display: flex;
-    gap: 1rem;
+    position: relative;
     padding: 1rem;
+    display: flex;
     justify-content: flex-end;
+  }
+
+  .language-button {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.5rem 1rem;
+    border: 1px solid var(--border-color);
+    border-radius: 0.25rem;
+    background: var(--bg-primary);
+    color: var(--text-primary);
+    cursor: pointer;
+    font-size: 1rem;
+    transition: all 0.2s;
+  }
+
+  .language-button:hover {
+    background: var(--bg-secondary);
+  }
+
+  .arrow {
+    font-size: 0.8rem;
+    transition: transform 0.2s;
+  }
+
+  .language-menu {
+    position: absolute;
+    top: 100%;
+    right: 1rem;
+    background: var(--bg-primary);
+    border: 1px solid var(--border-color);
+    border-radius: 0.25rem;
+    padding: 0.5rem;
+    display: none;
+    flex-direction: column;
+    gap: 0.25rem;
+    min-width: 120px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    z-index: 1000;
+  }
+
+  .language-menu.show {
+    display: flex;
   }
 
   .lang-link {
@@ -37,15 +105,17 @@ console.log('LanguageSwitcher - Current path:', currentPath);
     padding: 0.5rem;
     border-radius: 0.25rem;
     transition: all 0.2s;
+    display: block;
   }
 
   .lang-link:hover {
     color: var(--text-primary);
-    background: rgba(0, 0, 0, 0.05);
+    background: var(--bg-secondary);
   }
 
   .lang-link.active {
     color: var(--primary-color);
     font-weight: 500;
+    background: var(--bg-secondary);
   }
 </style> 
