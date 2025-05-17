@@ -7,49 +7,103 @@ import DocLayout from '../../../components/docs_layouts/DocLayout.astro';
 
 <DocLayout>
 
-# Getting Started with Rhodonite
+## What is Rhodonite?
 
-<p className="lead">
-  Welcome to Rhodonite! This guide will help you get started with our platform.
-</p>
+Rhodonite is a web3D library written in TypeScript.
 
-## Installation
+## Rhodonite Features
 
-To get started with Rhodonite, you'll need to follow these simple steps:
+### Component Oriented
 
-<div className="steps">
-  <div className="step">
-    ### 1. Clone the Repository
-    ```bash
-    git clone https://github.com/actnwit/RhodoniteWebSite.git
-    ```
-  </div>
+It employs a component-oriented design, which is also seen in the Unity game engine.
+By having entities, which are entities in the 3D space, carry various components, "objects" are given functions.
 
-  <div className="step">
-    ### 2. Install Dependencies
-    ```bash
-    npm install
-    ```
-  </div>
+A component is a minimal unit of various functions that gives an "object" capabilities, and is represented by a TypeScript class.
 
-  <div className="step">
-    ### 3. Start the Development Server
-    ```bash
-    npm run dev
-    ```
-  </div>
-</div>
+Components, which are the unit of functionality, are mounted on entities, which are the containers, to increase their functionality.
 
-## Next Steps
+This approach is superior to classical class inheritance programming in terms of flexibility and code maintainability. It is the predominant design approach in today's game engines.
 
-Now that you have Rhodonite set up, you can:
+### Blittable Memory Architecture
 
-* Explore our features
-* Read the documentation
-* Join our community
+Each member variable of Rhodonite's component classes is memory contiguous.
 
-<div className="note">
-  **Note:** Make sure to check out our other documentation pages for more detailed information.
-</div>
+Rhodonite first obtains a huge ArrayBuffer memory pool and assigns memory from that pool to each field member of the component.
+Each field member is memory contiguous across entities (potentially taking other memory layouts), which helps improve CPU cache memory hit rates.
+
+In addition, this huge memory pool can be sent to the GPU as textures all at once before rendering, and multiple meshes can be drawn as instances for fast scene rendering.
+The shaders obtain the location and material information from the texture where each entity is drawn. This is called the blittable memory architecture in Rhodonite.
+
+In WebGL, updating uniform variables is always a major performance bottleneck.
+The blittable memory architecture avoids this bottleneck by sending all data to the GPU at once as a texture without using setUniform.
+
+This mechanism provides particularly high performance when a large number of geometry batches must be drawn (instance drawing) with a relatively small number of polygons.
+Even in the case of non-instance rendering, the system avoids heavy setUniform-type processing, resulting in higher performance in many cases than with normal rendering methods.
+
+It is also suitable for cases where shaders must access complex and large amounts of data, such as in games.
+　
+### Rhodonite Introduction
+
+The following Listing 1-1 shows the minimum code for polygon display in Rhodonite at this time.
+
+````javascript
+async function main() {
+
+    // Rhodonite initialization. Specify the drawing processing method (Uniform in this case) and the canvas to draw to
+    await Rn.System.init({
+      approach: Rn.ProcessApproach.Uniform,
+      canvas: document.getElementById('world')
+    });
+
+    // Creation of Component-loaded Entity
+    const firstEntity = Rn.EntityHelper.createMeshEntity();
+
+    // create vertex data
+    const indices = new Float32Array([
+        0, 1, 3, 3, 1, 2
+    ]);
+
+    const positions = new Float32Array([
+        -1.5, -0.5, 0.0,
+        -0.5, -0.5, 0.0,
+        -0.5, 0.5, 0.0,
+        -1.5, 0.5, 0.0
+    ]);
+
+    const colors = new Float32Array([
+        0.0, 1.0, 1.0,
+        1.0, 1.0, 0.0,
+        1.0, 0.0, 0.0, 0.0,
+        0.0, 0.0, 1.0
+    ]);
+
+    // Create Primitive object with vertex data
+    const primitive = Primitive.createPrimitive({
+        indices: indices,
+        attributeSemantics: [VertexAttribute.Position.XYZ, VertexAttribute.Color0.XYZ],
+        attributes: [positions, colors],
+        material: void 0,
+        primitiveMode: PrimitiveMode.Triangles
+    });
+
+    // Add Primitive to Entity's Mesh component
+    const meshComponent = firstEntity.getMesh();
+    const mesh = new Rn.Mesh();
+    mesh.addPrimitive(primitive);
+    meshComponent.setMesh(mesh);
+
+    // Drawing.
+    // The existence of Entity is known internally by Rhodonite when it is created, so there is no need for the programmer to explicitly register Entity in the system.
+    const draw = function(time) {
+        Rn.system.processAuto();
+        requestAnimationFrame(draw);
+    }
+
+    draw();
+}
+````
+List 1-1
+
+The design of the Primitive class is designed to conceptually fit the glTF2 format.
 
 </DocLayout>
