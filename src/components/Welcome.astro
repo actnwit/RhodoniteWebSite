@@ -17,27 +17,29 @@ function getUrl(path: string) {
 }
 ---
 
-<div id="container">
-	<div id="background-canvas"></div>
-	<main>
-		<section id="hero">
-			<div class="logo-container">
+<div class="min-h-screen relative overflow-hidden font-['Inter',system-ui,-apple-system,sans-serif]">
+	<div id="background-canvas" class="fixed inset-0 -z-10 bg-white"></div>
+	<main class="p-8 max-w-7xl mx-auto">
+		<section id="hero" class="flex flex-col items-center text-center py-16 px-4">
+			<div class="flex items-center gap-4 mb-8">
 				<img src={rhodoniteLogo.src} alt="RhodoniteTS Logo" />
 			</div>
-			<p class="hero-description">
+			<p class="text-xl text-gray-600 max-w-2xl mb-10 leading-relaxed">
 				{t('hero.description')}
 			</p>
-			<section id="links">
-				<a class="button primary" href={getUrl('/docs')}>{t('hero.docs')}</a>
-				<a class="button secondary" href="https://github.com/actnwit/RhodoniteTS">
+			<section id="links" class="flex gap-4 flex-wrap justify-center">
+				<a class="inline-flex items-center gap-2 px-6 py-3 rounded-lg font-medium text-white bg-gradient-to-r from-indigo-500 to-purple-600 shadow-md hover:shadow-lg hover:-translate-y-0.5 transition-all" href={getUrl('/docs')}>
+					{t('hero.docs')}
+				</a>
+				<a class="inline-flex items-center gap-2 px-6 py-3 rounded-lg font-medium text-gray-900 bg-white border border-gray-200 hover:shadow-lg hover:-translate-y-0.5 transition-all" href="https://github.com/actnwit/RhodoniteTS">
 					{t('hero.github')}
-					<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+					<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-5 h-5">
 						<path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22"></path>
 					</svg>
 				</a>
-				<a class="button secondary" href="https://discord.gg/rhodonite">
+				<a class="inline-flex items-center gap-2 px-6 py-3 rounded-lg font-medium text-gray-900 bg-white border border-gray-200 hover:shadow-lg hover:-translate-y-0.5 transition-all" href="https://discord.gg/rhodonite">
 					{t('hero.discord')}
-					<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 127.14 96.36" width="20" height="20">
+					<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 127.14 96.36" class="w-5 h-5">
 						<path fill="currentColor" d="M107.7 8.07A105.15 105.15 0 0 0 81.47 0a72.06 72.06 0 0 0-3.36 6.83 97.68 97.68 0 0 0-29.11 0A72.37 72.37 0 0 0 45.64 0a105.89 105.89 0 0 0-26.25 8.09C2.79 32.65-1.71 56.6.54 80.21a105.73 105.73 0 0 0 32.17 16.15 77.7 77.7 0 0 0 6.89-11.11 68.42 68.42 0 0 1-10.85-5.18c.91-.66 1.8-1.34 2.66-2a75.57 75.57 0 0 0 64.32 0c.87.71 1.76 1.39 2.66 2a68.68 68.68 0 0 1-10.87 5.19 77 77 0 0 0 6.89 11.1 105.25 105.25 0 0 0 32.19-16.14c2.64-27.38-4.51-51.11-18.9-72.15Z"/>
 					</svg>
 				</a>
@@ -45,196 +47,23 @@ function getUrl(path: string) {
 		</section>
 	</main>
 
-	<div id="features" class="box">
-		<div class="feature-grid">
-			<div class="feature-item">
-				<h3>{t('features.performance.title')}</h3>
-				<p>{t('features.performance.description')}</p>
+	<div id="features" class="relative mx-auto my-8 max-w-7xl p-8 bg-white backdrop-blur-lg rounded-2xl shadow-md">
+		<div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+			<div class="text-center p-6">
+				<h3 class="text-2xl text-gray-900 mb-2">{t('features.performance.title')}</h3>
+				<p class="text-gray-600 leading-relaxed">{t('features.performance.description')}</p>
 			</div>
-			<div class="feature-item">
-				<h3>{t('features.typescript.title')}</h3>
-				<p>{t('features.typescript.description')}</p>
+			<div class="text-center p-6">
+				<h3 class="text-2xl text-gray-900 mb-2">{t('features.typescript.title')}</h3>
+				<p class="text-gray-600 leading-relaxed">{t('features.typescript.description')}</p>
 			</div>
-			<div class="feature-item">
-				<h3>{t('features.modern.title')}</h3>
-				<p>{t('features.modern.description')}</p>
+			<div class="text-center p-6">
+				<h3 class="text-2xl text-gray-900 mb-2">{t('features.modern.title')}</h3>
+				<p class="text-gray-600 leading-relaxed">{t('features.modern.description')}</p>
 			</div>
 		</div>
 	</div>
 </div>
-
-<style>
-	:root {
-		--primary-color: #6366f1;
-		--primary-gradient: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
-		--secondary-color: #4f46e5;
-		--text-primary: #1f2937;
-		--text-secondary: #4b5563;
-		--background-light: rgba(255, 255, 255, 1);
-	}
-
-	#container {
-		font-family: 'Inter', system-ui, -apple-system, sans-serif;
-		min-height: 100vh;
-		position: relative;
-		overflow: hidden;
-	}
-
-	#background-canvas {
-		position: fixed;
-		top: 0;
-		left: 0;
-		width: 100%;
-		height: 100%;
-		z-index: -1;
-		background: white;
-	}
-
-	main {
-		padding: 2rem;
-		max-width: 1200px;
-		margin: 0 auto;
-	}
-
-	#hero {
-		display: flex;
-		flex-direction: column;
-		align-items: center;
-		text-align: center;
-		padding: 4rem 1rem;
-	}
-
-	.logo-container {
-		display: flex;
-		align-items: center;
-		gap: 1rem;
-		margin-bottom: 2rem;
-	}
-
-	.version-tag {
-		background: var(--primary-gradient);
-		color: white;
-		padding: 0.25rem 0.75rem;
-		border-radius: 9999px;
-		font-size: 0.875rem;
-		font-weight: 500;
-	}
-
-	h1 {
-		font-size: 3rem;
-		line-height: 1.2;
-		color: var(--text-primary);
-		margin-bottom: 1.5rem;
-	}
-
-	.hero-description {
-		font-size: 1.25rem;
-		color: var(--text-secondary);
-		max-width: 600px;
-		margin-bottom: 2.5rem;
-		line-height: 1.6;
-	}
-
-	#links {
-		display: flex;
-		gap: 1rem;
-		flex-wrap: wrap;
-		justify-content: center;
-	}
-
-	.button {
-		display: inline-flex;
-		align-items: center;
-		gap: 0.5rem;
-		padding: 0.75rem 1.5rem;
-		border-radius: 0.5rem;
-		font-weight: 500;
-		text-decoration: none;
-		transition: all 0.2s;
-	}
-
-	.button.primary {
-		background: var(--primary-gradient);
-		color: white;
-		box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1);
-	}
-
-	.button.secondary {
-		background: var(--background-light);
-		color: var(--text-primary);
-		border: 1px solid #e5e7eb;
-	}
-
-	.button:hover {
-		transform: translateY(-1px);
-		box-shadow: 0 6px 8px -1px rgb(0 0 0 / 0.1);
-	}
-
-	code {
-		background: var(--primary-gradient);
-		-webkit-background-clip: text;
-		-webkit-text-fill-color: transparent;
-		font-family: 'JetBrains Mono', monospace;
-		font-weight: 600;
-		padding: 0.2em 0.4em;
-	}
-
-	#features {
-		position: relative;
-		margin: 2rem auto;
-		max-width: 1200px;
-		padding: 2rem;
-		background: var(--background-light);
-		backdrop-filter: blur(10px);
-		border-radius: 1rem;
-		box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1);
-	}
-
-	.feature-grid {
-		display: grid;
-		grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-		gap: 2rem;
-	}
-
-	.feature-item {
-		text-align: center;
-		padding: 1.5rem;
-	}
-
-	.feature-item h3 {
-		color: var(--text-primary);
-		font-size: 1.5rem;
-		margin-bottom: 0.5rem;
-	}
-
-	.feature-item p {
-		color: var(--text-secondary);
-		line-height: 1.5;
-	}
-
-	@media (max-width: 768px) {
-		h1 {
-			font-size: 2rem;
-		}
-
-		.hero-description {
-			font-size: 1.125rem;
-		}
-
-		#links {
-			flex-direction: column;
-		}
-
-		.button {
-			width: 100%;
-			justify-content: center;
-		}
-
-		.feature-grid {
-			grid-template-columns: 1fr;
-		}
-	}
-</style>
 
 <script>
 	// 背景の3Dエフェクトを実装するためのスクリプト
