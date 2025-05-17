@@ -3,7 +3,18 @@ import rhodoniteLogo from '../assets/Rhodonite_Logo_2.png';
 import { getLangFromUrl, useTranslations } from '../i18n/utils';
 
 const lang = getLangFromUrl(Astro.url);
+console.log('Welcome component - Current lang:', lang);
 const t = useTranslations(lang);
+console.log('Welcome component - Translations:', {
+	description: t('hero.description'),
+	docs: t('hero.docs'),
+	github: t('hero.github'),
+	discord: t('hero.discord')
+});
+
+function getUrl(path: string) {
+	return `/${lang}${path}`;
+}
 ---
 
 <div id="container">
@@ -17,7 +28,7 @@ const t = useTranslations(lang);
 				{t('hero.description')}
 			</p>
 			<section id="links">
-				<a class="button primary" href={`/${lang}/docs`}>{t('hero.docs')}</a>
+				<a class="button primary" href={getUrl('/docs')}>{t('hero.docs')}</a>
 				<a class="button secondary" href="https://github.com/actnwit/RhodoniteTS">
 					{t('hero.github')}
 					<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">

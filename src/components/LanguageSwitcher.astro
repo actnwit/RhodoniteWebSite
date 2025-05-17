@@ -1,8 +1,13 @@
+---
+// @ts-ignore
 import { languages } from '../i18n/ui';
+// @ts-ignore
 import { getLangFromUrl } from '../i18n/utils';
 
 const currentLang = getLangFromUrl(Astro.url);
 const currentPath = Astro.url.pathname.split('/').slice(2).join('/');
+console.log('LanguageSwitcher - Current path:', currentPath);
+---
 
 <div class="language-switcher">
   {Object.entries(languages).map(([lang, label]) => (
