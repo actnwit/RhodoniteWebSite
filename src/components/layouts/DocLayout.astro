@@ -1,5 +1,5 @@
 ---
-import BaseLayout from './BaseLayout.astro';
+import Layout from '../../layouts/Layout.astro';
 import TableOfContents from '../TableOfContents.astro';
 
 interface Props {
@@ -10,7 +10,7 @@ interface Props {
 const { title, description } = Astro.props;
 ---
 
-<BaseLayout title={title} description={description}>
+<Layout>
   <div class="doc-container">
     <aside class="doc-sidebar">
       <nav class="doc-nav">
@@ -22,7 +22,7 @@ const { title, description } = Astro.props;
       <slot />
     </main>
   </div>
-</BaseLayout>
+</Layout>
 
 <style>
   .doc-container {
