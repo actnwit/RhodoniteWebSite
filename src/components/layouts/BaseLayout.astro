@@ -1,0 +1,157 @@
+---
+interface Props {
+  title?: string;
+  description?: string;
+}
+
+const { title = 'Rhodonite Documentation', description = 'Rhodonite documentation and guides' } = Astro.props;
+---
+
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content={description} />
+    <title>{title}</title>
+
+    <!-- Tailwind CSS -->
+    <link rel="stylesheet" href="/styles/global.css" />
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+  </head>
+  <body>
+    <header class="site-header">
+      <div class="header-container">
+        <a href="/" class="logo">
+          Rhodonite
+        </a>
+        <nav class="main-nav">
+          <a href="/en/docs" class="nav-link">English</a>
+          <a href="/ja/docs" class="nav-link">日本語</a>
+        </nav>
+      </div>
+    </header>
+
+    <slot />
+
+    <footer class="site-footer">
+      <div class="footer-container">
+        <p>&copy; {new Date().getFullYear()} Rhodonite. All rights reserved.</p>
+      </div>
+    </footer>
+  </body>
+</html>
+
+<style is:global>
+  :root {
+    --bg-primary: #ffffff;
+    --bg-secondary: #f8fafc;
+    --bg-hover: #f1f5f9;
+    --bg-active: #e2e8f0;
+    --bg-code: #1e293b;
+    --bg-info: #f0f9ff;
+
+    --text-color: #334155;
+    --text-muted: #64748b;
+    --text-hover: #1e293b;
+    --text-active: #0f172a;
+    --heading-color: #0f172a;
+
+    --border-color: #e2e8f0;
+    --info-color: #0ea5e9;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg-primary: #0f172a;
+      --bg-secondary: #1e293b;
+      --bg-hover: #334155;
+      --bg-active: #475569;
+      --bg-code: #1e293b;
+      --bg-info: #082f49;
+
+      --text-color: #e2e8f0;
+      --text-muted: #94a3b8;
+      --text-hover: #f8fafc;
+      --text-active: #ffffff;
+      --heading-color: #f8fafc;
+
+      --border-color: #334155;
+      --info-color: #38bdf8;
+    }
+  }
+
+  * {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+  }
+
+  body {
+    font-family: 'Inter', system-ui, -apple-system, sans-serif;
+    background: var(--bg-primary);
+    color: var(--text-color);
+    line-height: 1.5;
+  }
+
+  .site-header {
+    background: var(--bg-primary);
+    border-bottom: 1px solid var(--border-color);
+    position: sticky;
+    top: 0;
+    z-index: 100;
+  }
+
+  .header-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 1rem 2rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .logo {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--heading-color);
+    text-decoration: none;
+  }
+
+  .main-nav {
+    display: flex;
+    gap: 1.5rem;
+  }
+
+  .nav-link {
+    color: var(--text-color);
+    text-decoration: none;
+    font-weight: 500;
+    transition: color 0.2s ease;
+  }
+
+  .nav-link:hover {
+    color: var(--text-hover);
+  }
+
+  .site-footer {
+    background: var(--bg-secondary);
+    border-top: 1px solid var(--border-color);
+    margin-top: 4rem;
+  }
+
+  .footer-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 2rem;
+    text-align: center;
+    color: var(--text-muted);
+  }
+</style>

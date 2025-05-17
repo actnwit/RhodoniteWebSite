@@ -1,0 +1,79 @@
+---
+title: Installation Guide
+description: Detailed guide for installing Rhodonite
+---
+
+import DocLayout from '../../../components/layouts/DocLayout.astro';
+
+<DocLayout>
+
+# Installation Guide
+
+<p className="lead">
+  This guide provides detailed instructions for installing Rhodonite on various platforms.
+</p>
+
+## System Requirements
+
+Before installing Rhodonite, ensure your system meets the following requirements:
+
+* **Operating System**: Windows 10+, macOS 10.15+, or Linux
+* **Node.js**: v14.0 or later
+* **Memory**: At least 4GB RAM
+* **GPU**: WebGL 2.0 compatible graphics card (recommended)
+
+## Installation Methods
+
+### Method 1: Using NPM
+
+The easiest way to install Rhodonite is via npm:
+
+```bash
+npm install @rhodonite/core --save
+```
+
+### Method 2: Using CDN
+
+You can also include Rhodonite directly from a CDN:
+
+```html
+<script src="https://cdn.example.com/rhodonite/latest/rhodonite.min.js"></script>
+```
+
+### Method 3: From Source
+
+For the latest features or to contribute, you can build from source:
+
+```bash
+# Clone the repository
+git clone https://github.com/actnwit/rhodonite.git
+
+# Navigate to the directory
+cd rhodonite
+
+# Install dependencies
+npm install
+
+# Build the project
+npm run build
+```
+
+## Verifying Installation
+
+To verify that Rhodonite is installed correctly, create a simple test file:
+
+```js
+import * as Rhodonite from '@rhodonite/core';
+
+// Initialize Rhodonite
+const system = Rhodonite.System.getInstance();
+if (system) {
+  console.log('Rhodonite installed correctly!');
+}
+```
+
+<div className="note">
+  **Note:** If you encounter any issues during installation, please check our troubleshooting guide or open an issue on GitHub.
+</div>
+
+</DocLayout>
