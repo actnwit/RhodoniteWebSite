@@ -1,5 +1,6 @@
 ---
 import rhodoniteLogo from '../assets/Rhodonite_Logo_2.png';
+import editorImage from '../assets/RhodoniteEditor.jpg';
 import { getLangFromUrl, useTranslations } from '../i18n/utils';
 
 const lang = getLangFromUrl(Astro.url);
@@ -62,6 +63,18 @@ function getUrl(path: string) {
 				<p class="text-gray-600 leading-relaxed">{t('features.modern.description')}</p>
 			</div>
 		</div>
+	</div>
+
+	<div class="relative mx-auto my-8 max-w-7xl p-8 bg-white backdrop-blur-lg rounded-2xl shadow-md">
+		<h2 class="text-2xl text-gray-900 mb-2">
+			{t('editor.title')}
+		</h2>
+		<p class="text-gray-600 leading-relaxed">
+			{t('editor.description')}
+		</p>
+		<a href="https://editor.librn.com">
+			<img src={editorImage.src} alt="Rhodonite Editor" />
+		</a>
 	</div>
 </div>
 

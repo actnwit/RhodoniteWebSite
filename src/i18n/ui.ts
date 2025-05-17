@@ -22,6 +22,8 @@ export const ui = {
     'nav.tutorials': 'チュートリアル',
     'nav.api': 'APIリファレンス',
     'nav.github': 'GitHub',
+    'editor.title': 'Rhodonite Editor',
+    'editor.description': '公式エディターでRhodoniteを試してみましょう！',
   },
   en: {
     'hero.description': 'RhodoniteTS is a high-performance 3D graphics library based on WebGL2/WebGPU. Written in modern TypeScript, it provides an intuitive API.',
@@ -39,5 +41,7 @@ export const ui = {
     'nav.tutorials': 'Tutorials',
     'nav.api': 'API Reference',
     'nav.github': 'GitHub',
+    'editor.title': 'Rhodonite Editor',
+    'editor.description': 'Try Rhodonite with the official editor!',
   },
 } as const;
