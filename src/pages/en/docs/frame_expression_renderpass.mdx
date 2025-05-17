@@ -1,0 +1,115 @@
+---
+title: Frame, Expression, RenderPass
+description: About Frame, Expression, RenderPass in Rhodonite
+---
+
+import DocLayout from '../../../components/layouts/DocLayout.astro';
+
+<DocLayout>
+
+## RenderPass
+
+A render pass in Rhodonite is almost the same as a render pass in real-time CG, and exists as a class called RenderPass.
+RenderPass can specify the framebuffer to which the rendering output will be directed. If not specified, the image will be rendered in Canvas.
+
+The renderPass can also specify a group of entities to be displayed in the render pass. Entities that are not specified will not be processed in that render pass.
+You can also specify the camera to be used for rendering in the render pass.
+
+A render pass cannot be passed to the System.process method without modification.
+It must be added to a class called expression that summarizes the render path.
+
+```javascript
+const renderPass1 = new Rn.RenderPass();
+const framebuffer = Rn.RenderableHelper.createTexturesForRenderTarget(600, 600, 1, {})
+renderPass1.toClearColorBuffer = true;
+renderPass1.cameraComponent = cameraComponent;
+renderPass1.setFramebuffer(framebuffer);
+```
+
+### MSAA
+
+RenderPass allows you to configure MSAA settings.
+An additional render target required to perform MSAA called Resolve is set with the setResolveFramebuffer method.
+
+```javascript
+const renderPass1 = new Rn.RenderPass();
+const framebufferMsaa = Rn.RenderableHelper.createTexturesForRenderTarget(600, 600, 0, {
+    isMSAA: true,
+    sampleCountMSAA: 4,
+    createDepthBuffer: true,
+});
+const framebufferResolve = Rn.RenderableHelper.createTexturesForRenderTarget(600, 600, 1, {});
+renderPass1.toClearColorBuffer = true;
+renderPass1.cameraComponent = cameraComponent;
+renderPass1.setFramebuffer(framebufferMsaa);
+renderPass1.setResolveFramebuffer(framebufferMsaa);
+```
+
+## Expression
+
+An Expression is a grouping of multiple render passes and is the unit for realizing some kind of CG expression in real-time CG with Rhodonite.
+By adding multiple RenderPasses to an Expression, it is possible to achieve such a rendering.
+
+In addition, the System.process method accepts an array of Expression as its argument.
+By writing the CG expressions you want to display one by one as an Expression, and passing these multiple expressions (=Expression) as an array to the System.process method, it is possible to display complex CG images consisting of multiple expressions.
+
+```javascript
+const expression = new Rn.Expression();
+const renderPass1 = new Rn.RenderPass();
+renderPass1.toClearColorBuffer = true;
+renderPass1.cameraComponent = cameraComponent;
+const renderPass2 = new Rn.RenderPass();
+renderPass2.toClearColorBuffer = true;
+renderPass2.cameraComponent = cameraComponent;
+
+const renderPass_fxaa = new Rn.RenderPass();
+renderPass_fxaa.toClearColorBuffer = true;
+const cameraEntity_fxaa = entityRepository.createEntity([Rn.TransformComponent, Rn.SceneGraphComponent, Rn.CameraComponent])
+const cameraComponent_fxaa = cameraEntity_fxaa.getComponent(Rn.CameraComponent);
+cameraComponent_fxaa.type = Rn.CameraType.Orthographic;
+renderPass_fxaa.cameraComponent = cameraComponent_fxaa;
+
+expression.addRenderPasses([renderPass1, renderPass2, renderPass_fxaa]);
+
+const framebuffer = Rn.RenderableHelper.createTexturesForRenderTarget(600, 600, 1, {})
+renderPass1.setFramebuffer(framebuffer);
+
+const framebuffer_fxaatarget = Rn.RenderableHelper.createTexturesForRenderTarget(600, 600, 1, {})
+renderPass2.setFramebuffer(framebuffer_fxaatarget);
+
+...
+...
+...
+
+system.process([expression]);
+```
+
+## Frame
+
+A Frame holds drawing information for one frame, specifically, it has an array of Expressions inside.
+By passing a Frame instance to the System.process() method, a frame is drawn.
+
+As a relatively recently introduced class, it is not required for drawing. As before, the System.process() method also accepts an array of Expression.
+
+## Overall image
+The image is as follows
+
+- Frame (not required)
+  - Array of Expressions
+    - Expression 1
+    - Expression 2
+      - Array of render paths
+        - Render path 1
+        - Render path 2
+          - Entity1
+          - Entity2
+          - Entity3
+            - TransformComponent
+            - SceneGraphComponent
+            - MeshComponent
+            - ...
+          - ...
+        - ...
+    - ...
+
+</DocLayout>

@@ -1,0 +1,114 @@
+---
+title: フレーム、エクスプレッション、レンダーパス
+description: Rhodoniteのフレーム、エクスプレッション、レンダーパスについて
+---
+
+import DocLayout from '../../../components/layouts/DocLayout.astro';
+
+<DocLayout>
+
+## RenderPass
+
+Rhodoniteにおけるレンダーパスとは、リアルタイムCGにおけるレンダーパスとほぼ同義であり、RenderPassというクラスとして存在します。
+RenderPassにはレンダリング出力先のフレームバッファを指定することができます。指定しない場合はCanvasに描画されます。
+
+また、そのレンダーパスで表示対象とするEntity群を指定することができます。指定されていないEntityはそのレンダーパスでは処理されません。
+そのレンダーパスで描画する際に使用するカメラを指定することもできます。
+
+レンダーパスは、そのままではSystem.processメソッドに渡すことができません。
+レンダーパスをまとめるエクスプレッションと呼ばれるクラスに追加する必要があります。
+
+```javascript
+const renderPass1 = new Rn.RenderPass();
+const framebuffer = Rn.RenderableHelper.createTexturesForRenderTarget(600, 600, 1, {})
+renderPass1.toClearColorBuffer = true;
+renderPass1.cameraComponent = cameraComponent;
+renderPass1.setFramebuffer(framebuffer);
+```
+
+### MSAA
+
+RenderPassではMSAAの設定を行うことができます。
+ResolveというMSAAを行うために必要な追加のレンダーターゲットをsetResolveFramebufferメソッドで設定します。
+
+```javascript
+const renderPass1 = new Rn.RenderPass();
+const framebufferMsaa = Rn.RenderableHelper.createTexturesForRenderTarget(600, 600, 0, {
+    isMSAA: true,
+    sampleCountMSAA: 4,
+    createDepthBuffer: true,
+});
+const framebufferResolve = Rn.RenderableHelper.createTexturesForRenderTarget(600, 600, 1, {});
+renderPass1.toClearColorBuffer = true;
+renderPass1.cameraComponent = cameraComponent;
+renderPass1.setFramebuffer(framebufferMsaa);
+renderPass1.setResolveFramebuffer(framebufferMsaa);
+```
+
+## Expression
+
+Expressionとは、複数のレンダーパスをまとめたもので、RhodoniteによるリアルタイムCGにおいて何らかのCG表現を実現する単位となります。
+CGで表現したい映像は、複雑なものになるとマルチパスレンダリングが必要となります。Expressionに複数のRenderPassを追加することで、そうした表現も可能になります。
+
+また、System.processメソッドはExpressionの配列を引数として受ける仕様になっています。
+表示したいCG表現をひとつひとつExpressionとして記述していき、それら複数の表現（＝Expression）を配列としてSystem.processメソッドに渡すことで、複数の表現からなる複雑なCG映像を表示することが可能になります。
+
+```javascript
+const expression = new Rn.Expression();
+const renderPass1 = new Rn.RenderPass();
+renderPass1.toClearColorBuffer = true;
+renderPass1.cameraComponent = cameraComponent;
+const renderPass2 = new Rn.RenderPass();
+renderPass2.toClearColorBuffer = true;
+renderPass2.cameraComponent = cameraComponent;
+const renderPass_fxaa = new Rn.RenderPass();
+renderPass_fxaa.toClearColorBuffer = true;
+const cameraEntity_fxaa = entityRepository.createEntity([Rn.TransformComponent, Rn.SceneGraphComponent, Rn.CameraComponent])
+const cameraComponent_fxaa = cameraEntity_fxaa.getComponent(Rn.CameraComponent);
+cameraComponent_fxaa.type = Rn.CameraType.Orthographic;
+renderPass_fxaa.cameraComponent = cameraComponent_fxaa;
+
+expression.addRenderPasses([renderPass1, renderPass2, renderPass_fxaa]);
+
+const framebuffer = Rn.RenderableHelper.createTexturesForRenderTarget(600, 600, 1, {})
+renderPass1.setFramebuffer(framebuffer);
+
+const framebuffer_fxaatarget = Rn.RenderableHelper.createTexturesForRenderTarget(600, 600, 1, {})
+renderPass2.setFramebuffer(framebuffer_fxaatarget);
+
+...
+...
+...
+
+system.process([expression]);
+```
+
+## Frame
+
+フレーム(Frame)は１フレーム分の描画情報を持っており、具体的には内部にエクスプレッション（Expression）の配列を持ちます。
+System.process()メソッドにFrameインスタンスを渡すことで、その１フレーム分の描画が行われます。
+
+比較的最近登場したクラスであるため、描画のために必須ではありません。従来通り、System.process()メソッドはExpressionの配列も受け入れます。
+
+## 全体のイメージ
+次のようなイメージです。
+
+- フレーム（必須ではない）
+  - エクスプレッションの配列
+    - エクスプレッション1
+    - エクスプレッション2
+      - レンダーパスの配列
+        - レンダーパス1
+        - レンダーパス2
+          - Entity1
+          - Entity2
+          - Entity3
+            - TransformComponent
+            - SceneGraphComponent
+            - MeshComponent
+            - ...
+          - ...
+        - ...
+    - ...
+
+</DocLayout>

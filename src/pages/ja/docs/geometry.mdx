@@ -1,0 +1,23 @@
+---
+title: MeshとPrimitive
+description: RhodoniteのMeshとPrimitiveについて
+---
+
+import DocLayout from '../../../components/layouts/DocLayout.astro';
+
+<DocLayout>
+
+# MeshとPrimitive
+
+Rhodoniteでのジオメトリを表現する主なクラスはMeshクラスとPrimitiveクラスです。
+Meshが複数のPrimitiveを保持しており、Primitiveは各頂点属性のデータをAccessorクラスという形で保持しています。
+Primitiveはプリミティブタイプ（トライアングルリストかトライアングルストリップかまたはラインリストなどか）も持っており、さらに重要なことに質感を決定するMaterialも保持しています。
+
+このデータ構造はglTFフォーマットを参考にしており、実際両者のデータ構造はほとんど同じです。
+
+# MeshComponentとMeshRendererComponent
+
+MeshComponentは、Meshを一つ保持するコンポーネントです。いわば、3D空間に配置されたEntityが3D形状を持つためのデータ領域のようなものです。
+MeshRendererComponentはMeshComponentと連携しており、MeshRendererが持つMeshにアクセスし、そのジオメトリを画面に描画する処理を担当します。
+
+</DocLayout>

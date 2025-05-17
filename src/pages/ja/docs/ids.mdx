@@ -1,0 +1,72 @@
+---
+title: ID規則
+description: RhodoniteのID規則について
+---
+
+import DocLayout from '../../../components/layouts/DocLayout.astro';
+
+<DocLayout>
+
+Rhodoniteでは殆どのオブジェクトにIDが割り当てられており、IDで物事を識別・管理できるようになっています。
+
+## IDの種類
+（以下の説明で出てくる「XXX」は同じ要素を意味する）
+
+### TypeID（XXX_TID）
+  - XXXについての種類を表すID。番号空間はXXXの中で閉じており、またその中でユニーク。
+  - 実例としては、`ComponentTID`
+### UniqueID（XXX_UID）
+  - 「XXX」の実体（複数生成可能なインスタンスで生死を問わない）を識別するためのID。
+  - 一度でも生成された実体にはすべてUniqueIDが割り振られ、実体の生死にかかわらず、割り当てが変更されることはない。
+  - 実例としては、`EntityUID`や`ObjectUID`
+### ScopedID（XXX_SID）
+  - 基本的にユニークなIDだが、番号空間は対応するTypedIDの中で閉じていてその中ではユニークな識別番号。つまり、異なるTypedID範囲同士では番号が重複する場合がある。
+  - 実例としては、`ComponentSID`
+
+### 他規則
+
+- 同じ「XXX」であっても、UniqueID、ScopedID, TypeIDで互いに番号空間は別である。
+- 全ての種類のIDについて、採番は0起算である。負の値（特に運用上-1）は「無効または指定なし」と解釈する。
+
+## 代表的なID
+
+### EntityUID
+
+Entityのインスタンスに割り当てられるUniqueIDです。特定のEntityを取り出したり指定したりするときによく使います。
+
+```javascript
+const entityRepository = Rn.EntityRepository.getInstance();
+const meshEntity = entityRepository.createEntity([Rn.TransformComponent, Rn.SceneGraphComponent]);
+console.log(meshEntity.entityUID)
+```
+
+### ObjectUID
+
+RnObjectを継承しているクラスのインスタンスに割り当てられるUniqueIDです。EntityはRnObjectでもあるので、EntityはentityUIDとobjectUIDの両方を持っています。
+
+```javascript
+const rnObject = new RnObject();
+console.log(rnObject.objectUID);
+
+const entityRepository = Rn.EntityRepository.getInstance();
+const entity = entityRepository.createEntity([]);
+console.log(entity.objectUID);
+```
+
+### ComponentTID
+
+コンポーネントの種類を表すTypeIDです。コンパイル時点で値が確定している静的なIDでもあります。
+代表的なComponentTIDは [Rhodonite内のこのファイル](https://github.com/emadurandal/RhodoniteTS/blob/master/src/foundation/components/WellKnownComponentTIDs.ts)に記述されています。
+
+### ComponentSID
+
+コンポーネントのインスタンスのScopedIDです。
+
+```javascript
+const entityRepository = Rn.EntityRepository.getInstance();
+const meshEntity = entityRepository.createEntity([Rn.TransformComponent, Rn.SceneGraphComponent]);
+const transformComponent = meshEntity.getTransforom();
+console.log(transfomrComponent.componentSID);
+```
+
+</DocLayout>

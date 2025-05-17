@@ -1,0 +1,61 @@
+---
+title: Memory Model
+description: About the memory model in Rhodonite
+---
+
+import DocLayout from '../../../components/layouts/DocLayout.astro';
+
+<DocLayout>
+
+　Much of the memory used by Rhodonite is allocated as a huge memory pool called Buffer, which is allocated to each component　and material as follows
+
+![MemoryLayout](https://user-images.githubusercontent.com/3821214/163668732-73265eb5-27da-42df-8a8c-a4357db7384d.png)
+
+## glTF-inspired management method
+
+Buffers are divided into areas called BufferView, and BufferView is further divided into Accessor areas for management. The Rhodonite memory model is inspired by the glTF format memory model.
+
+It is this memory management mechanism that allows the shaders to properly fetch data after it has been sent to the GPU as a texture. The byteStride and byte alignment between the data is properly adjusted so that the shaders can fetch the data efficiently.
+
+## Classes responsible for memory management
+
+Rhodonite manages memory at three levels of granularity: Buffer, BufferView, and Accessor.
+Classes with the same names are provided to facilitate memory management in many applications.
+
+### Buffer class
+
+It represents one large contiguous buffer pool.
+It can be thought of as the equivalent of glTF's Buffer.
+
+### BufferView
+
+This class represents a portion of the memory area managed by the Buffer class and manages that portion of the memory area.
+It can be thought of as the equivalent of glTF's BufferView.
+The reason why the BufferView class exists is that there are many cases where you want to divide a huge Buffer into separate areas for different purposes and manage them.
+
+### Accessor
+
+This class represents a portion of the memory area managed by the BufferView class and manages that portion of the memory area.
+It can be thought of as the equivalent of glTF's Accessor.
+
+The functional difference from BufferView is that Accessor already knows the units and methods of data access to the memory area under its management.
+
+Direct data read/write operations, such as vertex data manipulation, would be performed using this Accessor class.
+Also, by using the method takeOne, one piece of data can be retrieved as a TypedArray and held in a separate class. This acquired memory area remains unchanged and remains part of Accessor (originally the huge ArrayBuffer pool that Buffer represents), and no memory copying is done.
+
+## Blittable Memory Architecture
+
+One of Rhodonite's unique features is its "blittable memory architecture.
+Using the memory management mechanism described so far, the Bufer class manages contiguous memory areas as a huge ArrayBuffer pool.
+Then, some of the data is extracted using the takeOne method of the Accessor class and assigned as the storage area for the individual properties of components and materials.
+
+This means that when you change a property of a component or material, that change actually rewrites the inside of the huge ArrayBuffer memory pool represented by the Buffer class.
+
+The beauty of this is that with this mechanism, after the various library calculations, the ArrayBuffer memory pool indicated by Buffer is simply sent to the GPU as a floating-point texture, and the GPU has access to almost all data through the texture. It is.
+
+Another benefit is that the cost of setting up uniform variables (copying values to retrieve them and the overhead of WebGL's uniform function itself) is eliminated.
+
+On mobile devices, the number of uniform variables available can be very small, which can cause difficulties when passing large amounts of parameters, such as the bone matrix of a skeletal animation.
+Rhodonite with its blittable memory architecture can easily overcome such limitations by allowing floating point textures to be used to pass parameters to shaders.
+
+</DocLayout>

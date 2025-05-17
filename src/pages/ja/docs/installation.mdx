@@ -7,73 +7,163 @@ import DocLayout from '../../../components/layouts/DocLayout.astro';
 
 <DocLayout>
 
-# インストールガイド
+Rhodoniteは以下の2通りの方法で導入できます。
 
-<p className="lead">
-  このガイドでは、様々なプラットフォームにRhodoniteをインストールする詳細な手順を説明します。
-</p>
+## npmリポジトリを利用する方法
 
-## システム要件
+Rhodoniteはnpmを用いて導入することができます。
 
-Rhodoniteをインストールする前に、システムが以下の要件を満たしていることを確認してください：
+### npmを用いたRhodoniteのインストール
 
-* **オペレーティングシステム**: Windows 10以上、macOS 10.15以上、またはLinux
-* **Node.js**: v14.0以上
-* **メモリ**: 少なくとも4GB RAM
-* **GPU**: WebGL 2.0対応グラフィックカード（推奨）
-
-## インストール方法
-
-### 方法1: NPMを使用
-
-Rhodoniteをインストールする最も簡単な方法はnpmを使用することです：
+ターミナルから以下のコマンドでRhodoniteをインストールできます。
 
 ```bash
-npm install @rhodonite/core --save
+$ npm install rhodonite
 ```
 
-### 方法2: CDNを使用
+### Bundlerを使った場合のコーディング例
 
-CDNから直接Rhodoniteを含めることもできます：
+WebpackやViteなどのバンドラーを使うことで、Rhodoniteを容易にimportして利用することができます。
+以下はTypeScriptを用いた一例です。
 
-```html
-<script src="https://cdn.example.com/rhodonite/latest/rhodonite.min.js"></script>
-```
+```ts
+// main.ts
+import Rn from 'rhodonite';
 
-### 方法3: ソースからビルド
+document.body.onload = async function load() {
+  await Rn.System.init({
+    approach: Rn.ProcessApproach.Uniform,
+    canvas: document.getElementById('world') as HTMLCanvasElement,
+  });
 
-最新の機能を使用したり、貢献したりするには、ソースからビルドできます：
-
-```bash
-# リポジトリをクローン
-git clone https://github.com/actnwit/rhodonite.git
-
-# ディレクトリに移動
-cd rhodonite
-
-# 依存関係をインストール
-npm install
-
-# プロジェクトをビルド
-npm run build
-```
-
-## インストールの確認
-
-Rhodoniteが正しくインストールされたことを確認するには、次のような簡単なテストファイルを作成します：
-
-```js
-import * as Rhodonite from '@rhodonite/core';
-
-// Rhodoniteを初期化
-const system = Rhodonite.System.getInstance();
-if (system) {
-  console.log('Rhodoniteが正しくインストールされました！');
+  // 3Dモデルの読み込みやdrawコールなど
 }
 ```
 
-<div className="note">
-  **注意:** インストール中に問題が発生した場合は、トラブルシューティングガイドを確認するか、GitHubで問題を報告してください。
-</div>
+### Bundlerを使わない場合
+
+Bundlerを使わないで利用することもできます。以下はTypeScriptでの例です。
+
+```html
+<!-- index.html -->
+...
+<script type="module" src="main.js">
+...
+```
+
+```ts
+// main.ts
+import Rn from 'node_modules/rhodonite/dist/esm/index.js'; // ESModuleとして利用
+// import Rn from 'node_modules/rhodonite/dist/esmdev/index.js'; // ライブラリ内のソースマップ表示やステップ実行をしたい場合はこちらを使う
+
+document.body.onload = async function load() {
+  await Rn.System.init({
+    approach: Rn.ProcessApproach.Uniform,
+    canvas: document.getElementById('world') as HTMLCanvasElement,
+  });
+
+  // 3Dモデルの読み込みやdrawコールなど
+}
+```
+
+```
+// tsconfig.json
+{
+  ...
+  "compilerOptions": {
+    "module": "ESNext",
+    "moduleResolution": "node",
+    "esModuleInterop": true,
+    ...
+  }
+  ...
+}
+```
+
+## GitHubリポジトリ内のランタイムを使用する方法
+
+この方法では、導入したいプロジェクトフォルダーにRhodoniteランタイム（実行用のjsファイル）をコピーし、それを参照して利用します。
+
+### Rhodoniteランタイムのコピー
+
+RhodoniteのGitHubリポジトリには`dist`ディレクトリが存在します。
+リポジトリをCloneしてbuildを行うと、dist/iifeディレクトリ以下にRhodoniteランタイムが生成されます。
+
+![dist_dir](https://user-images.githubusercontent.com/3821214/161363331-ff417948-228b-460e-a11a-2cc8481f6df0.png)
+
+または、CI(自動テスト)結果ページ([https://github.com/actnwit/RhodoniteTS/actions/workflows/test.yml](https://github.com/actnwit/RhodoniteTS/actions/workflows/test.yml))のテストが成功したリンク先のArtifactの欄からdistフォルダの内容をZipダウンロードして入手することも可能です。
+![image](https://user-images.githubusercontent.com/3821214/161414183-1d070606-771a-47e4-b5c3-330bcd5170d9.png)
+
+`dist`ディレクトリ内の`rhodonite.js`、またはそのminify版の`rhodonite.min.js`をプロジェクトフォルダー以下にコピーします。以下では`rhodonite.js`を用いた例を扱いますが、`rhodonite.min.js`に読み換えても問題ありません。
+
+### JavaScriptを用いたコーディング例
+
+htmlファイルから`rhodonite.js`を参照することで、グローバルオブジェクト(window)のRnプロパティからRhodoniteを使えます。
+この場合、RhodoniteのIIFE版を利用していることになります。
+
+たとえば、プロジェクトフォルダーが次の画像のように構成されているとします。
+
+![use_runtime_directory](https://user-images.githubusercontent.com/3821214/161363360-26add3ca-54b2-4173-bf2c-aeb4add8168e.png)
+
+このとき、`index.html`から次のようにRhodoniteを利用できます。
+
+```html
+// index.html
+<body>
+  <canvas id="world"></canvas>
+  <script src="./rhodonite.js"></script>
+  <script>
+    document.body.onload = async function load() {
+      await Rn.System.init({
+        approach: Rn.ProcessApproach.Uniform,
+        canvas: document.getElementById('world'),
+      });
+
+      // 3Dモデルの読み込みやdrawコールなど
+    }
+  </script>
+</body>
+```
+
+TypeScriptを使う場合は次のようにします。
+IIFE版ではRhodoniteの型の運用が通常よりも変則的になります。
+TypeScriptでコーディングする場合は、ESModule版の利用を推奨します。
+
+```ts
+import _Rn from 'rhodonite'; // Use this for adding type annotations to window.Rn in this sample
+import { CameraComponent, RenderPass } from 'rhodonite'; // for type annotations for iife usage
+
+declare const window: any;
+declare const Rn: typeof _Rn; // Use the window.Rn as Rn
+
+
+async function load() {
+  Rn.System.init({
+    approach: Rn.ProcessApproach.Uniform,
+    canvas: document.getElementById('world') as HTMLCanvasElement
+  });
+
+  // Camera
+  const cameraEntity = Rn.EntityHelper.createCameraControllerEntity();
+  const cameraComponent: CameraComponent = cameraEntity.getCamera();
+
+  ...
+  (After that, please refer to the sample codes.)
+  ...
+
+```
+
+TypeScriptコードを次のようにコンバイルします。
+
+```bash
+$ npx tsc ./main.ts --lib es2015,dom --target es2015 --module umd --moduleResolution node
+```
+
+TypeScriptコードをUMDとしてコンパイルしたので、それをブラウザで読み込むためにreqiurejsなどを利用します。
+
+```html
+<script src="dist/iife/rhodonite.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.6/require.min.js" data-main="main.js"></script>
+```
 
 </DocLayout>

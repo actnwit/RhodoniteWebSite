@@ -7,73 +7,164 @@ import DocLayout from '../../../components/layouts/DocLayout.astro';
 
 <DocLayout>
 
-# Installation Guide
+Rhodonite can be installed in the following two ways
 
-<p className="lead">
-  This guide provides detailed instructions for installing Rhodonite on various platforms.
-</p>
+## Using npm repository
 
-## System Requirements
+Rhodonite can be installed using npm.
 
-Before installing Rhodonite, ensure your system meets the following requirements:
+### Installing Rhodonite using npm
 
-* **Operating System**: Windows 10+, macOS 10.15+, or Linux
-* **Node.js**: v14.0 or later
-* **Memory**: At least 4GB RAM
-* **GPU**: WebGL 2.0 compatible graphics card (recommended)
-
-## Installation Methods
-
-### Method 1: Using NPM
-
-The easiest way to install Rhodonite is via npm:
+You can install Rhodonite from a terminal with the following command.
 
 ```bash
-npm install @rhodonite/core --save
+$ npm install rhodonite
 ```
 
-### Method 2: Using CDN
+### Coding example when used with bundler
 
-You can also include Rhodonite directly from a CDN:
+By using bundlers such as Webpack or Vite, Rhodonite can be easily imported and used. The following is an example using TypeScript.
+The following is an example using TypeScript.
 
-```html
-<script src="https://cdn.example.com/rhodonite/latest/rhodonite.min.js"></script>
-```
+```ts
+// main.ts
+import Rn from 'rhodonite';
 
-### Method 3: From Source
+document.body.onload = async function load() {
+  await Rn.System.init({
+    approach: Rn.ProcessApproach.Uniform,
+    canvas: document.getElementById('world') as HTMLCanvasElement,
+  });
 
-For the latest features or to contribute, you can build from source:
-
-```bash
-# Clone the repository
-git clone https://github.com/actnwit/rhodonite.git
-
-# Navigate to the directory
-cd rhodonite
-
-# Install dependencies
-npm install
-
-# Build the project
-npm run build
-```
-
-## Verifying Installation
-
-To verify that Rhodonite is installed correctly, create a simple test file:
-
-```js
-import * as Rhodonite from '@rhodonite/core';
-
-// Initialize Rhodonite
-const system = Rhodonite.System.getInstance();
-if (system) {
-  console.log('Rhodonite installed correctly!');
+  // loading 3D models, draw calls, etc.
 }
 ```
 
-<div className="note">
-  **Note:** If you encounter any issues during installation, please check our troubleshooting guide or open an issue on GitHub.
-</div>
+### Using without bundler
+
+You can you Rhodonite without Bundler. The following is an example in TypeScript.
+
+```html
+<! -- index.html -->
+...
+<script type="module" src="main.js">
+...
+```
+
+```ts
+// main.ts
+import Rn from 'node_modules/rhodonite/dist/esm/index.js'; // use as ESModule
+// import Rn from 'node_modules/rhodonite/dist/esmdev/index.js'; // use this if you want to display the source map or step through the library
+
+document.body.onload = async function load() {
+  await Rn.System.init({
+    approach: Rn.ProcessApproach.Uniform,
+    canvas: document.getElementById('world') as HTMLCanvasElement,
+  });
+
+  // loading 3D models, draw calls, etc.
+}
+```
+
+```
+// tsconfig.json
+{
+  ...
+  "compilerOptions": {
+    "module": "ESNext",
+    "moduleResolution": "node",
+    "esModuleInterop": true,
+    ...
+  }
+  ...
+}
+```
+
+## How to use the runtime in the GitHub repository
+
+In this method, you copy the Rhodonite runtime (the js file for execution) to the project folder where you want to deploy it, and refer to it for use.
+
+### Copy the Rhodonite runtime
+
+There is a `dist` directory in the Rhodonite GitHub repository.
+Clone the repository and do build, Rhodonite runtime will be generated under the dist/iife directory.
+
+![dist_dir](https://user-images.githubusercontent.com/3821214/161363331-ff417948-228b-460e-a11a-2cc8481f6df0.png)
+
+Or, the CI (automated testing) results page ([https://github.com/actnwit/RhodoniteTS/actions/workflows/test.yml](https://github.com/actnwit/RhodoniteTS/ actions/workflows/test.yml)).
+![image](https://user-images.githubusercontent.com/3821214/161414183-1d070606-771a-47e4-b5c3-330bcd5170d9.png)
+
+Copy `rhodonite.js` in the `dist` directory or its minify version `rhodonite.min.js` under the project folder. The following example uses `rhodonite.js`, but you can replace it with `rhodonite.min.js`.
+
+### Coding example using JavaScript
+
+By referring to `rhodonite.js` from the html file, you can use Rhodonite from the Rn property of the global object (window).
+In this case, you are using the IIFE version of Rhodonite.
+
+For example, suppose your project folder is configured as in the following image.
+
+![use_runtime_directory](https://user-images.githubusercontent.com/3821214/161363360-26add3ca-54b2-4173-bf2c-aeb4add8168e.png)
+
+In this case, you can use Rhodonite from `index.html` as follows
+
+```html
+// index.html
+<body>
+  <canvas id="world"></canvas>
+  <script src=". /rhodonite.js"></script>
+  <script>
+    document.body.onload = async function load() {
+      await Rn.System.init({
+        approach: Rn.ProcessApproach.Uniform,
+        canvas: document.getElementById('world'),
+      });
+
+      // loading 3D model, draw call, etc.
+    }
+  </script>
+</body>
+```
+
+If you use TypeScript, do the following
+The IIFE version has more irregularities in the operation of Rhodonite types than usual.
+If you code in TypeScript, we recommend using the ESModule version.
+
+```ts
+import _Rn from 'rhodonite'; // Use this for adding type annotations to window.Rn in this sample
+import { CameraComponent, RenderPass } from 'rhodonite'; // for type annotations for iife usage
+
+declare const window: any;
+declare const Rn: typeof _Rn; // Use the window.Rn as Rn
+
+
+async function load() {
+  Rn.System.init({
+    approach: Rn.ProcessApproach.Uniform,
+    canvas: document.getElementById('world') as HTMLCanvasElement
+  });
+
+  // Camera
+  const cameraEntity = Rn.EntityHelper.createCameraControllerEntity();
+  const cameraComponent: CameraComponent = cameraEntity.getCamera();
+
+  ...
+  (After that, please refer to the sample codes.)
+  ...
+
+```
+
+Convey the TypeScript code as follows.
+
+```bash
+$ npx tsc . /main.ts --lib es2015,dom --target es2015 --module umd --moduleResolution node
+```
+
+Now that we have compiled the TypeScript code as a UMD, we can use reqiurejs or something similar to load it in the browser.
+
+```html
+<script src="dist/iife/rhodonite.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.6/require.min.js" data-main="main.js"></script>
+```
+
 
 </DocLayout>

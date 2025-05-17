@@ -1,0 +1,234 @@
+---
+title: EntityとComponent
+description: RhodoniteのEntityとComponentについて
+---
+
+import DocLayout from '../../../components/layouts/DocLayout.astro';
+
+<DocLayout>
+
+RhodoniteではUnityやUnreal Engineでも見られる、コンポーネントシステムを採用しています。
+３D空間上のオブジェクトを意味するEntityに１つ以上のコンポーネントを搭載させることで、そのEntityは搭載したコンポーネントの機能を獲得します。
+
+## Entityについて
+
+エンティティ（Entity）は3D空間上のオブジェクトに相当するものです。Entityそのものは自身のIDを持つだけの入れ物に過ぎません。
+このEntityにさまざまな機能を持ったコンポーネント（Component）を追加することで、そのEntityは3D空間上でそれらの機能を発揮します。
+
+Entityを作るには次のようにします。
+
+```ts
+const entity = Rn.EntityRepository.createEntity();
+```
+
+Entityにコンポーネントを追加するには、次のようにします。
+
+```ts
+  const entityAddedComponent = Rn.EntityRepository.addComponentToEntity(
+    TransformComponent,
+    entity
+  );
+```
+
+実際には、Componentを搭載済みのEntityを返してくれる`createXXXEntity`メソッド群を使うことになるでしょう。
+
+```ts
+const groupEntity = Rn.createGroupEntity(); // TransformComponent, SceneGraphComponentを持つ
+const meshEntity = Rn.createMeshEntity(); // TransformComponent, SceneGraphComponent, MeshComponent, MeshRendererComponentを持つ
+```
+
+## 代表的なコンポーネント
+
+代表的なコンポーネントを紹介します。
+
+### Transformコンポーネント
+
+平行移動（translate）、回転（rotate）、スケール（scale）の設定値を元に、物体の姿勢を示す変換行列を内部的に生成するコンポーネントです。3D空間上に配置するEntityであれば必須のコンポーネントです。
+
+```typescript
+const cubeTransformComponent = cubeEntity.getTransform();
+cubeTransformComponent.translate = Rn.Vector3.fromCopy3(0, 3, 0);
+cubeTransformComponent.rotate = Rn.Vector3.fromCopy3(90, 0, 0);
+cubeTransformComponent.scale = Rn.Vector3.fromCopy3(2, 2, 2);
+```
+
+### SceneGraphコンポーネント
+
+物体の親子関係（シーングラフ）を形成するコンポーネントです。Transformコンポーネントが持つ姿勢の変換行列を積算してワールド行列を生成します。こちらも、3D空間上に配置するEntityであれば必須のコンポーネントです。
+
+```typescript
+const groupEntity = Rn.EntityHelper.createSceneGraphEntity();
+const cubeEntity = Rn.MeshHelper.createCube();
+const groupSceneGraphComponent = groupEntity.getSceneGraph();
+groupSceneGraphComponent.addChild(cubeEntity.getSceneGraph());
+```
+
+### Meshコンポーネント
+
+ポリゴンメッシュのデータを保持するコンポーネントです。
+
+### MeshRendererコンポーネント
+
+Meshコンポーネントからメッシュデータを受け取り、WebGLなどの３DAPIを用いてメッシュの描画を行うコンポーネントです。
+
+### Skeletalコンポーネント
+
+スキニング処理を行うコンポーネントです。
+
+### Cameraコンポーネント
+
+カメラの機能を担うコンポーネントです。
+
+### Lightコンポーネント
+
+ライトの機能を担うコンポーネントです。現在はポイントライト、ディレクショナルライト、スポットライトをサポートします。
+
+### Effekseerコンポーネント
+
+オープンソースエフェクトツール`Effekseer`のエフェクトを再生するためのコンポーネントです。
+
+### コンポーネントの処理の流れ
+
+#### 処理の起点
+
+Rhodoniteでは、まずSystemインスタンスを生成して、次にExpressionを構築、最後にsystem.processメソッドにエクスプレッションの配列を指定して処理を開始します。
+
+```ts
+// Initializes Rhodonite
+Rn.System.init({
+  approach: Rn.ProcessApproach.FastestWebGL2,
+  canvas: document.getElementById('world')
+});
+
+// constructs expressions
+...
+
+// drawing
+Rn.System.startRenderLoop(()=>{
+  system.process([expression]);
+});
+```
+
+つまり、基本的には各描画フレームで１度呼ばれるsystem.processメソッドが、処理の起点になるわけです。
+
+#### データの階層
+
+##### Frame, Expression, RenderPass
+フレーム(Frame)は１フレーム分の描画情報を持っており、具体的には内部にエクスプレッション（Expression）の配列を持ちます。エクスプレッションは複数のレンダーパス（RenderPass）を配列として保持しています。レンダーパスには、処理に対象となるEntity群を指定することができます。そして、各Entityは複数のComponentを持っています。
+次のようなイメージです。
+
+- フレーム
+  - エクスプレッションの配列
+    - エクスプレッション1
+    - エクスプレッション2
+      - レンダーパスの配列
+        - レンダーパス1
+        - レンダーパス2
+          - Entity1
+          - Entity2
+          - Entity3
+            - TransformComponent
+            - SceneGraphComponent
+            - MeshComponent
+            - ...
+          - ...
+        - ...
+    - ...
+
+さらに、コンポーネントは「処理のステージ」という概念を持っています。以下のステージです。
+
+- ProcessStage.Create
+- ProcessStage.Load
+- ProcessStage.Logic
+- ProcessStage.PreRender
+- ProcessStage.Render
+
+基本的には、各コンポーネントにおいて、上から下にむかって処理のステージが遷移していきます。
+一度に複数のステージに所属することはなく、各Componentは常にどれかのステージだけを処理しています。
+各Componentには、それぞれのステージと対応する名前のメソッドを持っています。
+例えば、`ProcessStage.Create`に対応するコンポーネントのメソッドは`$Create`メソッドになります。
+Createステージでは、$Createメソッドが実行されることになります。
+
+
+### 実際の処理工程
+
+データの階層について説明しましたが、実際の実行順序がこのデータ階層の上から下に、と単純になっているいうわけではありません。
+実際にSystem.processメソッドの中身を見てみると。次のようなループ構造になっています。
+
+```typescript
+  process(expressions: Expression[]) {
+
+    // まずは「処理のステージ」の種類の順にループを実行
+    for (let stage of this.__processStages) {
+      const methodName = stage.methodName;
+      const commonMethodName = 'common_' + methodName;
+      const componentTids = this.__componentRepository.getComponentTIDs();
+      // 次に、コンポーネントの種類順にループ処理を実行
+      for (let componentTid of componentTids) {
+        // エクスプレッションの配列でループ処理を実行
+        for (let exp of expressions) {
+          let loopN = 1;
+          if (componentTid === MeshRendererComponent.componentTID) {
+            loopN = exp!.renderPasses.length;
+          }
+          // エクスプレッションが持つレンダーパスの配列でループ処理を実行
+          for (let i = 0; i < loopN; i++) {
+            const renderPass = exp!.renderPasses[i];
+            if (componentTid === MeshRendererComponent.componentTID && (stage == ProcessStage.Render)) {
+              this.__webglResourceRepository.bindFramebuffer(renderPass.getFramebuffer());
+              this.__webglResourceRepository.setViewport(renderPass.getViewport());
+              this.__webglResourceRepository.setDrawTargets(renderPass.getFramebuffer());
+              this.__webglResourceRepository.clearFrameBuffer(renderPass);
+            }
+
+            const componentClass: typeof Component = ComponentRepository.getComponentClass(componentTid)!;
+            // コンポーネントの現在の処理ステージおよびパイプラインにおいて処理対象となるEntityリストをアップデート
+            componentClass.updateComponentsOfEachProcessStage(componentClass, stage, this.__componentRepository, renderPass);
+
+            const componentClass_commonMethod = (componentClass as any)[commonMethodName];
+
+            // コンポーネントの現在の処理ステージにおいて、処理対象の全てのEntityに共通する処理をする
+            if (componentClass_commonMethod) {
+              componentClass_commonMethod({ processApproach: this.__processApproach, renderPass: renderPass, processStage: stage, renderPassTickCount: this.__renderPassTickCount });
+            }
+
+            // コンポーネントのプロセス処理を行う。具体的には現在の処理ステージの処理対象のEntity群を、現在の処理ステージに対応するComponentクラスのインスタンスメソッドで処理していく。
+            componentClass.process({
+              componentType: componentClass,
+              processStage: stage,
+              processApproach: this.__processApproach,
+              componentRepository: this.__componentRepository,
+              strategy: this.__webglStrategy!,
+              renderPass: renderPass,
+              renderPassTickCount: this.__renderPassTickCount
+            });
+
+            this.__renderPassTickCount++;
+
+            if (stage === ProcessStage.Render && renderPass.getResolveFramebuffer()) {
+              renderPass.copyFramebufferToResolveFramebuffer();
+            }
+          }
+        }
+      }
+    }
+
+    Time._processEnd();
+  }
+```
+
+簡略化して箇条書きすると、以下のような流れでループ処理が回っていきます。
+
+- 「処理のステージ」の種類の順にループを実行
+  - コンポーネントの種類順にループ処理を実行
+    - エクスプレッションの配列でループ処理を実行
+      - エクスプレッションが持つレンダーパスの配列でループ処理を実行
+        - コンポーネントの現在の処理ステージおよびレンダーパスにおいて処理対象となるEntityリストをアップデート
+        - コンポーネントの現在の処理ステージにおいて、処理対象の全てのEntityに共通する処理をする
+        - コンポーネントのプロセス処理を行う
+          - 現在の処理ステージの処理対象のEntity群を、現在の処理ステージに対応するComponentクラスのインスタンスメソッドで処理していく。
+
+端的にいえば、CreateやLoad、Renderといった「処理のステージ」が一番大きな処理の段階です。
+それぞれの処理のステージにおいて、さらにコンポーネント単位で処理が行われ、そのコンポーネントの処理では、そのコンポーネントを所持しているEntityの数だけ、コンポーネントインスタンスが一気に流れるように大量処理されることになります。
+
+</DocLayout>

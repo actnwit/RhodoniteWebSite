@@ -1,0 +1,47 @@
+---
+title: Initialization
+description: About the initialization of Rhodonite
+---
+
+import DocLayout from '../../../components/layouts/DocLayout.astro';
+
+<DocLayout>
+
+Initialization of Rhodonite is simple.
+
+In the Rn.System.init method, specify the process approach and the Canvas to draw to. Don't forget to specify `await`.
+
+Depending on which process approach is chosen, the internal processing of WebGL differs.
+For the latest Rhodonite we recommend DataTexture.
+
+```javascript
+await Rn.System.init({
+  approach: Rn.ProcessApproach.DataTexture,
+  canvas: document.getElementById('world')
+};
+```
+
+### List of Process Approaches
+
+| Type | Characteristics |
+|:-----------|------------|
+| Uniform | Works with WebGL2. Uses Uniform variables for passing shader parameters, suitable for troubleshooting as you can check the parameters passed to Uniform variables in e.g. specter.js. |
+| DataTexture | Works with WebGL2. Uses floating point textures for passing shader parameters. Normally recommended to use this instead of Uniform. |
+| WebGPU | Works with WebGPU |
+
+## Summary
+
+The following is a summary of the code up to this point.
+
+```typescript
+// Set up System (specify process approach and pass in canvas)
+await Rn.System.init({
+  approach: Rn.ProcessApproach.DataTexture,
+  canvas: document.getElementById('world')
+});
+```
+
+Rhodonite initialization is now complete.
+Now it is time to create 3D data by writing the necessary data in code or reading it from a file such as glTF, and pass it to the System's process method via an Expression instance for rendering. The specific method is explained on the next page.
+
+</DocLayout>

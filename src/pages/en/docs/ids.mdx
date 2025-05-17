@@ -1,0 +1,71 @@
+---
+title: Code of Identifiers
+description: About the code of identifiers in Rhodonite
+---
+
+import DocLayout from '../../../components/layouts/DocLayout.astro';
+
+<DocLayout>
+In Rhodonite, most objects are assigned IDs so that they can be identified and managed by IDs.
+
+## Types of IDs
+("XXX" in the following explanation means the same element)
+
+### TypeID (XXX_TID)
+  - An ID that represents a kind about XXX; the number space is closed within XXX and also unique within it.
+  - A practical example is `ComponentTID`.
+### UniqueID (XXX_UID)
+  - An ID to identify an entity (multiple generable instances, alive or dead) of "XXX".
+  - Once an entity is created, all entities are assigned a UniqueID, and the assignment is never changed regardless of whether the entity is alive or dead.
+  - Examples include `EntityUID` and `ObjectUID`.
+### ScopedID (XXX_SID)
+  - Basically a unique ID, but the number space is closed within the corresponding TypedID and a unique identification number within it. This means that numbers may overlap between different TypedID ranges.
+  - A practical example is the `ComponentSID`.
+
+### other rules
+
+- Even if the same "XXX" is used, UniqueID, ScopedID, and TypeID have a different number space from each other.
+- For all types of IDs, the numbering starts from zero. Negative values (especially -1 for operational use) are interpreted as "invalid or not specified.
+
+## Representative IDs
+
+### EntityUID
+
+UniqueID assigned to an instance of Entity. It is often used to retrieve or specify a specific Entity.
+
+````javascript
+const entityRepository = Rn.EntityRepository.getInstance();
+const meshEntity = entityRepository.createEntity([Rn.TransformComponent, Rn.SceneGraphComponent]);
+console.log(meshEntity.entityUID)
+````
+
+### ObjectUID
+
+UniqueID assigned to an instance of a class that extends RnObject; since Entity is also a RnObject, Entity has both an entityUID and an objectUID.
+
+```javascript
+const rnObject = new RnObject();
+console.log(rnObject.objectUID);
+
+const entityRepository = Rn.EntityRepository.getInstance();
+const entity = entityRepository.createEntity([]);
+console.log(entity.objectUID);
+```
+
+### ComponentTID
+
+TypeID representing the type of component. It is also a static ID whose value is fixed at the time of compilation.
+A typical ComponentTID is [this file in Rhodonite](https://github.com/emadurandal/RhodoniteTS/blob/master/src/foundation/components/ WellKnownComponentTIDs.ts).
+
+### ComponentSID
+
+ScopedID of the component instance.
+
+```javascript
+const entityRepository = Rn.EntityRepository.getInstance();
+const meshEntity = entityRepository.createEntity([Rn.TransformComponent, Rn.SceneGraphComponent]);
+const transformComponent = meshEntity.getTransforom();
+console.log(transformComponent.componentSID);
+```
+
+</DocLayout>

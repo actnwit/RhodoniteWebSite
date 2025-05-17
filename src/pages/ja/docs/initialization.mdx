@@ -1,0 +1,47 @@
+---
+title: 初期化
+description: Rhodoniteの初期化について
+---
+
+import DocLayout from '../../../components/layouts/DocLayout.astro';
+
+<DocLayout>
+
+Rhodoniteの初期化は簡単です。
+
+Rn.System.initメソッドで、プロセスアプローチと描画先のCanvasを指定します。awaitの指定を忘れないでください。
+
+どのプロセスアプローチを選ぶかによってWebGLの内部処理が異なります。
+最新のRhodoniteではDataTextureをお薦めします。
+
+```javascript
+await Rn.System.init({
+  approach: Rn.ProcessApproach.DataTexture,
+  canvas: document.getElementById('world')
+};
+```
+
+### プロセスアプローチの一覧
+
+| 種類 | 特徴 |
+|:-----------|------------|
+| Uniform | WebGL2で動作します。シェーダパラメータの受け渡しにUniform変数を使います。spector.jsなどでUniform変数へ渡すパラメータを確認できるため、トラブルシュートに向きます。 |
+| DataTexture | WebGL2で動作します。シェーダパラメータの受け渡しに浮動小数点テクスチャを使います。普段の利用ではUniformではなくこちらの利用を推奨します。 |
+| WebGPU | WebGPUで動作します。 |
+
+## まとめ
+
+ここまでのコードをまとめたものを以下に示します。
+
+```typescript
+// Systemを設定（プロセスアプローチの指定とcanvasの受け渡し）
+await Rn.System.init({
+  approach: Rn.ProcessApproach.DataTexture,
+  canvas: document.getElementById('world')
+});
+```
+
+ここまででRhodoniteの初期化は完了です。
+あとは必要なデータをコード記述するか、またはglTFなどのファイルから読み込むなどして3Dデータを作成し、それをExpressionインスタンスを介してSystemのprocessメソッドに渡して描画を行っていきます。その具体的な方法は次のページで解説します。
+
+</DocLayout>

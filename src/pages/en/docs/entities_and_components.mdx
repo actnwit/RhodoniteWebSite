@@ -1,0 +1,239 @@
+---
+title: Entity and Component
+description: About Entity and Component in Rhodonite
+---
+
+import DocLayout from '../../../components/layouts/DocLayout.astro';
+
+<DocLayout>
+
+Rhodonite uses the component system, which is also found in Unity and Unreal Engine.
+By loading one or more components onto an Entity, meaning an object in 3D space, the Entity acquires the functionality of the loaded component.
+
+## About Entity
+
+Entity is the equivalent of an object in 3D space; an Entity itself is nothing more than a container with its own ID.
+By adding components with various functions to the Entity, the Entity can perform those functions in the 3D space.
+
+To create an Entity, do the following
+
+```ts
+const entity = Rn.EntityRepository.createEntity();
+```
+
+To add a component to an Entity, do the following.
+
+```ts
+const entityAddedComponent = Rn.EntityRepository.addComponentToEntity(
+  TransformComponent,
+  entity
+);
+```
+
+In practice, we would use the `createXXXEntity` methods that return a Component-loaded Entity.
+
+```ts
+const groupEntity = Rn.EntityHelper.createGroupEntity(); // with TransformComponent, SceneGraphComponent
+const meshEntity = Rn.EntityHelper.createMeshEntity(); // with TransformComponent, SceneGraphComponent, MeshComponent, MeshRendererComponent
+```
+
+## Typical components
+
+Here are some typical components.
+
+### Transform component
+
+This component internally generates a transformation matrix that indicates the object's orientation based on the translate, rotate, and scale settings.
+
+```typescript
+const cubeTransformComponent = cubeEntity.getTransform();
+cubeTransformComponent.translate = Rn.Vector3.fromCopy3(0, 3, 0);
+cubeTransformComponent.rotate = Rn.Vector3.fromCopy3(90, 0, 0);
+cubeTransformComponent.scale = Rn.Vector3.fromCopy3(2, 2, 2);
+```
+
+### SceneGraph component
+
+This component forms the parent-child relationship (scene graph) of an object and generates a world matrix by integrating the transformation matrix of the Transform component. This component is also required for Entity that places objects in 3D space.
+
+```typescript
+const groupEntity = Rn.EntityHelper.createSceneGraphEntity();
+const cubeEntity = Rn.MeshHelper.createCube();
+const groupSceneGraphComponent = groupEntity.getSceneGraph();
+groupSceneGraphComponent.addChild(cubeEntity.getSceneGraph());
+```
+
+### Mesh component
+
+This component holds polygon mesh data.
+
+### MeshRenderer component
+
+This component receives mesh data from the Mesh component and draws the mesh using a 3D API such as WebGL.
+
+### Skeletal component
+
+This component performs the skinning process.
+
+### Camera component
+
+This component is responsible for camera functions.
+
+### Light component
+
+This component is responsible for light functions. Currently supports point light, directional light, and spot light.
+
+### Effekseer component
+
+Components for playing back effects from the open-source effects tool `Effekseer`.
+
+### Component Processing Flow
+
+#### Starting point for processing
+
+Rhodonite first creates a System instance, then builds an Expression, and finally starts the process by specifying an array of Expressions in the system.process method.
+
+```javascript
+// Initializes Rhodonite
+const gl = system.init({
+  approach: Rn.ProcessApproach.UniformWebGL2,
+  canvas: document.getElementById('world')
+});
+
+// constructs expressions
+...
+
+// drawing
+const draw = function (time) {
+
+  Rn.System.process([expression]);
+
+  requestAnimationFrame(draw);
+};
+
+draw();
+````
+
+So basically, the system.process method, which is called once for each drawing frame, is the starting point for processing.
+
+#### Data Hierarchy
+
+##### Frame, Expression, RenderPass
+A frame holds drawing information for a single frame, specifically, an array of expressions. An Expression holds multiple RenderPasses as an array. Each RenderPass can specify a group of entities to be processed. And each Entity has multiple Components.
+The image is as follows
+
+- Frame
+  - Array of Expressions
+    - Expression 1
+    - Expression 2
+      - Array of render paths
+        - Render Path 1
+        - Render path 2
+          - Entity1
+          - Entity2
+          - Entity3
+            - TransformComponent
+            - SceneGraphComponent
+            - MeshComponent
+            - ...
+          - ...
+        - ...
+    - ...
+
+In addition, components have the concept of "stages of processing". These are the following stages
+
+- ProcessStage.Create
+- ProcessStage.Load
+- Logic
+- PreRender
+- Render
+
+Basically, in each component, the stage of processing transitions from top to bottom.
+No component belongs to more than one stage at a time, and each component always processes only one stage at a time.
+Each Component has a method with a name that corresponds to each stage.
+For example, the method of the Component corresponding to `ProcessStage.Create` is the `$Create` method.
+In the Create stage, the $Create method would be executed.
+
+
+### Actual Processing Process
+
+Although the data hierarchy has been explained, the actual order of execution is not simply from top to bottom of this data hierarchy.
+Let's look at the actual contents of the System.process method. The loop structure is as follows.
+
+````typescript
+  process(expressions: Expression[]) {
+
+    // First, execute the loop in the order of the "stage of processing" type
+    for (let stage of this.__processStages) {
+      const methodName = stage.methodName;
+      const commonMethodName = 'common_' + methodName;
+      const componentTids = this.__componentRepository.getComponentTIDs();
+      // Next, loop through the components in order of type
+      for (let componentTid of componentTids) {
+        // Loop through an array of expressions
+        for (let exp of expressions) {
+          let loopN = 1;
+          if (componentTid === MeshRendererComponent.componentTID) {
+            loopN = exp!.renderPasses.length;
+          }
+          // Looping over an array of render paths held by the expression
+          for (let i = 0; i < loopN; i++) {
+            const renderPass = exp!
+            if (componentTid === MeshRendererComponent.componentTID && (stage == ProcessStage.Render)) {
+              this.__webglResourceRepository.bindFramebuffer(renderPass.getFramebuffer());
+              this.__webglResourceRepository.setViewport(renderPass.getViewport());
+              this.__webglResourceRepository.setDrawTargets(renderPass.getFramebuffer());
+              clearFrameBuffer(renderPass); this.__webglResourceRepository.clearFrameBuffer(renderPass);
+            }
+
+            const componentClass: typeof Component = ComponentRepository.getComponentClass(componentTid)! ;
+            // Update the Entity list to be processed in the component's current processing stage and pipeline
+            componentClass.updateComponentsOfEachProcessStage(componentClass, stage, this.__componentRepository, renderPass);
+
+            const componentClass_commonMethod = (componentClass as any)[commonMethodName];
+
+            // common to all Entities to be processed in the component's current processing stage.
+            if (componentClass_commonMethod) {
+              componentClass_commonMethod({ processApproach: this.__processApproach, renderPass: renderPass, processStage: stage, renderPassTickCount: this.__renderPassTickCount });
+            }
+
+            // Process components. Specifically, the Entity group to be processed in the current processing stage is processed by the instance method of the Component class corresponding to the current processing stage.
+            componentClass.process({
+              componentType: componentClass,
+              processStage: stage,
+              processApproach: this.__processApproach,
+              componentRepository: this.__componentRepository,
+              strategy: this.__webglStrategy!
+              renderPass: renderPass,
+              renderPassTickCount: this.__renderPassTickCount
+            });
+
+            this.__renderPassTickCount++;
+
+            if (stage === ProcessStage.Render && renderPass.getResolveFramebuffer()) {
+              renderPass.copyFramebufferToResolveFramebuffer();
+            }
+          }
+        }
+      }
+    }
+
+    Time._processEnd();
+  }
+````
+
+In a simplified, bulleted format, the loop process goes around in the following flow.
+
+- Loops are executed in order of "processing stage" type.
+  - Loop process executed in order of component type
+    - Looping through an array of expressions
+      - Loop through the expression's array of render paths
+        - Update the Entity list to be processed in the component's current processing stage and render pass
+        - In the current processing stage of the component, perform processing common to all Entities to be processed
+        - Process components
+          - The group of Entities to be processed in the current processing stage is processed by the instance method of the Component class corresponding to the current processing stage.
+
+Simply put, the "processing stages" such as Create, Load, and Render are the largest processing stages.
+In each processing stage, further processing is performed on a component-by-component basis, and in the processing of that component, a large number of component instances are processed so that they flow at once, as many as the number of Entities that possess that component.
+
+</DocLayout>
