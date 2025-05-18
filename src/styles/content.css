@@ -1,0 +1,73 @@
+/* マークダウンコンテンツ用のグローバルスタイル */
+.content-wrapper h1 {
+  font-size: 2.5rem;
+  font-weight: 700;
+  margin-bottom: 1.5rem;
+  color: var(--heading-color);
+}
+
+.content-wrapper h2 {
+  font-size: 1.875rem;
+  font-weight: 600;
+  margin: 2rem 0 1rem;
+  color: var(--heading-color);
+}
+
+.content-wrapper h3 {
+  font-size: 1.5rem;
+  font-weight: 600;
+  margin: 1.5rem 0 1rem;
+  color: var(--heading-color);
+}
+
+.content-wrapper p {
+  margin: 1rem 0;
+  line-height: 1.7;
+}
+
+.content-wrapper .lead {
+  font-size: 1.25rem;
+  color: var(--text-muted);
+}
+
+.content-wrapper .steps {
+  margin: 2rem 0;
+}
+
+.content-wrapper .step {
+  margin: 1.5rem 0;
+  padding: 1.5rem;
+  background: var(--bg-secondary);
+  border-radius: 0.5rem;
+}
+
+.content-wrapper pre {
+  background: var(--bg-code);
+  padding: 1rem;
+  border-radius: 0.375rem;
+  overflow-x: auto;
+  margin: 1rem 0;
+}
+
+.content-wrapper code {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  font-size: 0.875rem;
+}
+
+.content-wrapper .note {
+  margin: 1.5rem 0;
+  padding: 1rem;
+  background: var(--bg-info);
+  border-left: 4px solid var(--info-color);
+  border-radius: 0.375rem;
+}
+
+.content-wrapper ul {
+  margin: 1rem 0;
+  padding-left: 1.5rem;
+}
+
+.content-wrapper li {
+  margin: 0.5rem 0;
+  line-height: 1.7;
+}

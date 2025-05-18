@@ -1,14 +1,8 @@
----
-const { headings } = Astro.props;
+import React from 'react';
+import ContentLayout from '../layouts/ContentLayout';
 
-// 現在のパスを取得
-const currentPath = Astro.url.pathname;
-
-// 言語を判定（en または ja）
-const lang = currentPath.startsWith('/ja') ? 'ja' : 'en';
-
-// 目次のデータ
-const tocItems = {
+// docsセクション用の目次データ
+const docsTableOfContents = {
   en: [
     { title: 'Overview', href: '/en/docs/' },
     { title: 'Installation', href: '/en/docs/installation' },
@@ -35,70 +29,16 @@ const tocItems = {
   ],
 };
 
-const items = tocItems[lang];
----
+interface DocsLayoutProps {
+  children: React.ReactNode;
+}
 
-<nav class="toc">
-  <h2 class="toc-title">
-    {lang === 'en' ? 'Documentation' : 'ドキュメント'}
-  </h2>
+const DocsLayout: React.FC<DocsLayoutProps> = ({ children }) => {
+  return (
+    <ContentLayout tocItems={docsTableOfContents}>
+      {children}
+    </ContentLayout>
+  );
+};
 
-  <ul class="toc-list">
-    {items.map((item) => (
-      <li class="toc-item">
-        <a
-          href={item.href}
-          class:list={[
-            'toc-link',
-            { 'is-active': currentPath === item.href }
-          ]}
-        >
-          {item.title}
-        </a>
-      </li>
-    ))}
-  </ul>
-</nav>
-
-<style>
-  .toc {
-    padding: 1rem 0;
-  }
-
-  .toc-title {
-    font-size: 1.25rem;
-    font-weight: 600;
-    margin-bottom: 1rem;
-    color: var(--heading-color);
-  }
-
-  .toc-list {
-    list-style: none;
-    padding: 0;
-    margin: 0;
-  }
-
-  .toc-item {
-    margin: 0.5rem 0;
-  }
-
-  .toc-link {
-    display: block;
-    padding: 0.5rem;
-    color: var(--text-color);
-    text-decoration: none;
-    border-radius: 0.375rem;
-    transition: all 0.2s ease;
-  }
-
-  .toc-link:hover {
-    background: var(--bg-hover);
-    color: var(--text-hover);
-  }
-
-  .toc-link.is-active {
-    background: var(--bg-active);
-    color: var(--text-active);
-    font-weight: 500;
-  }
-</style>
+export default DocsLayout;
