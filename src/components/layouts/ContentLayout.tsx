@@ -7,6 +7,7 @@ interface ContentLayoutProps {
   tocItems: {
     en: Array<{ title: string; href: string }>;
     ja: Array<{ title: string; href: string }>;
+    tr: Array<{ title: string; href: string }>;
   };
   children: React.ReactNode;
 }
@@ -98,17 +99,16 @@ const ContentLayout: React.FC<ContentLayoutProps> = ({ tocItems, children }) => 
         }`}
       >
         <div className="flex justify-between items-center mb-4">
-          <h2 className="text-xl font-bold">{t('toc.title')}</h2>
+          <TOCComponent tocItems={tocItems} />
           <button
             type="button"
-            className="p-2 text-xl"
+            className="p-2 text-xl block absolute top-4 right-4"
             onClick={() => setIsMenuOpen(false)}
             aria-label="閉じる"
           >
             ✕
           </button>
         </div>
-        <TOCComponent tocItems={tocItems} />
       </div>
     </div>
   );
