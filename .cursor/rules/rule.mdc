@@ -1,9 +1,9 @@
 ---
-description: 
-globs: 
+description:
+globs:
 alwaysApply: true
 ---
-* ページに文言を加える際は、必ず多言語対応にしてください。
+* ページに文言を加える際は、必ず多言語対応にしてください。言語リソースファイルは src/i18n/ui.ts にあります。
 * componentsの実装には、.astroではなくReactコンポーネントにしてください。
 * スタイリングにはTailwindCSS v3を使用してください。
 

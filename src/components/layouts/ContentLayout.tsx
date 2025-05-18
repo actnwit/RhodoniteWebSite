@@ -63,7 +63,7 @@ const ContentLayout: React.FC<ContentLayoutProps> = ({ tocItems, children }) => 
       {/* メニューボタン */}
       <button
         type="button"
-        className="fixed left-4 bottom-4 z-[9999] w-14 h-14 rounded-full bg-blue-600 text-white flex items-center justify-center shadow-lg"
+        className="fixed left-4 bottom-4 z-[9999] w-14 h-14 rounded-full bg-pink-600 text-white flex items-center justify-center shadow-lg"
         onClick={handleMenuClick}
         aria-label="メニューを開く"
       >
@@ -81,30 +81,32 @@ const ContentLayout: React.FC<ContentLayoutProps> = ({ tocItems, children }) => 
       </button>
 
       {/* オーバーレイ（メニューが開いているときのみ表示） */}
-      {isMenuOpen && (
-        <div
-          className="fixed inset-0 bg-black/50 z-[9000]"
-          onClick={() => setIsMenuOpen(false)}
-        />
-      )}
+      <div
+        className={`fixed inset-0 bg-black/50 z-[9000] transition-opacity duration-300 ease-in-out ${
+          isMenuOpen ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'
+        }`}
+        onClick={() => setIsMenuOpen(false)}
+      />
 
-      {/* サイドバー（メニューが開いているときのみ表示） */}
-      {isMenuOpen && (
-        <div className="fixed top-0 left-0 h-full w-[280px] z-[9500] bg-white overflow-y-auto p-4 shadow-lg">
-          <div className="flex justify-between items-center mb-4">
-            <h2 className="text-xl font-bold">目次</h2>
-            <button
-              type="button"
-              className="p-2 text-xl"
-              onClick={() => setIsMenuOpen(false)}
-              aria-label="閉じる"
-            >
-              ✕
-            </button>
-          </div>
-          <TOCComponent tocItems={tocItems} />
+      {/* サイドバー（常に存在し、トランスフォームで位置を制御） */}
+      <div
+        className={`fixed top-0 left-0 h-full w-[280px] z-[9500] bg-white overflow-y-auto p-4 shadow-lg transform transition-transform duration-300 ease-in-out ${
+          isMenuOpen ? 'translate-x-0' : '-translate-x-full'
+        }`}
+      >
+        <div className="flex justify-between items-center mb-4">
+          <h2 className="text-xl font-bold">目次</h2>
+          <button
+            type="button"
+            className="p-2 text-xl"
+            onClick={() => setIsMenuOpen(false)}
+            aria-label="閉じる"
+          >
+            ✕
+          </button>
         </div>
-      )}
+        <TOCComponent tocItems={tocItems} />
+      </div>
     </div>
   );
 };
