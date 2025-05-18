@@ -10,6 +10,10 @@ type RnViewerProps = {
 
 export const RnViewer = ({ gltfFilePath, width, height, isAnimating }: RnViewerProps) => {
   useEffect(() => {
+
+    let g_forwardRenderPipeline: Rn.ForwardRenderPipeline;
+    let g_cameraEntity: Rn.ICameraControllerEntity;
+
     (async ()=> {
       const iblDirectoryPath = 'https://storage.googleapis.com/emadurandal-3d.appspot.com/rhodonite/assets/ibl/papermill'
       Rn.Config.cgApiDebugConsoleOutput = true;
@@ -21,19 +25,20 @@ export const RnViewer = ({ gltfFilePath, width, height, isAnimating }: RnViewerP
       console.log('Rn.System.init');
 
       // create ForwardRenderPipeline
-      const forwardRenderPipeline = new Rn.ForwardRenderPipeline();
-      forwardRenderPipeline.setup(canvas.width, canvas.height, {
-        isBloom: false,
+      g_forwardRenderPipeline = new Rn.ForwardRenderPipeline();
+      g_forwardRenderPipeline.setup(canvas.width, canvas.height, {
+        isBloom: true,
         isShadow: false,
       });
 
       // camera
-      const { cameraComponent, cameraEntity } = createCamera();
+      // const { cameraComponent, cameraEntity } = createCamera();
+      // g_cameraEntity = cameraEntity;
 
       // gltf
       const mainExpression = (
         await Rn.GltfImporter.importFromUri(gltfFilePath, {
-          cameraComponent: cameraComponent,
+          // cameraComponent: cameraComponent,
           defaultMaterialHelperArgumentArray: [
             {
               makeOutputSrgb: false,
@@ -43,17 +48,18 @@ export const RnViewer = ({ gltfFilePath, width, height, isAnimating }: RnViewerP
       ).unwrapForce();
 
       // env
-      const envExpression = createEnvCubeExpression(iblDirectoryPath, cameraEntity);
+      const envExpression = createEnvCubeExpression(iblDirectoryPath);
 
       const mainRenderPass = mainExpression.renderPasses[0];
       mainRenderPass.tryToSetUniqueName('main', true);
       // cameraController
-      const mainCameraControllerComponent = cameraEntity.getCameraController();
-      const controller = mainCameraControllerComponent.controller as Rn.OrbitCameraController;
-      controller.setTarget(mainRenderPass.sceneTopLevelGraphComponents[0].entity);
-      controller.dolly = 0.83;
+      // const mainCameraControllerComponent = cameraEntity.getCameraController();
+      // const controller = mainCameraControllerComponent.controller as Rn.OrbitCameraController;
+      // controller.setTarget(mainRenderPass.sceneTopLevelGraphComponents[0].entity);
+      // controller.dolly = 0.83;
 
-      await forwardRenderPipeline.setExpressions([envExpression, mainExpression]);
+
+      await g_forwardRenderPipeline.setExpressions([envExpression, mainExpression]);
 
       // lighting
       const diffuseCubeTexture = new Rn.CubeTexture();
@@ -68,11 +74,13 @@ export const RnViewer = ({ gltfFilePath, width, height, isAnimating }: RnViewerP
       specularCubeTexture.hdriFormat = Rn.HdriFormat.RGBE_PNG;
       specularCubeTexture.mipmapLevelNumber = 10;
 
-      await forwardRenderPipeline.setIBLTextures(diffuseCubeTexture, specularCubeTexture);
+      await g_forwardRenderPipeline.setIBLTextures(diffuseCubeTexture, specularCubeTexture);
 
       let count = 0;
       let startTime = Date.now();
       const draw = function (frame: Rn.Frame) {
+        const cameraComponent = Rn.ComponentRepository.getComponentsWithType(Rn.CameraComponent).at(3)!.componentSID;
+        Rn.CameraComponent.current = cameraComponent;
         if (isAnimating) {
           Rn.AnimationComponent.setIsAnimating(true);
           const date = new Date();
@@ -90,7 +98,7 @@ export const RnViewer = ({ gltfFilePath, width, height, isAnimating }: RnViewerP
         count++;
       };
 
-      forwardRenderPipeline.startRenderLoop(draw);
+      g_forwardRenderPipeline.startRenderLoop(draw);
 
       function createCamera() {
         const cameraEntity = Rn.createCameraControllerEntity();
@@ -102,7 +110,7 @@ export const RnViewer = ({ gltfFilePath, width, height, isAnimating }: RnViewerP
         return { cameraComponent, cameraEntity };
       }
 
-      function createEnvCubeExpression(baseuri, cameraEntity) {
+      function createEnvCubeExpression(baseuri) {
         const environmentCubeTexture = new Rn.CubeTexture();
         environmentCubeTexture.baseUriToLoad = baseuri + '/environment/environment';
         environmentCubeTexture.isNamePosNeg = true;
@@ -141,7 +149,7 @@ export const RnViewer = ({ gltfFilePath, width, height, isAnimating }: RnViewerP
         const sphereRenderPass = new Rn.RenderPass();
         sphereRenderPass.tryToSetUniqueName('envCube', true);
         sphereRenderPass.addEntities([sphereEntity]);
-        sphereRenderPass.cameraComponent = cameraEntity.getCamera();
+        // sphereRenderPass.cameraComponent = cameraEntity.getCamera();
 
         const sphereExpression = new Rn.Expression();
         sphereExpression.addRenderPasses([sphereRenderPass]);

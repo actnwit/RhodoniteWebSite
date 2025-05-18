@@ -15,12 +15,15 @@ function getUrl(path: string) {
 <div class="min-h-screen relative overflow-hidden font-['Inter',system-ui,-apple-system,sans-serif]">
 	<div id="background-canvas" class="fixed inset-0 -z-10 bg-white"></div>
 	<main class="p-8 max-w-7xl mx-auto">
-		<section id="hero" class="flex flex-col items-center text-center py-16 px-4">
-			<div class="flex items-center gap-4 mb-8">
+		<section id="hero" class="flex flex-col items-center text-center py-16 px-4 relative">
+      <div class="absolute bottom-0 z-0">
+        <RnViewer gltfFilePath="https://storage.googleapis.com/emadurandal-3d.appspot.com/rhodonite/assets/gltf/project_polly.glb" width={1250} height={720} isAnimating={true} client:only="react"  />
+        <p class="text-gray-400 text-sm">(This Polly model is from <a href="https://github.com/KhronosGroup/glTF-Blender-Exporter">https://github.com/KhronosGroup/glTF-Blender-Exporter</a>)</p>
+      </div>
+			<div class="flex items-center gap-4 mt-10 mb-8 z-10" style="pointer-events: none;">
 				<img src={rhodoniteLogo.src} alt="RhodoniteTS Logo" />
 			</div>
-      <RnViewer gltfFilePath="https://storage.googleapis.com/emadurandal-3d.appspot.com/rhodonite/assets/gltf/IridescentDishWithOlives.glb" width={1000} height={1000} isAnimating={true} client:only="react" />
-			<p class="text-xl text-gray-600 max-w-2xl mb-10 leading-relaxed">
+			<p class="text-xl text-gray-200 max-w-2xl mb-10 leading-relaxed z-10">
 				{t('hero.description')}
 			</p>
 			<section id="links" class="flex gap-4 flex-wrap justify-center">
