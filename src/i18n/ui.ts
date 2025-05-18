@@ -1,6 +1,6 @@
 export const languages = {
-  ja: '日本語',
   en: 'English',
+  ja: '日本語',
   tr: 'Türkçe',
 };
 
@@ -23,6 +23,7 @@ export const ui = {
     'nav.tutorials': 'チュートリアル',
     'nav.api': 'APIリファレンス',
     'nav.github': 'GitHub',
+    'nav.toggleMenu': 'メニューを切り替える',
     'editor.title': 'Rhodonite Editor',
     'editor.description': '公式エディターでRhodoniteを試してみましょう！ エディターを起動して、glTFファイルまたはVRMファイルを画面にドラッグ＆ドロップしてください。',
   },
@@ -42,6 +43,7 @@ export const ui = {
     'nav.tutorials': 'Tutorials',
     'nav.api': 'API Reference',
     'nav.github': 'GitHub',
+    'nav.toggleMenu': 'Toggle menu',
     'editor.title': 'Rhodonite Editor',
     'editor.description': 'Try Rhodonite with the official editor! Launch the editor and drag-and-drop a glTF or VRM file onto the screen.',
   },
@@ -61,6 +63,7 @@ export const ui = {
     'nav.tutorials': 'Eğitimler',
     'nav.api': 'API Referansı',
     'nav.github': 'GitHub',
+    'nav.toggleMenu': 'Menüyü aç/kapat',
     'editor.title': 'Rhodonite Editor',
     'editor.description': 'Resmi editörde Rhodonite\'ı deneyin! Editörü başlatıp glTF ya da VRM dosyasını ekrana sürükleyip bırakın.',
   },

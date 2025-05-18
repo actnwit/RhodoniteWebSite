@@ -33,11 +33,11 @@ In Rhodonite, most objects are assigned IDs so that they can be identified and m
 
 UniqueID assigned to an instance of Entity. It is often used to retrieve or specify a specific Entity.
 
-````javascript
+```javascript
 const entityRepository = Rn.EntityRepository.getInstance();
 const meshEntity = entityRepository.createEntity([Rn.TransformComponent, Rn.SceneGraphComponent]);
 console.log(meshEntity.entityUID)
-````
+```
 
 ### ObjectUID
 

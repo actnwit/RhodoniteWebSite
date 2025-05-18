@@ -11,7 +11,7 @@ const { title, description } = Astro.props;
 ---
 
 <Layout title={title} description={description}>
-  <TutorialsLayout>
+  <TutorialsLayout client:only="react">
     <div class="content-wrapper">
       <slot />
     </div>
