@@ -67,7 +67,7 @@ export const ui = {
     'nav.tutorials': 'Eğitimler',
     'nav.api': 'API Referansı',
     'nav.github': 'GitHub',
-    'nav.toggleMenu': 'Menüyü aç/kapat',
+    'nav.toggleMenu': 'Menüyü göster/gizle',
     'editor.title': 'Rhodonite Editor',
     'editor.description': 'Resmi editörde Rhodonite\'ı deneyin! Editörü başlatıp glTF ya da VRM dosyasını ekrana sürükleyip bırakın.',
     'toc.title': 'İçindekiler',
