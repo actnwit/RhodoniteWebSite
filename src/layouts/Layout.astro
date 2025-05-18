@@ -1,6 +1,6 @@
 ---
 import { getLangFromUrl, useTranslations } from '../i18n/utils';
-import { LanguageSwitcher } from '../components/LanguageSwitcher.tsx';
+import { Navigation } from '../components/Navigation';
 import '../styles/global.css';
 import '../styles/content.css';
 
@@ -40,24 +40,7 @@ const { title, description } = Astro.props;
 		<title>RhodoniteTS</title>
 	</head>
 	<body>
-		<nav class="navbar">
-			<div class="nav-container">
-				<a href={getUrl('/')} class="nav-logo">RhodoniteTS</a>
-				<div class="nav-links">
-					<a href={getUrl('/')} class="nav-link">{t('nav.home')}</a>
-					<a href={getUrl('/docs')} class="nav-link">{t('nav.docs')}</a>
-					<a href={getUrl('/tutorials/display_geometries')} class="nav-link">{t('nav.tutorials')}</a>
-					<a href={getUrl('/api')} class="nav-link">{t('nav.api')}</a>
-					<a href="https://github.com/actnwit/RhodoniteTS" class="nav-link" target="_blank" rel="noopener">
-						{t('nav.github')}
-						<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="github-icon">
-							<path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22"></path>
-						</svg>
-					</a>
-					<LanguageSwitcher client:only="react" />
-				</div>
-			</div>
-		</nav>
+		<Navigation client:load lang={lang as 'en' | 'ja' | 'tr'} />
 		<slot />
 	</body>
 </html>
@@ -68,72 +51,5 @@ const { title, description } = Astro.props;
 		margin: 0;
 		width: 100%;
 		height: 100%;
-	}
-
-	.navbar {
-		background: white;
-		box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-		position: sticky;
-		top: 0;
-		z-index: 1000;
-	}
-
-	.nav-container {
-		max-width: 1200px;
-		margin: 0 auto;
-		padding: 0rem 2rem;
-		display: flex;
-		justify-content: space-between;
-		align-items: center;
-	}
-
-	.nav-logo {
-		font-size: 1.5rem;
-		font-weight: 600;
-		color: var(--text-primary, #1f2937);
-		text-decoration: none;
-	}
-
-	.nav-links {
-		display: flex;
-		gap: 1.5rem;
-		align-items: center;
-	}
-
-	.nav-link {
-		color: var(--text-secondary, #4b5563);
-		text-decoration: none;
-		font-weight: 500;
-		display: flex;
-		align-items: center;
-		gap: 0.25rem;
-		transition: color 0.2s;
-		font-size: 1.1rem;
-	}
-
-	.nav-link:hover {
-		color: var(--primary-color, #6366f1);
-	}
-
-	.github-icon {
-		vertical-align: middle;
-	}
-
-	@media (max-width: 768px) {
-		.nav-container {
-			flex-direction: column;
-			gap: 0.5rem;
-			padding: 0.5rem;
-		}
-
-		.nav-links {
-			flex-wrap: wrap;
-			justify-content: center;
-			gap: 1rem;
-		}
-
-		.nav-link {
-			font-size: 0.875rem;
-		}
 	}
 </style>
