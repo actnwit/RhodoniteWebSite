@@ -27,6 +27,7 @@ const docsTableOfContents = {
     { title: 'ID規則', href: '/ja/docs/ids' },
     { title: 'コントリビュートについて', href: '/ja/docs/contribution' },
   ],
+  tr: []
 };
 
 interface DocsLayoutProps {

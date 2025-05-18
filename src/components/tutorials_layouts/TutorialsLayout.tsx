@@ -19,6 +19,7 @@ const tutorialsTableOfContents = {
     { title: 'Render Pipeline', href: '/ja/tutorials/render_pipeline' },
     { title: 'その他のサンプル', href: '/ja/tutorials/other_samples' },
   ],
+  tr: []
 };
 
 interface TutorialsLayoutProps {
