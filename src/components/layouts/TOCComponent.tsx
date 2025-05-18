@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { getLangFromUrl } from '../../i18n/utils';
 
 interface TOCItem {
   title: string;
@@ -9,17 +10,17 @@ interface TOCProps {
   tocItems: {
     en: TOCItem[];
     ja: TOCItem[];
+    tr: TOCItem[];
   };
 }
 
 const TOCComponent: React.FC<TOCProps> = ({ tocItems }) => {
   const [currentPath, setCurrentPath] = useState('');
-  const [lang, setLang] = useState<'en' | 'ja'>('en');
+  const lang = getLangFromUrl(new URL(window.location.href));
 
   useEffect(() => {
     // クライアントサイドでのみ実行
     setCurrentPath(window.location.pathname);
-    setLang(window.location.pathname.startsWith('/ja') ? 'ja' : 'en');
   }, []);
 
   const items = tocItems[lang];

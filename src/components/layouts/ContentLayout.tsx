@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import TOCComponent from './TOCComponent';
 import ContentStyles from './ContentStyles';
+import { getLangFromUrl, useTranslations } from '../../i18n/utils';
 
 interface ContentLayoutProps {
   tocItems: {
@@ -14,6 +15,8 @@ const ContentLayout: React.FC<ContentLayoutProps> = ({ tocItems, children }) => 
   // 状態管理
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isMobile, setIsMobile] = useState(true);
+  const lang = getLangFromUrl(new URL(window.location.href));
+  const t = useTranslations(lang);
 
   // 画面サイズの変更を監視
   useEffect(() => {
@@ -95,7 +98,7 @@ const ContentLayout: React.FC<ContentLayoutProps> = ({ tocItems, children }) => 
         }`}
       >
         <div className="flex justify-between items-center mb-4">
-          <h2 className="text-xl font-bold">目次</h2>
+          <h2 className="text-xl font-bold">{t('toc.title')}</h2>
           <button
             type="button"
             className="p-2 text-xl"
