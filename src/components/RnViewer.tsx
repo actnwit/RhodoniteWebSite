@@ -27,7 +27,7 @@ export const RnViewer = ({ gltfFilePath, width, height, isAnimating }: RnViewerP
       // create ForwardRenderPipeline
       g_forwardRenderPipeline = new Rn.ForwardRenderPipeline();
       g_forwardRenderPipeline.setup(canvas.width, canvas.height, {
-        isBloom: true,
+        isBloom: false,
         isShadow: false,
       });
 
