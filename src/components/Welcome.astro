@@ -4,14 +4,7 @@ import editorImage from '../assets/RhodoniteEditor.jpg';
 import { getLangFromUrl, useTranslations } from '../i18n/utils';
 
 const lang = getLangFromUrl(Astro.url);
-console.log('Welcome component - Current lang:', lang);
 const t = useTranslations(lang);
-console.log('Welcome component - Translations:', {
-	description: t('hero.description'),
-	docs: t('hero.docs'),
-	github: t('hero.github'),
-	discord: t('hero.discord')
-});
 
 function getUrl(path: string) {
 	return `/${lang}${path}`;

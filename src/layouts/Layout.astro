@@ -6,7 +6,6 @@ import '../styles/content.css';
 
 const { pathname } = Astro.url;
 const lang = getLangFromUrl(Astro.url);
-console.log('Layout component - Current lang:', lang);
 const t = useTranslations(lang);
 
 const languages = {
