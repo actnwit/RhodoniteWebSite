@@ -14,13 +14,13 @@ Rhodoniteのシェーダー設計は主に次の３つから成り立ってい�
 * シェーダーコード
 
 
-# マテリアル
+## マテリアル
 
 Rhodoniteでは、Meshが１つまたは複数のPrimitiveを持ち、それぞれのPrimitiveが必ず１つのMaterialを持ちます。
 RhodoniteのMaterialはWebGLで例えるならシェーダープログラム（頂点シェーダーやフラグメントシェーダーをあわせたもの）に相当します。
 Materialインスタンスには、setParameterメソッドなどで、そのマテリアル（シェーダー）が持つシェーダーパラメーターの具体的な値（ベースカラー等）を設定することができます。
 
-# ３つのシェーダーコード構築方法
+## ３つのシェーダーコード構築方法
 
 Rhodoniteには以下の３つのシェーダーコードの構築方法があります。
 
@@ -30,12 +30,12 @@ Rhodoniteには以下の３つのシェーダーコードの構築方法があ�
 
 Rhodoniteでは、この３つのシェーダー機構どれを使ってもシェーダーを開発できます。
 
-# TypeScriptクラスベース
+## TypeScriptクラスベース
 
 シェーダーコードの断片をTypeScriptクラスの中に文字列として埋め込み、組み合わせることで最終的なシェーダーコードを構築する機構です。
 この方法はRhodoniteの初期の開発で構築された機構ですが、現在は非推奨となっており、すでに多くのマテリアル・シェーダーコードがShaderityベースに移行しています。さらに将来はノードエディタベースに移行する予定です。
 
-# Shaderityベース
+## Shaderityベース
 
 Rhodoniteで現在主流のシェーダー作成方法になります。
 Rhodoniteとは別プロジェクトとして開発しているShaderユーティリティライブラリ「[Shaderity](https://github.com/actnwit/shaderity)」を利用してシェーダーを構築する機構です。
@@ -43,7 +43,7 @@ Shaderityとは、シェーダーのインポート機能によるコード結�
 Shaderityベースでは通常のGLSLファイルを作成し、それをShaderityのWebPack向けローダーを使って、Rhodoniteライブラリ内に取り込むことでシェーダーを生成します。
 その際に、Shaderityのインポート機能を使うことで、複数のGLSLコード断片のファイルからシェーダーを構築できます。
 
-## ShaderityベースのGLSLの書き方
+### ShaderityベースのGLSLの書き方
 
 以下はRhodoniteのClassicシェーダーのピクセルシェーダーの内容です。
 
@@ -207,7 +207,7 @@ uniform int u_shadingModel; // initialValue=0
 
 Shaderity独自の構文はpragmaまたはコメント形式で記述されるため、Shaderityコード全体としてはGLSLの文法から逸脱しないものになっています。
 
-# ノードエディタ
+## ノードエディタ
 
 Rhodoniteには独自のノードシステムを搭載しており、ノード編集によってシェーダーのリアルタイム構築が可能です（開発中です）。
 

@@ -7,7 +7,7 @@ import DocLayout from '../../../components/docs_layouts/DocLayout.astro';
 
 <DocLayout>
 
-# Mesh and Primitive
+## Mesh and Primitive
 
 The main classes that represent geometry in Rhodonite are the Mesh and Primitive classes.
 Mesh holds multiple Primitives, and Primitive holds the data for each vertex attribute in the form of an Accessor class.
@@ -15,7 +15,7 @@ The Primitive also holds the primitive type (Triangle List, Triangle Strip, Line
 
 This data structure is based on the glTF format, and in fact the data structure is almost identical between the two.
 
-# MeshComponent and MeshRendererComponent
+## MeshComponent and MeshRendererComponent
 
 MeshComponent is a component that holds a single mesh. It is like a data area for an Entity placed in 3D space to have a 3D shape.
 MeshRendererComponent is linked to MeshComponent and is responsible for accessing the mesh held by MeshRenderer and drawing its geometry to the screen.
