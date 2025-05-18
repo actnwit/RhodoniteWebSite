@@ -1,6 +1,7 @@
 ---
 import Layout from '../../layouts/Layout.astro';
 import DocsLayout from './DocsLayout';
+import HeadingAnchorLocalization from '../HeadingAnchorLocalization';
 
 interface Props {
   title?: string;
@@ -13,7 +14,9 @@ const { title, description } = Astro.props;
 <Layout title={title} description={description}>
   <DocsLayout client:only="react">
     <div class="content-wrapper">
-      <slot />
+      <HeadingAnchorLocalization client:only="react">
+        <slot />
+      </HeadingAnchorLocalization>
     </div>
   </DocsLayout>
 </Layout>

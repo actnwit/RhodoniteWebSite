@@ -135,3 +135,31 @@
   overflow-x: auto;
   display: block;
 }
+
+/* ヘッダーアンカーリンクのスタイル */
+.content-wrapper h2,
+.content-wrapper h3 {
+  position: relative;
+}
+
+.content-wrapper h2 .heading-anchor,
+.content-wrapper h3 .heading-anchor {
+  position: absolute;
+  visibility: hidden;
+  margin-left: 0.5rem;
+  color: var(--primary-color, #d946ef);
+  text-decoration: none;
+  opacity: 0;
+  transition: opacity 0.2s, visibility 0.2s;
+}
+
+.content-wrapper h2:hover .heading-anchor,
+.content-wrapper h3:hover .heading-anchor {
+  visibility: visible;
+  opacity: 1;
+}
+
+.content-wrapper .heading-anchor .anchor-icon {
+  font-size: 0.85em;
+  vertical-align: middle;
+}
