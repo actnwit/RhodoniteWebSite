@@ -42,7 +42,8 @@ export default defineConfig({
   vite: {
     resolve: {
       extensions: ['.js', '.jsx', '.ts', '.tsx', '.mjs', '.mts']
-    }
+    },
+    assetsInclude: ['**/*.glb']
   },
   site: 'https://librn.com',
 });
