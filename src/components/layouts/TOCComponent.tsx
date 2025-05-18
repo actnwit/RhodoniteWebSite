@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { getLangFromUrl } from '../../i18n/utils';
+import { getLangFromUrl, useTranslations } from '../../i18n/utils';
 
 interface TOCItem {
   title: string;
@@ -17,6 +17,7 @@ interface TOCProps {
 const TOCComponent: React.FC<TOCProps> = ({ tocItems }) => {
   const [currentPath, setCurrentPath] = useState('');
   const lang = getLangFromUrl(new URL(window.location.href));
+  const t = useTranslations(lang);
 
   useEffect(() => {
     // クライアントサイドでのみ実行
@@ -28,7 +29,7 @@ const TOCComponent: React.FC<TOCProps> = ({ tocItems }) => {
   return (
     <nav className="py-2 md:py-4">
       <h2 className="text-xl font-semibold mb-4 text-[var(--heading-color)]">
-        {lang === 'en' ? 'Documentation' : 'ドキュメント'}
+        {t('toc.title')}
       </h2>
 
       <ul className="list-none p-0 m-0 space-y-1">
