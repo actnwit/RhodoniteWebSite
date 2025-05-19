@@ -20,13 +20,23 @@ const material = Rn.MaterialHelper.createPbrUberMaterial()
 Shader parameters are done for the Material class that holds the shader.
 
 ```typescript
-material.setParameter(Rn.ShaderSemantics.BaseColorFactor, Rn.Vector4.fromCopy4(1, 1, 1, 1));
-````
+material.setParameter("baseColorFactor", Rn.Vector4.fromCopy4(1, 1, 1, 1));
+```
 
 To pass the texture to the shader, do the following
 
 ```typescript
-material.setTextureParameter(Rn.ShaderSemantics.BaseColorTexture, rnTexture);
+const rnTexture = new Rn.Texture();
+texture.generateTextureFromUri('/path/to/texture.png');
+const rnSampler = new Rn.Sampler({
+   magFilter: Rn.TextureParameter.Linear,
+   minFilter: Rn.TextureParameter.Linear,
+   wrapS: Rn.TextureParameter.ClampToEdge,
+   wrapT: Rn.TextureParameter.ClampToEdge,
+});
+rnSampler.create();
+
+material.setTextureParameter("baseColorTexture", rnTexture, rnSampler);
 ```
 
 ## Apply Material
@@ -41,15 +51,15 @@ const primitive = Rn.Primitive.createPrimitive({
   primitiveMode: Rn.PrimitiveMode.Lines,
 });
 primitive.material = mateiral;
-````
+```
 
-````typescript
+```typescript
 const sphere = Rn.MeshHelper.createSphere({
     radius: 1,
     widthSegments: 10,
     heightSegments: 10,
     material: material
   })
-````
+```
 
 </DocLayout>

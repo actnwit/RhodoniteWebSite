@@ -20,7 +20,7 @@ const material = Rn.MaterialHelper.createPbrUberMaterial()
 シェーダーパラメータの設定は、そのシェーダーを保持している[Material](https://actnwit.github.io/RhodoniteTS/api/classes/Material.html)クラスに対して行います。
 
 ```typescript
-material.setParameter(Rn.ShaderSemantics.BaseColorFactor, Rn.Vector4.fromCopy4(1, 1, 1, 1));
+material.setParameter("baseColorFactor", Rn.Vector4.fromCopy4(1, 1, 1, 1));
 ```
 
 テクスチャをシェーダーに渡す場合は、以下のようにします。
@@ -37,7 +37,7 @@ const rnSampler = new Rn.Sampler({
 });
 rnSampler.create();
 
-material.setTextureParameter(Rn.ShaderSemantics.BaseColorTexture, rnTexture, rnSampler);
+material.setTextureParameter("baseColorTexture", rnTexture, rnSampler);
 ```
 
 ## Materialの適用
