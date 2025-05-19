@@ -20,20 +20,14 @@ Rhodoniteでは、Meshが１つまたは複数のPrimitiveを持ち、それぞ�
 RhodoniteのMaterialはWebGLで例えるならシェーダープログラム（頂点シェーダーやフラグメントシェーダーをあわせたもの）に相当します。
 Materialインスタンスには、setParameterメソッドなどで、そのマテリアル（シェーダー）が持つシェーダーパラメーターの具体的な値（ベースカラー等）を設定することができます。
 
-## ３つのシェーダーコード構築方法
+## ２つのシェーダーコード構築方法
 
-Rhodoniteには以下の３つのシェーダーコードの構築方法があります。
+Rhodoniteには以下の2つのシェーダーコードの構築方法があります。
 
-* TypeScriptクラスベース
 * [Shaderity](https://github.com/actnwit/shaderity)ベース
 * ノードエディタ
 
-Rhodoniteでは、この３つのシェーダー機構どれを使ってもシェーダーを開発できます。
-
-## TypeScriptクラスベース
-
-シェーダーコードの断片をTypeScriptクラスの中に文字列として埋め込み、組み合わせることで最終的なシェーダーコードを構築する機構です。
-この方法はRhodoniteの初期の開発で構築された機構ですが、現在は非推奨となっており、すでに多くのマテリアル・シェーダーコードがShaderityベースに移行しています。さらに将来はノードエディタベースに移行する予定です。
+Rhodoniteでは、この2つのシェーダー機構どちらを使ってもシェーダーを開発できます。
 
 ## Shaderityベース
 
@@ -48,129 +42,68 @@ Shaderityベースでは通常のGLSLファイルを作成し、それをShaderi
 以下はRhodoniteのClassicシェーダーのピクセルシェーダーの内容です。
 
 ```glsl
-#pragma shaderity: require(../common/version.glsl)
-#pragma shaderity: require(../common/enableExtensions.glsl)
-#pragma shaderity: require(../common/glslPrecision.glsl)
+
+/* shaderity: @{enableVertexExtensions} */
+/* shaderity: @{glslPrecision} */
 
 /* shaderity: @{definitions} */
 
-#pragma shaderity: require(../common/prerequisites.glsl)
+#ifdef WEBGL2_MULTI_VIEW
+  layout(num_views=2) in;
+#endif
 
-in vec3 v_color;
-in vec3 v_normal_inWorld;
-in vec4 v_position_inWorld;
-in vec2 v_texcoord_0;
-in vec3 v_baryCentricCoord;
+/* shaderity: @{vertexInOut} */
+out vec4 v_shadowCoord;
 
-uniform int u_shadingModel; // initialValue=0
-uniform float u_alphaCutoff; // initialValue=0.01
-uniform float u_shininess; // initialValue=5
-uniform vec4 u_diffuseColorFactor; // initialValue=(1,1,1,1)
-uniform sampler2D u_diffuseColorTexture; // initialValue=(0,white)
-uniform sampler2D u_normalTexture; // initialValue=(1,blue)
-uniform vec4 u_diffuseColorTextureTransform; // initialValue=(1,1,0,0)
-uniform float u_diffuseColorTextureRotation; // initialValue=0
+uniform float u_pointSize; // initialValue=30
+uniform vec3 u_pointDistanceAttenuation; // initialValue=(0,0.1,0.01)
 
-#pragma shaderity: require(../common/rt0.glsl)
+// BiasMatrix * LightProjectionMatrix * LightViewMatrix, See: http://www.opengl-tutorial.org/intermediate-tutorials/tutorial-16-shadow-mapping/#basic-shader
+uniform mat4 u_depthBiasPV; // initialValue=(1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,1)
 
-#pragma shaderity: require(../common/utilFunctions.glsl)
+#pragma shaderity: require(../common/morphVariables.glsl)
+
+/* shaderity: @{prerequisites} */
 
 /* shaderity: @{getters} */
 
-#pragma shaderity: require(../common/opticalDefinition.glsl)
+/* shaderity: @{matricesGetters} */
 
-void main ()
+/* shaderity: @{processGeometry} */
+
+void main()
 {
 
-#pragma shaderity: require(../common/mainPrerequisites.glsl)
+/* shaderity: @{mainPrerequisites} */
 
-  // Normal
-  vec3 normal_inWorld = normalize(v_normal_inWorld);
+  mat4 worldMatrix = get_worldMatrix(a_instanceInfo.x);
+  mat4 viewMatrix = get_viewMatrix(cameraSID, 0);
+  mat4 projectionMatrix = get_projectionMatrix(cameraSID, 0);
+  mat3 normalMatrix = get_normalMatrix(a_instanceInfo.x);
+  bool isBillboard = get_isBillboard(a_instanceInfo.x);
 
-  vec4 diffuseColorFactor = get_diffuseColorFactor(materialSID, 0);
+  // Skeletal
+  processGeometry(
+    skeletalComponentSID,
+    worldMatrix,
+    viewMatrix,
+    isBillboard,
+    normalMatrix,
+    normalMatrix,
+    a_position,
+    v_position_inWorld,
+    a_normal,
+    v_normal_inWorld
+  );
 
+  gl_Position = projectionMatrix * viewMatrix * v_position_inWorld;
 
-  // diffuseColor (Considered to be premultiplied alpha)
-  vec3 diffuseColor = vec3(0.0, 0.0, 0.0);
-  float alpha = 1.0;
-  if (v_color != diffuseColor && diffuseColorFactor.rgb != diffuseColor) {
-    diffuseColor = v_color * diffuseColorFactor.rgb;
-    alpha = diffuseColorFactor.a;
-  } else if (v_color == diffuseColor) {
-    diffuseColor = diffuseColorFactor.rgb;
-    alpha = diffuseColorFactor.a;
-  } else if (diffuseColorFactor.rgb == diffuseColor) {
-    diffuseColor = v_color;
-  } else {
-    diffuseColor = vec3(1.0, 1.0, 1.0);
-  }
+  v_color = a_color;
+  v_normal_inWorld = normalMatrix * a_normal;
+  v_texcoord_0 = a_texcoord_0;
+  v_baryCentricCoord = a_baryCentricCoord.xyz;
 
-  // diffuseColorTexture (Considered to be premultiplied alpha)
-  vec4 diffuseColorTextureTransform = get_diffuseColorTextureTransform(materialSID, 0);
-  float diffuseColorTextureRotation = get_diffuseColorTextureRotation(materialSID, 0);
-  vec2 diffuseColorTexUv = uvTransform(diffuseColorTextureTransform.xy, diffuseColorTextureTransform.zw, diffuseColorTextureRotation, v_texcoord_0);
-  vec4 textureColor = texture2D(u_diffuseColorTexture, diffuseColorTexUv);
-  diffuseColor *= textureColor.rgb;
-  alpha *= textureColor.a;
-
-#pragma shaderity: require(../common/alphaMask.glsl)
-
-  // Lighting
-  vec3 shadingColor = vec3(0.0, 0.0, 0.0);
-#ifdef RN_IS_LIGHTING
-  int shadingModel = get_shadingModel(materialSID, 0);
-  if (shadingModel > 0) {
-
-    vec3 diffuse = vec3(0.0, 0.0, 0.0);
-    vec3 specular = vec3(0.0, 0.0, 0.0);
-    for (int i = 0; i < /* shaderity: @{Config.maxLightNumberInShader} */ ; i++) {
-      if (i >= lightNumber) {
-        break;
-      }
-
-      // Light
-      Light light = getLight(i, v_position_inWorld.xyz);
-
-      // Diffuse
-      diffuse += diffuseColor * max(0.0, dot(normal_inWorld, light.direction)) * light.attenuatedIntensity;
-
-      float shininess = get_shininess(materialSID, 0);
-      int shadingModel = get_shadingModel(materialSID, 0);
-
-      float cameraSID = u_currentComponentSIDs[/* shaderity: @{WellKnownComponentTIDs.CameraComponentTID} */];
-      vec3 viewPosition = get_viewPosition(cameraSID, 0);
-
-      // Specular
-      if (shadingModel == 2) {// BLINN
-        // ViewDirection
-        vec3 viewDirection = normalize(viewPosition - v_position_inWorld.xyz);
-        vec3 halfVector = normalize(light.direction + viewDirection);
-        specular += pow(max(0.0, dot(halfVector, normal_inWorld)), shininess);
-      } else if (shadingModel == 3) { // PHONG
-        vec3 viewDirection = normalize(viewPosition - v_position_inWorld.xyz);
-        vec3 R = reflect(light.direction, normal_inWorld);
-        specular += pow(max(0.0, dot(R, viewDirection)), shininess);
-      }
-
-    }
-
-    shadingColor = diffuse + specular;
-  } else {
-    shadingColor = diffuseColor;
-  }
-#else
-  shadingColor = diffuseColor;
-#endif
-
-  rt0 = vec4(shadingColor * alpha, alpha);
-  // rt0 = vec4(u_lightNumber, 0.0, 0.0, 1.0);
-  // rt0 = vec4(1.0, 0.0, 0.0, 1.0);
-  // rt0 = vec4(normal_inWorld*0.5+0.5, 1.0);
-
-#pragma shaderity: require(../common/setAlphaIfNotInAlphaBlendMode.glsl)
-
-#pragma shaderity: require(../common/glFragColor.glsl)
-
+  v_shadowCoord = get_depthBiasPV(materialSID, 0) * v_position_inWorld;
 }
 ```
 
@@ -209,6 +142,8 @@ Shaderity独自の構文はpragmaまたはコメント形式で記述される�
 
 ## ノードエディタ
 
-Rhodoniteには独自のノードシステムを搭載しており、ノード編集によってシェーダーのリアルタイム構築が可能です（開発中です）。
+Rhodoniteは独自のノードシステムを搭載しており、ノード編集によってシェーダーのリアルタイム構築が可能です（開発中です）。
+
+![Node Editor](../../../assets/screenshot_shader_node_editor.jpg)
 
 </DocLayout>
