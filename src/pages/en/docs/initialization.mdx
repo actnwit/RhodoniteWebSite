@@ -7,6 +7,8 @@ import DocLayout from '../../../components/docs_layouts/DocLayout.astro';
 
 <DocLayout>
 
+## Initialization
+
 Initialization of Rhodonite is simple.
 
 In the Rn.System.init method, specify the process approach and the Canvas to draw to. Don't forget to specify `await`.
@@ -29,19 +31,62 @@ await Rn.System.init({
 | DataTexture | Works with WebGL2. Uses floating point textures for passing shader parameters. Normally recommended to use this instead of Uniform. |
 | WebGPU | Works with WebGPU |
 
-## Summary
+## Rn.Config
 
-The following is a summary of the code up to this point.
+This configuration is optional.
+[Rn.Config](https://actnwit.github.io/RhodoniteTS/api/variables/default.Config.html) is an object used to configure Rhodonite.
+If you want to change the default value, set a value to `Rn.Config.xxx`.
+This value should be set before calling the `Rn.System.init` method.
 
 ```typescript
-// Set up System (specify process approach and pass in canvas)
+Rn.Config.maxEntityNumber = 10000;
+Rn.Config.maxLightNumberInShader = 10;
+
 await Rn.System.init({
   approach: Rn.ProcessApproach.DataTexture,
   canvas: document.getElementById('world')
-});
+};
 ```
 
+The following is a list of properties and their meanings.
+
+| Property Name | Meaning |
+|:-----------|------------|
+| boneDataType | The type of bone data |
+| cacheWebGpuRenderBundles | Whether to cache render bundles in WebGPU |
+| cgApiDebugConsoleOutput | Whether to output WebGL/WebGPU debug information to the console |
+| maxEntityNumber | The maximum number of entities that Rhodonite can handle |
+| maxLightNumberInShader | The maximum number of lights that Rhodonite can handle in a shader |
+| dataTextureHeight | The height of the data texture. The larger it is, the more data Rhodonite can handle. |
+| dataTextureWidth | The width of the data texture. The larger it is, the more data Rhodonite can handle. |
+
+## Logger
+
+This configuration is optional.
+`Rn.Logger.loglevel` can be set to the following values.
+
+| Value | Meaning |
+|:-----------|------------|
+| `Rn.LogLevel.Error` | Outputs errors |
+| `Rn.LogLevel.Warn` | Outputs errors and warnings |
+| `Rn.LogLevel.Debug` | Outputs errors, warnings, and debug information |
+| `Rn.LogLevel.Info` | Outputs errors, warnings, debug information, and detailed information |
+
+```typescript
+Rn.Logger.loglevel = Rn.LogLevel.Info;
+```
+
+Setting this will output the desired level of log to the browser's developer console.
+
+Especially, by setting the following, detailed shader error information can be output when the shader build fails.
+
+```typescript
+Rn.Config.cgApiDebugConsoleOutput = true;
+Rn.Logger.loglevel = Rn.LogLevel.Info;
+```
+
+## Summary
+
 Rhodonite initialization is now complete.
-Now it is time to create 3D data by writing the necessary data in code or reading it from a file such as glTF, and pass it to the System's process method via an Expression instance for rendering. The specific method is explained on the next page.
 
 </DocLayout>

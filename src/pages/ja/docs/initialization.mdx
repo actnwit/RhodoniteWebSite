@@ -7,6 +7,8 @@ import DocLayout from '../../../components/docs_layouts/DocLayout.astro';
 
 <DocLayout>
 
+## Rhodoniteの初期化
+
 Rhodoniteの初期化は簡単です。
 
 Rn.System.initメソッドで、プロセスアプローチと描画先のCanvasを指定します。awaitの指定を忘れないでください。
@@ -29,19 +31,64 @@ await Rn.System.init({
 | DataTexture | WebGL2で動作します。シェーダパラメータの受け渡しに浮動小数点テクスチャを使います。普段の利用ではUniformではなくこちらの利用を推奨します。 |
 | WebGPU | WebGPUで動作します。 |
 
-## まとめ
 
-ここまでのコードをまとめたものを以下に示します。
+## Rn.Configによる設定
+
+この設定はオプショナルです。
+[Rn.Config](https://actnwit.github.io/RhodoniteTS/api/variables/default.Config.html)はRhodoniteの設定を行うためのオブジェクトです。
+初期設定値を変えたい場合に、`Rn.Config.xxx` に値を設定します。
+この値の設定は、`Rn.System.init` メソッドを呼ぶ前に行ってください。
+
 
 ```typescript
-// Systemを設定（プロセスアプローチの指定とcanvasの受け渡し）
+Rn.Config.maxEntityNumber = 10000;
+Rn.Config.maxLightNumberInShader = 10;
+
 await Rn.System.init({
   approach: Rn.ProcessApproach.DataTexture,
   canvas: document.getElementById('world')
-});
+};
 ```
 
+各プロパティの意味については以下の表を参照してください。
+
+| プロパティ名 | 意味 |
+|:-----------|------------|
+| boneDataType | ボーンデータの型 |
+| cacheWebGpuRenderBundles | WebGPUでのレンダーバンドルのキャッシュを有効にするかどうか |
+| cgApiDebugConsoleOutput | コンソールにWebGL/WebGPUのデバッグ情報を出力するかどうか |
+| maxEntityNumber | Rhodoniteで扱えるエンティティの最大数 |
+| maxLightNumberInShader | Rhodoniteで扱えるライトの最大数 |
+| dataTextureHeight | データテクスチャの高さ。大きいほどRhodoniteで扱えるデータ量が多くなります。 |
+| dataTextureWidth | データテクスチャの幅。大きいほどRhodoniteで扱えるデータ量が多くなります。 |
+
+## Loggerの設定
+
+この設定はオプショナルです。
+`Rn.Logger.loglevel` には以下の値を設定できます。
+
+| 値 | 意味 |
+|:-----------|------------|
+| `Rn.LogLevel.Error` | エラーを出力します。 |
+| `Rn.LogLevel.Warn` | エラーと警告を出力します。 |
+| `Rn.LogLevel.Debug` | エラー、警告、デバッグ情報を出力します。 |
+| `Rn.LogLevel.Info` | エラー、警告、デバッグ情報、細部の情報を出力します。 |
+
+```typescript
+Rn.Logger.loglevel = Rn.LogLevel.Info;
+```
+
+設定することで、ブラウザの開発者コンソールへの望んだレベルでのログ出力がなされます。
+
+特に、以下の設定をすることで、シェーダービルドに失敗した際に詳細なシェーダーのエラーを出力することができます。
+
+```typescript
+Rn.Config.cgApiDebugConsoleOutput = true;
+Rn.Logger.loglevel = Rn.LogLevel.Info;
+```
+
+## まとめ
+
 ここまででRhodoniteの初期化は完了です。
-あとは必要なデータをコード記述するか、またはglTFなどのファイルから読み込むなどして3Dデータを作成し、それをExpressionインスタンスを介してSystemのprocessメソッドに渡して描画を行っていきます。その具体的な方法は次のページで解説します。
 
 </DocLayout>
