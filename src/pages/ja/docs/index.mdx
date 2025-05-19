@@ -46,63 +46,62 @@ WebGLではUniform変数の更新が常に性能上の大きなボトルネッ�
 
 次のリスト1-1は、現時点でのRhodoniteにおけるポリゴン表示のための最小コードです。
 
-```javascript
-async function main() {
+```typescript
+import Rn from "rhodonite";
 
-    // Rhodoniteの初期化。描画処理方法（今回はUniform）と描画先canvasを指定
-    await Rn.System.init({
-      approach: Rn.ProcessApproach.Uniform,
-      canvas: document.getElementById('world')
-    });
+(async () => {
+  // Rhodoniteの初期化。描画処理方法（今回はUniform）と描画先canvasを指定
+  await Rn.System.init({
+    approach: Rn.ProcessApproach.Uniform,
+    canvas: document.getElementById("world") as HTMLCanvasElement,
+  });
 
-    // Component搭載済みEntityの作成
-    const firstEntity = Rn.EntityHelper.createMeshEntity();
+  // Component搭載済みEntityの作成
+  const firstEntity = Rn.createMeshEntity();
 
-    // 頂点データの作成
-    const indices = new Float32Array([
-        0, 1, 3, 3, 1, 2
-    ]);
+  // 頂点データの作成
+  const indices = new Uint32Array([0, 1, 3, 3, 1, 2]);
 
-    const positions = new Float32Array([
-        -1.5, -0.5, 0.0,
-        -0.5, -0.5, 0.0,
-        -0.5, 0.5, 0.0,
-        -1.5, 0.5, 0.0
-    ]);
+  const positions = new Float32Array([
+    -0.5, -0.5, 0.0, 0.5, -0.5, 0.0, 0.5, 0.5, 0.0, -0.5, 0.5, 0.0,
+  ]);
 
-    const colors = new Float32Array([
-        0.0, 1.0, 1.0,
-        1.0, 1.0, 0.0,
-        1.0, 0.0, 0.0,
-        0.0, 0.0, 1.0
-    ]);
+  const colors = new Float32Array([
+    0.0, 1.0, 1.0, 1.0, 1.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0,
+  ]);
 
-    // 頂点データを指定してPrimitiveオブジェクトを作成
-    const primitive = Rn.Primitive.createPrimitive({
-        indices: indices,
-        attributeSemantics: [VertexAttribute.Position.XYZ, VertexAttribute.Color0.XYZ],
-        attributes: [positions, colors],
-        material: void 0,
-        primitiveMode: PrimitiveMode.Triangles
-    });
+  // 頂点データを指定してPrimitiveオブジェクトを作成
+  const primitive = Rn.Primitive.createPrimitive({
+    indices: indices,
+    attributeSemantics: [
+      Rn.VertexAttribute.Position.XYZ,
+      Rn.VertexAttribute.Color0.XYZ,
+    ],
+    attributes: [positions, colors],
+    primitiveMode: Rn.PrimitiveMode.Triangles,
+  });
 
-    // EntityのMeshコンポーネントにPrimitiveを追加
-    const meshComponent = firstEntity.getMesh();
-    const mesh = new Rn.Mesh();
-    mesh.addPrimitive(primitive);
-    meshComponent.setMesh(mesh);
+  // EntityのMeshコンポーネントにPrimitiveを追加
+  const meshComponent = firstEntity.getMesh();
+  const mesh = new Rn.Mesh();
+  mesh.addPrimitive(primitive);
+  meshComponent.setMesh(mesh);
 
-    // 描画する。
-    // Entityの存在は作成した時点でRhodoniteが内部的に把握しているため、プログラマが明示的にシステムにEntityを登録する必要はありません。
-    const draw = function(time) {
-        Rn.system.processAuto();
-        requestAnimationFrame(draw);
-    }
-
-    draw();
-}
+  // 描画する。
+  // Entityの存在は作成した時点でRhodoniteが内部的に把握しているため、プログラマが明示的にシステムにEntityを登録する必要はありません。
+  Rn.System.startRenderLoop(() => {
+    Rn.System.processAuto();
+  });
+})();
 ```
 List 1-1
+
+<iframe src="https://codesandbox.io/embed/j5pyv8?view=preview&module=%2Fsrc%2Findex.ts"
+    style="width:100%; height: 500px; border:0; border-radius: 4px; overflow:hidden;"
+    title="Rhodonite_example"
+    allow="accelerometer; ambient-light-sensor; camera; encrypted-media; geolocation; gyroscope; hid; microphone; midi; payment; usb; vr; xr-spatial-tracking"
+    sandbox="allow-forms allow-modals allow-popups allow-presentation allow-same-origin allow-scripts"
+></iframe>
 
 Primitiveクラスの設計はglTF2フォーマットに概念的に合うよう設計されています。
 

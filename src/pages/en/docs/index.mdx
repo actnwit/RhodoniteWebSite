@@ -46,63 +46,63 @@ It is also suitable for cases where shaders must access complex and large amount
 
 The following Listing 1-1 shows the minimum code for polygon display in Rhodonite at this time.
 
-````javascript
-async function main() {
+```typescript
+import Rn from "rhodonite";
 
-    // Rhodonite initialization. Specify the drawing processing method (Uniform in this case) and the canvas to draw to
-    await Rn.System.init({
-      approach: Rn.ProcessApproach.Uniform,
-      canvas: document.getElementById('world')
-    });
+(async () => {
+  // Initialize Rhodonite. Specify the drawing method (Uniform in this case) and the canvas to draw on
+  await Rn.System.init({
+    approach: Rn.ProcessApproach.Uniform,
+    canvas: document.getElementById("world") as HTMLCanvasElement,
+  });
 
-    // Creation of Component-loaded Entity
-    const firstEntity = Rn.EntityHelper.createMeshEntity();
+  // Create an entity with components
+  const firstEntity = Rn.createMeshEntity();
 
-    // create vertex data
-    const indices = new Float32Array([
-        0, 1, 3, 3, 1, 2
-    ]);
+  // Create vertex data
+  const indices = new Uint32Array([0, 1, 3, 3, 1, 2]);
 
-    const positions = new Float32Array([
-        -1.5, -0.5, 0.0,
-        -0.5, -0.5, 0.0,
-        -0.5, 0.5, 0.0,
-        -1.5, 0.5, 0.0
-    ]);
+  const positions = new Float32Array([
+    -0.5, -0.5, 0.0, 0.5, -0.5, 0.0, 0.5, 0.5, 0.0, -0.5, 0.5, 0.0,
+  ]);
 
-    const colors = new Float32Array([
-        0.0, 1.0, 1.0,
-        1.0, 1.0, 0.0,
-        1.0, 0.0, 0.0, 0.0,
-        0.0, 0.0, 1.0
-    ]);
+  const colors = new Float32Array([
+    0.0, 1.0, 1.0, 1.0, 1.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0,
+  ]);
 
-    // Create Primitive object with vertex data
-    const primitive = Primitive.createPrimitive({
-        indices: indices,
-        attributeSemantics: [VertexAttribute.Position.XYZ, VertexAttribute.Color0.XYZ],
-        attributes: [positions, colors],
-        material: void 0,
-        primitiveMode: PrimitiveMode.Triangles
-    });
+  // Create a Primitive object by specifying the vertex data
+  const primitive = Rn.Primitive.createPrimitive({
+    indices: indices,
+    attributeSemantics: [
+      Rn.VertexAttribute.Position.XYZ,
+      Rn.VertexAttribute.Color0.XYZ,
+    ],
+    attributes: [positions, colors],
+    primitiveMode: Rn.PrimitiveMode.Triangles,
+  });
 
-    // Add Primitive to Entity's Mesh component
-    const meshComponent = firstEntity.getMesh();
-    const mesh = new Rn.Mesh();
-    mesh.addPrimitive(primitive);
-    meshComponent.setMesh(mesh);
+  // Add the Primitive to the Mesh component of the entity
+  const meshComponent = firstEntity.getMesh();
+  const mesh = new Rn.Mesh();
+  mesh.addPrimitive(primitive);
+  meshComponent.setMesh(mesh);
 
-    // Drawing.
-    // The existence of Entity is known internally by Rhodonite when it is created, so there is no need for the programmer to explicitly register Entity in the system.
-    const draw = function(time) {
-        Rn.system.processAuto();
-        requestAnimationFrame(draw);
-    }
-
-    draw();
-}
-````
+  // Render the scene.
+  // The existence of the entity is internally managed by Rhodonite at the time of creation, so the programmer does not need to explicitly register the entity with the system.
+  Rn.System.startRenderLoop(() => {
+    Rn.System.processAuto();
+  });
+})();
+```
 List 1-1
+
+
+<iframe src="https://codesandbox.io/embed/j5pyv8?view=preview&module=%2Fsrc%2Findex.ts"
+    style="width:100%; height: 500px; border:0; border-radius: 4px; overflow:hidden;"
+    title="Rhodonite_example"
+    allow="accelerometer; ambient-light-sensor; camera; encrypted-media; geolocation; gyroscope; hid; microphone; midi; payment; usb; vr; xr-spatial-tracking"
+    sandbox="allow-forms allow-modals allow-popups allow-presentation allow-same-origin allow-scripts"
+></iframe>
 
 The design of the Primitive class is designed to conceptually fit the glTF2 format.
 
