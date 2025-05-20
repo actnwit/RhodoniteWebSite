@@ -1,29 +1,29 @@
 ---
-title: レンダーパイプライン
-description: Rhodoniteでレンダーパイプラインを使う方法
+title: Render Pipeline
+description: How to use the render pipeline in Rhodonite
 ---
 
-import DocLayout from '../../../components/tutorials_layouts/DocLayout.astro';
+import DocLayout from '../../../../components/tutorials_layouts/DocLayout.astro';
 
 <DocLayout>
 
-Rhodoniteでは屈折表現やMSAAなどの込み入った表現ができますが、本来そのためには複雑なレンダリングパスの設定を行う必要があります。
-それには一般的なリアルタイムレンダリングの知識が要求され、誰にでも容易にできることではありません。
+Rhodonite allows for intricate rendering such as refraction and MSAA, but this inherently requires complex rendering pass settings.
+This requires general real-time rendering knowledge and is not easy for everyone to do.
 
 ![image](https://user-images.githubusercontent.com/3821214/173999603-1015e98e-1e9c-4bd6-a0d5-a5c0a9dc406f.png)
 
-そのため、Rhodoniteではレンダーパイプラインという仕組みを用意しています。
-レンダーパイプラインは複雑なマルチパスの設定をすでに構築ずみのクラスであり、ユーザーはこれを使うことで屈折表現やMSAAなどの高度な表現の恩恵を簡単に受けることができます。
-（UnityエンジンのURP(Universal Render Pipeline)のようなものです）
+For this reason, Rhodonite provides a mechanism called the render pipeline.
+The render pipeline is a class of complex multi-pass setups already built in, which allows users to easily benefit from advanced expressions such as refraction and MSAA.
+(like the URP (Universal Render Pipeline) in the Unity engine).
 
-現在、ForwardRenderPipelineというレンダリングパイプラインのみが存在しますが、今後別のパイプラインが追加される可能性があります。
+Currently, there is only one rendering pipeline, ForwardRenderPipeline, but another pipeline may be added in the future.
 
 ## ForwardRenderPipeline
 
-Forwardレンダリング方式のレンダーパイプラインです。
+The render pipeline for the Forward rendering method.
 
 ```ts
-import Rn from '../../../dist/esm/index.mjs';
+import Rn from '... /... /... /dist/esm/index.mjs';
 
 const p = document.createElement('p');
 document.body.appendChild(p);
@@ -49,7 +49,7 @@ declare const window: any;
 
   // gltf
   const mainExpression = await Rn.GltfImporter.import(
-    '../../../assets/gltf/glTF-Sample-Models/2.0/IridescentDishWithOlives/glTF-Binary/IridescentDishWithOlives.glb',
+    '... /... /... /assets/gltf/glTF-Sample-Models/2.0/IridescentDishWithOlives/glTF-Binary/IridescentDishWithOlives.glb',
     {
       cameraComponent: cameraComponent,
       defaultMaterialHelperArgumentArray: [
@@ -62,7 +62,7 @@ declare const window: any;
 
   // env
   const envExpression = createEnvCubeExpression(
-    './../../../assets/ibl/papermill',
+    '. /... /... /... /assets/ibl/papermill',
     cameraEntity
   );
 
@@ -77,7 +77,7 @@ declare const window: any;
   forwardRenderPipeline.setExpressions([envExpression, mainExpression]);
 
   // lighting
-  setIBL('./../../../assets/ibl/papermill');
+  setIBL('. /... /... /... /assets/ibl/papermill');
 
   const draw = function (frame) {
     Rn.System.process(frame);
@@ -87,9 +87,9 @@ declare const window: any;
 })();
 ```
 
-### 使い方
+### Usage
 
-まず、ForwardRenderPipelineをnewで生成し、次にsetupメソッドを呼びます。
+First, create the ForwardRenderPipeline with new, then call the setup method.
 
 ```ts
   // create ForwardRenderPipeline
@@ -97,13 +97,13 @@ declare const window: any;
   forwardRenderPipeline.setup(canvas.width, canvas.height);
 ```
 
-次に、描画させたいExpressionの配列をsetExpressionsメソッドでセットします。
+Next, set the array of Expressions you want to draw with the setExpressions method.
 
 ```ts
   forwardRenderPipeline.setExpressions([envExpression, mainExpression]);
 ```
 
-Rn.System.startRenderLoop()ではなく、forwardRenderPipelineのstartRenderLoop()メソッドを呼びます。引数として描画関数をセットします。渡した関数の第一引数にはforwardRenderPipelineからframeオブジェクトが渡されるので、それを使ってRn.System.processメソッドを呼び出します。
+Call forwardRenderPipeline's startRenderLoop() method instead of Rn.System.startRenderLoop(). Set the drawing function as an argument. The first argument of the passed function is a frame object from the forwardRenderPipeline, which is used to call the Rn.System.process method.
 
 ```ts
   const draw = function (frame) {

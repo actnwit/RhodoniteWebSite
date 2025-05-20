@@ -1,27 +1,27 @@
 ---
-title: Transform and SceneGraph
-description: How to use Transform and SceneGraph in Rhodonite
+title: TransformとSceneGraph
+description: RhodoniteでTransformとSceneGraphを使う方法
 ---
 
-import DocLayout from '../../../components/tutorials_layouts/DocLayout.astro';
+import DocLayout from '../../../../components/tutorials_layouts/DocLayout.astro';
 
 <DocLayout>
 
-## Getting Components
+## コンポーネントの取得
 
-Rhodonite is a component-oriented library.
-Operations on Entity (an object in 3D space) are actually performed on the various components of Entity.
+Rhodoniteはコンポーネント志向のライブラリです。
+Entity（３D空間上の物体）に対する操作は、実際にはEntityが持つ各種のコンポーネントに対して行います。
 
-Therefore, we need to get the components from Entity first.
+そのため、Entityからまずはコンポーネントを取得する必要があります。
 
 ```typescript
 const cubeEntity = Rn.MeshHelper.createCube();
 const cubeTransformComponent = cubeEntity.getTransform();
 ```
 
-## Transform component
+## Transformコンポーネント
 
-The transform component allows you to manipulate translation, scale, and rotation in local coordinates for that Entity.
+トランスフォームコンポーネントを使うと、そのEntityに対するローカル座標における平行移動、スケール、回転を操作できます。
 
 ```typescript
 const cubeTransformComponent = cubeEntity.getTransform();
@@ -30,9 +30,9 @@ cubeTransformComponent.localEulerAngles = Rn.Vector3.fromCopy3(90, 0, 0);
 cubeTransformComponent.localScale = Rn.Vector3.fromCopy3(2, 2, 2);
 ```
 
-## SceneGraph component
+## SceneGraphコンポーネント
 
-The SceneGraph component allows you to build parent-child relationships between Entities.
+SceneGraphコンポーネントでは、Entity同士の親子関係を構築できます。
 
 ```typescript
 const groupEntity = Rn.EntityHelper.createGroupEntity();
@@ -41,7 +41,7 @@ const groupSceneGraphComponent = groupEntity.getSceneGraph();
 groupSceneGraphComponent.addChild(cubeEntity.getSceneGraph());
 ```
 
-It can also manipulate translations and rotations in world space.
+また、ワールド空間における平行移動、回転を操作できます。
 
 ```typescript
 const groupEntity = Rn.EntityHelper.createGroupEntity();
@@ -49,10 +49,10 @@ groupEntity.position = Rn.Vector3.fromCopy3(0, 3, 0);
 groupEntity.eulerAngles = Rn.Vector3.fromCopy3(90, 0, 0);
 ```
 
-## Shortcut methods for Transform and SceneGraph components
+## TransformコンポーネントとSceneGraphコンポーネントのショートカットメソッド
 
-Thus, essentially, for any operation on Entity, you must first obtain the component of the corresponding function.
-However, for the Transform and SceneGraph components, there are also key methods in Entity itself as shortcuts, since they are often used.
+このように、本来はEntityに対するあらゆる操作において、まずは対応する機能のコンポーネントを取得する必要があります。
+ただし、TransformコンポーネントとSceneGraphコンポーネントについてはよく使われるため、ショートカットとして主要なメソッドがEntity自体にも存在します。
 
 ```typescript
 const cubeEntity = Rn.MeshHelper.createCube();
@@ -66,7 +66,7 @@ const groupEntity = Rn.EntityHelper.createGroupEntity();
 groupEntity.addChild(cubeEntity.getSceneGraph());
 ```
 
-You can learn about each of the shortcut methods provided in the following file
+用意されているそれぞれのショートカットメソッドについては以下のファイルから知ることができます。
 
 https://github.com/actnwit/RhodoniteTS/blob/master/src/foundation/components/Transform/ITransformEntity.ts
 https://github.com/actnwit/RhodoniteTS/blob/master/src/foundation/components/SceneGraph/ISceneGraphEntity.ts

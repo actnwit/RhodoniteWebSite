@@ -1,16 +1,14 @@
 ---
-title: ジオメトリの表示
-description: Rhodoniteでジオメトリを表示する方法
+title: Displaying Geometries
+description: How to display geometries in Rhodonite
 ---
 
-import DocLayout from '../../../components/tutorials_layouts/DocLayout.astro';
+import DocLayout from '../../../../components/tutorials_layouts/DocLayout.astro';
 
 <DocLayout>
 
-## ジオメトリクラス群の構造
-
-実際の頂点データを格納するクラスはPrimitiveクラスです。複数のPrimitiveクラスをまとめるクラスとしてMeshクラスがあります。
-各PrimitiveクラスはMaterialクラスのインスタンスを所有します。
+## Structure of the geometry-related classes
+The class that stores the actual vertex data is the Primitive class.The Mesh class is the class that brings together multiple Primitive classes. Each Primitive class owns an instance of the Material class.
 
 ```typescript
 const primitive = new Rn.Plane();
@@ -22,9 +20,8 @@ const mesh = new Mesh();
 mesh.addPrimitive(primitive);
 ```
 
-## MeshComponentへの追加
-
-meshがセットアップできたら、Meshを持たせたいEntityのMeshComponentにmeshを追加します。
+## Adding to MeshComponent
+Once the mesh is set up, add the mesh to the MeshComponent of the Entity that wants to have the mesh.
 
 ```typescript
 const meshEntity = Rn.EntityHelper.createMeshEntity();
@@ -32,9 +29,8 @@ const meshComponent = meshEntity.getMesh();
 meshComponent.setMesh(mesh);
 ```
 
-## レンダーループを回す
-
-Rhodoniteの最も簡単な使い方では、ここまでのコーディングだけでRhodoniteエンジンが生成されたMeshとEntityを自動的に認識し、以下のレンダーループを回すだけでメッシュの描画が行われます。
+## Turning the render loop
+In the simplest use of Rhodonite, the Rhodonite engine automatically recognises the generated Mesh and Entity with just the coding up to this point, and the mesh is drawn by simply turning the following render loop.
 
 ```typescript
 Rn.System.startRenderLoop(()=>{
@@ -42,8 +38,7 @@ Rn.System.startRenderLoop(()=>{
 });
 ```
 
-また、Rhodoniteに自動的にMeshを持つEntityを認識させるのではなく、明示的に指定することもできます。その場合は、ExpressionとRenderPassを使います。
-Expressionは一つのCG表現の単位と考えてください。Expressionは複数のRenderPassを持ちます。RenderPassはリアルタイムグラフィックスにおけるレンダーパスの概念に相当します。
+Alternatively, instead of having Rhodonite automatically recognise Entities with Mesh, you can specify it explicitly. In this case, use Expression and RenderPass. Think of an Expression as a single unit of CG representation; an Expression has multiple RenderPasses; a RenderPass corresponds to the concept of a RenderPass in real-time graphics.
 
 ```typescript
 const renderPass = new Rn.RenderPass();
@@ -56,17 +51,17 @@ Rn.System.startRenderLoop(()=>{
 });
 ```
 
-## MeshHelperを使って簡単にMeshを生成する
+## Basic Shapes
 
-[MeshHelper](https://actnwit.github.io/RhodoniteTS/api/variables/MeshHelper.html)オブジェクトを使って、いくつかの基本形状を作ることができます。これらの関数は作成した基本形状のentityを返します。
+Several basic shapes can be created using the MeshHelper class. These functions return the entities of the basic shapes created.
 
 ```typescript
-const cubeEntity = Rn.MeshHelper.createCube();
-cubeEntity.eulerAngles = Rn.Vector3.fromCopy3(90, 0, 0);
-cubeEntity.position = Rn.Vector3.fromCopy3(0, 3, 0);
-```
+  const cubeEntity = Rn.MeshHelper.createCube();
+  cubeEntity.rotate = Rn.Vector3.fromCopy3(90, 0, 0);
+  cubeEntity.translate = Rn.Vector3.fromCopy3(0, 3, 0);
+````
 
-以下の基本形状が用意されています。
+The following basic shapes are available.
 
 * Plane - [Rn.MeshHelper.createPlane()](https://github.com/actnwit/RhodoniteTS/blob/4219ddad/src/foundation/helpers/MeshHelper.ts#L14)
 * Grid - [Rn.MeshHelper.createGrid()](https://github.com/actnwit/RhodoniteTS/blob/4219ddad/src/foundation/helpers/MeshHelper.ts#L42)
@@ -76,28 +71,18 @@ cubeEntity.position = Rn.Vector3.fromCopy3(0, 3, 0);
 * Line - [Rn.MeshHelper.createLine()](https://github.com/actnwit/RhodoniteTS/blob/4219ddad/src/foundation/helpers/MeshHelper.ts#L29)
 * Sphere - [Rn.MeshHelper.creteSphere()](https://github.com/actnwit/RhodoniteTS/blob/4219ddad/src/foundation/helpers/MeshHelper.ts#L68)
 
-参考となるサンプルです。
+
+Here is a sample for reference.
 
 - [Primitives](https://github.com/actnwit/RhodoniteTS/blob/master/samples/test_e2e/Primitives/main.ts)
 
 ![image](https://user-images.githubusercontent.com/3821214/205436440-8f9d271b-c083-41f4-8b61-04fe9b09eecc.png)
 
-### マテリアルを渡す
+## If you prepare your own vertex data
 
-各種生成関数では、引数にマテリアルを渡せます。
+Vertex data can be defined as follows
+The defined vertex data is set to the Primitive class.
 
-```typescript
-const material = Rn.MaterialHelper.createClassicUberMaterial();
-material.setParameter(Rn.ShaderSemantics.DiffuseColorFactor, Rn.Vector4.fromCopy4(1, 0, 0, 1));
-const cube = Rn.MeshHelper.createCube({
-    material: material
-});
-```
-
-## 頂点データを自前で用意してPrimitiveオブジェクトを作る
-
-次のようにして、頂点データを定義することができます。
-定義した頂点データはPrimitiveクラスに設定します。
 
 ```typescript
 function readyBasicVerticesData() {
@@ -122,6 +107,7 @@ function readyBasicVerticesData() {
         indices: indices,
         attributeSemantics: [Rn.VertexAttribute.Position.XYZ, Rn.VertexAttribute.Color0.XYZ],
         attributes: [positions, colors],
+        material: void 0,
         primitiveMode: Rn.PrimitiveMode.Triangles
     });
 
@@ -129,7 +115,8 @@ function readyBasicVerticesData() {
 }
 ```
 
-コード全体を以下に示します。
+
+The entire code is shown below.
 
 ```typescript
 function readyBasicVerticesData() {
@@ -154,6 +141,7 @@ function readyBasicVerticesData() {
         indices: indices,
         attributeSemantics: [Rn.VertexAttribute.Position.XYZ, Rn.VertexAttribute.Color0.XYZ],
         attributes: [positions, colors],
+        material: void 0,
         primitiveMode: Rn.PrimitiveMode.Triangles
     });
 
@@ -162,9 +150,9 @@ function readyBasicVerticesData() {
 
 const load = async function () {
     const c = document.getElementById('world');
-    await Rn.System.init({
-      approach: Rn.ProcessApproach.DataTexture,
-      canvas: c
+    Rn.System.init({
+      approach: Rn.ProcessApproach.FastestWebGL2,
+      canvas: c,
     });
 
     resizeCanvas();
