@@ -3,7 +3,7 @@ title: Getting Started
 description: Learn how to get started with Rhodonite
 ---
 
-import DocLayout from '../../../components/docs_layouts/DocLayout.astro';
+import DocLayout from '../../../../components/docs_layouts/DocLayout.astro';
 
 <DocLayout>
 
@@ -34,7 +34,7 @@ Each field member is memory contiguous across entities (potentially taking other
 In addition, this huge memory pool can be sent to the GPU as textures all at once before rendering, and multiple meshes can be drawn as instances for fast scene rendering.
 The shaders obtain the location and material information from the texture where each entity is drawn. This is called the blittable memory architecture in Rhodonite.
 
-![Blittable Memory Architecture](../../../assets/RhodoniteMemoryModel.png)
+![Blittable Memory Architecture](../../../../assets/RhodoniteMemoryModel.png)
 
 In WebGL, updating uniform variables is always a major performance bottleneck.
 The blittable memory architecture avoids this bottleneck by sending all data to the GPU at once as a texture without using setUniform.

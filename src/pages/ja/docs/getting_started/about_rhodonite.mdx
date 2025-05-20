@@ -3,7 +3,7 @@ title: はじめに
 description: Rhodoniteの使い方を学びましょう
 ---
 
-import DocLayout from '../../../components/docs_layouts/DocLayout.astro';
+import DocLayout from '../../../../components/docs_layouts/DocLayout.astro';
 
 <DocLayout>
 
@@ -34,7 +34,7 @@ Rhodoniteは最初に巨大なArrayBufferのメモリプールを取得し、そ
 また、この巨大なメモリプールをレンダリング前にGPUへテクスチャとして一気に送信し、複数メッシュをインスタンス描画することで高速なシーン描画を行うことができます。
 各エンティティが描かれる位置情報やマテリアル情報などは、シェーダーがそのテクスチャから取得します。これをRhodoniteではブリッタブルメモリアーキテクチャと呼んでいます。
 
-![ブリッタブルメモリアーキテクチャ](../../../assets/RhodoniteMemoryModel.png)
+![ブリッタブルメモリアーキテクチャ](../../../../assets/RhodoniteMemoryModel.png)
 
 WebGLではUniform変数の更新が常に性能上の大きなボトルネックになります。
 ブリッタブルメモリアーキテクチャでは、setUniformを使わずに全てのデータをテクスチャとしてGPUに一気に送りこむため、このボトルネックを回避できます。
