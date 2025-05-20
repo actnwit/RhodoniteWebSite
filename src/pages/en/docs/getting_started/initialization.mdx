@@ -41,6 +41,9 @@ This value should be set before calling the `Rn.System.init` method.
 ```typescript
 Rn.Config.maxEntityNumber = 10000;
 Rn.Config.maxLightNumberInShader = 10;
+Rn.Config.dataTextureHeight = 1024;
+Rn.Config.dataTextureWidth = 1024;
+Rn.Config.cgApiDebugConsoleOutput = true;
 
 await Rn.System.init({
   approach: Rn.ProcessApproach.DataTexture,
@@ -53,12 +56,12 @@ The following is a list of properties and their meanings.
 | Property Name | Meaning |
 |:-----------|------------|
 | boneDataType | The type of bone data |
-| cacheWebGpuRenderBundles | Whether to cache render bundles in WebGPU |
+| cacheWebGpuRenderBundles | Whether to cache render bundles in WebGPU. Usually true is fine. |
 | cgApiDebugConsoleOutput | Whether to output WebGL/WebGPU debug information to the console |
 | maxEntityNumber | The maximum number of entities that Rhodonite can handle |
 | maxLightNumberInShader | The maximum number of lights that Rhodonite can handle in a shader |
-| dataTextureHeight | The height of the data texture. The larger it is, the more data Rhodonite can handle. |
-| dataTextureWidth | The width of the data texture. The larger it is, the more data Rhodonite can handle. |
+| dataTextureHeight | The height of the data texture. The larger it is, the more data Rhodonite can handle. It must be a power of 2. |
+| dataTextureWidth | The width of the data texture. The larger it is, the more data Rhodonite can handle. It must be a power of 2. |
 
 ## Logger
 

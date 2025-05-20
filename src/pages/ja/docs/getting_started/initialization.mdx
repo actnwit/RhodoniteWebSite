@@ -43,6 +43,9 @@ await Rn.System.init({
 ```typescript
 Rn.Config.maxEntityNumber = 10000;
 Rn.Config.maxLightNumberInShader = 10;
+Rn.Config.dataTextureHeight = 1024;
+Rn.Config.dataTextureWidth = 1024;
+Rn.Config.cgApiDebugConsoleOutput = true;
 
 await Rn.System.init({
   approach: Rn.ProcessApproach.DataTexture,
@@ -55,12 +58,12 @@ await Rn.System.init({
 | プロパティ名 | 意味 |
 |:-----------|------------|
 | boneDataType | ボーンデータの型 |
-| cacheWebGpuRenderBundles | WebGPUでのレンダーバンドルのキャッシュを有効にするかどうか |
+| cacheWebGpuRenderBundles | WebGPUでのレンダーバンドルのキャッシュを有効にするかどうか。通常はtrueで大丈夫です。 |
 | cgApiDebugConsoleOutput | コンソールにWebGL/WebGPUのデバッグ情報を出力するかどうか |
 | maxEntityNumber | Rhodoniteで扱えるエンティティの最大数 |
 | maxLightNumberInShader | Rhodoniteで扱えるライトの最大数 |
-| dataTextureHeight | データテクスチャの高さ。大きいほどRhodoniteで扱えるデータ量が多くなります。 |
-| dataTextureWidth | データテクスチャの幅。大きいほどRhodoniteで扱えるデータ量が多くなります。 |
+| dataTextureHeight | データテクスチャの高さ。大きいほどRhodoniteで扱えるデータ量が多くなります。２のべき乗である必要があります。 |
+| dataTextureWidth | データテクスチャの幅。大きいほどRhodoniteで扱えるデータ量が多くなります。２のべき乗である必要があります。 |
 
 ## Loggerの設定
 
