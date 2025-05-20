@@ -44,6 +44,50 @@ Even in the case of non-instance rendering, the system avoids heavy setUniform-t
 
 It is also suitable for cases where shaders must access complex and large amounts of data, such as in games.
 
+## PBR (Physically Based Rendering) Support
+
+Rhodonite supports PBR (Physically Based Rendering).
+
+By combining PBR materials in the glTF2 format and .hdr images for IBL (Image Based Lighting), it achieves very realistic rendering.
+
+![PBR Materials](../../../../assets/screenshot_pbr.jpg)
+
+## glTF2 Format Support
+
+Rhodonite supports the glTF2 format.
+
+glTF2 is a format for representing scene data for 3D games and apps.
+
+Rhodonite supports the following extensions of glTF2:
+
+- [x] KHR_animation_pointer
+- [x] KHR_draco_mesh_compression
+- [x] KHR_lights_punctual
+- [x] KHR_materials_anisotropy
+- [x] KHR_materials_clearcoat
+- [x] KHR_materials_dispersion
+- [x] KHR_materials_emissive_strength
+- [x] KHR_materials_ior
+- [x] KHR_materials_iridescence
+- [x] KHR_materials_sheen
+- [x] KHR_materials_specular
+- [x] KHR_materials_transmission
+- [x] KHR_materials_unlit
+- [x] KHR_materials_variant
+- [x] KHR_materials_volume
+- [x] KHR_texture_basisu
+- [x] KHR_texture_transform
+
+## VRM Format Support
+
+Rhodonite supports the VRM format.
+
+VRM is a format for representing 3D avatars based on glTF2.
+
+Rhodonite supports both VRM0.x and VRM1.0.
+
+![VRM Format](../../../../assets/screenshot_vrm.jpg)
+
 ## Rhodonite Introduction
 
 The following Listing 1-1 shows the minimum code for polygon display in Rhodonite at this time.

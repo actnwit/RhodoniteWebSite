@@ -44,6 +44,49 @@ WebGLではUniform変数の更新が常に性能上の大きなボトルネッ�
 
 また、ゲームなどのように、複雑かつ大量のデータにシェーダーがアクセスしなければならない場合にも適しています。
 
+## 高度なPBR(物理ベースレンダリング)への対応
+
+Rhodoniteは物理ベースレンダリングに対応しています。
+
+後述するglTF2フォーマットのPBRマテリアルと.hdr画像によるIBL(Image Based Lighting)を組み合わせることで、とてもリアルなレンダリングを実現します。
+
+![PBRマテリアル](../../../../assets/screenshot_pbr.jpg)
+
+## glTF2フォーマットのサポート
+
+RhodoniteはglTF2フォーマットをサポートしています。
+
+glTF2フォーマットは、3Dゲームやアプリのシーンデータを表現するためのフォーマットです。
+
+RhodoniteはglTF2の以下の拡張形式をサポートしています
+
+- [x] KHR_animation_pointer
+- [x] KHR_draco_mesh_compression
+- [x] KHR_lights_punctual
+- [x] KHR_materials_anisotropy
+- [x] KHR_materials_clearcoat
+- [x] KHR_materials_dispersion
+- [x] KHR_materials_emissive_strength
+- [x] KHR_materials_ior
+- [x] KHR_materials_iridescence
+- [x] KHR_materials_sheen
+- [x] KHR_materials_specular
+- [x] KHR_materials_transmission
+- [x] KHR_materials_unlit
+- [x] KHR_materials_variant
+- [x] KHR_materials_volume
+- [x] KHR_texture_basisu
+- [x] KHR_texture_transform
+
+## VRMフォーマットのサポート
+
+RhodoniteはVRMフォーマットをサポートしています。
+
+VRMフォーマットは、glTF2に基づく、3Dアバターフォーマットです。
+
+RhodoniteはVRM0.xとVRM1.0の両方をサポートしています。
+
+![VRMフォーマット](../../../../assets/screenshot_vrm.jpg)
 
 ## Rhodoniteことはじめ
 
