@@ -171,3 +171,14 @@
   font-size: 0.85em;
   vertical-align: middle;
 }
+
+.content-wrapper a {
+  color: #0066cc;
+  text-decoration: underline;
+  transition: color 0.2s ease;
+}
+
+.content-wrapper a:hover {
+  color: #004c99;
+  text-decoration: underline;
+}
