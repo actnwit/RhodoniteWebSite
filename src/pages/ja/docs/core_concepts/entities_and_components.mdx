@@ -64,7 +64,7 @@ cubeTransformComponent.scale = Rn.Vector3.fromCopy3(2, 2, 2);
 物体の親子関係（シーングラフ）を形成するコンポーネントです。Transformコンポーネントが持つ姿勢の変換行列を積算してワールド行列を生成します。こちらも、3D空間上に配置するEntityであれば必須のコンポーネントです。
 
 ```typescript
-const groupEntity = Rn.EntityHelper.createSceneGraphEntity();
+const groupEntity = Rn.createGroupEntity();
 const cubeEntity = Rn.MeshHelper.createCube();
 const groupSceneGraphComponent = groupEntity.getSceneGraph();
 groupSceneGraphComponent.addChild(cubeEntity.getSceneGraph());
@@ -103,7 +103,7 @@ Rhodoniteでは、まずSystemインスタンスを生成して、次にExpressi
 ```ts
 // Initializes Rhodonite
 Rn.System.init({
-  approach: Rn.ProcessApproach.FastestWebGL2,
+  approach: Rn.ProcessApproach.DataTexture,
   canvas: document.getElementById('world')
 });
 

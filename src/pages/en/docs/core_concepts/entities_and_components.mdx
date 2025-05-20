@@ -64,7 +64,7 @@ cubeTransformComponent.scale = Rn.Vector3.fromCopy3(2, 2, 2);
 This component forms the parent-child relationship (scene graph) of an object and generates a world matrix by integrating the transformation matrix of the Transform component. This component is also required for Entity that places objects in 3D space.
 
 ```typescript
-const groupEntity = Rn.EntityHelper.createSceneGraphEntity();
+const groupEntity = Rn.createGroupEntity();
 const cubeEntity = Rn.MeshHelper.createCube();
 const groupSceneGraphComponent = groupEntity.getSceneGraph();
 groupSceneGraphComponent.addChild(cubeEntity.getSceneGraph());
@@ -103,7 +103,7 @@ Rhodonite first creates a System instance, then builds an Expression, and finall
 ```javascript
 // Initializes Rhodonite
 const gl = system.init({
-  approach: Rn.ProcessApproach.UniformWebGL2,
+  approach: Rn.ProcessApproach.DataTexture,
   canvas: document.getElementById('world')
 });
 
