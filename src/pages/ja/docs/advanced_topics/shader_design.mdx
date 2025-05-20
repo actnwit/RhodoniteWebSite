@@ -34,7 +34,7 @@ Rhodoniteでは、この2つのシェーダー機構どちらを使ってもシ�
 Rhodoniteで現在主流のシェーダー作成方法になります。
 Rhodoniteとは別プロジェクトとして開発しているShaderユーティリティライブラリ「[Shaderity](https://github.com/actnwit/shaderity)」を利用してシェーダーを構築する機構です。
 Shaderityとは、シェーダーのインポート機能によるコード結合機能と、コード変換等のユーティリティ機能を備えたシェーダー開発支援ライブラリです。
-Shaderityベースでは通常のGLSLファイルを作成し、それをShaderityのWebPack向けローダーを使って、Rhodoniteライブラリ内に取り込むことでシェーダーを生成します。
+Shaderityベースでは通常のGLSLファイルを作成し、それをShaderityのesbuild向けローダーを使って、Rhodoniteライブラリ内に取り込むことでシェーダーを生成します。
 その際に、Shaderityのインポート機能を使うことで、複数のGLSLコード断片のファイルからシェーダーを構築できます。
 
 ### ShaderityベースのGLSLの書き方
