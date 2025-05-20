@@ -54,7 +54,7 @@ import Rn from "rhodonite";
 (async () => {
   // Initialize Rhodonite. Specify the drawing method (Uniform in this case) and the canvas to draw on
   await Rn.System.init({
-    approach: Rn.ProcessApproach.Uniform,
+    approach: Rn.ProcessApproach.DataTexture,
     canvas: document.getElementById("world") as HTMLCanvasElement,
   });
 

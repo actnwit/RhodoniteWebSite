@@ -55,7 +55,7 @@ import Rn from "rhodonite";
 (async () => {
   // Rhodoniteの初期化。描画処理方法（今回はUniform）と描画先canvasを指定
   await Rn.System.init({
-    approach: Rn.ProcessApproach.Uniform,
+    approach: Rn.ProcessApproach.DataTexture,
     canvas: document.getElementById("world") as HTMLCanvasElement,
   });
 

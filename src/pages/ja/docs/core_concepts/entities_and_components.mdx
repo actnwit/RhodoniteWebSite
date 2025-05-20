@@ -25,7 +25,7 @@ Entityにコンポーネントを追加するには、次のようにします�
 
 ```ts
   const entityAddedComponent = Rn.EntityRepository.addComponentToEntity(
-    TransformComponent,
+    Rn.TransformComponent,
     entity
   );
 ```
@@ -36,6 +36,13 @@ Entityにコンポーネントを追加するには、次のようにします�
 const groupEntity = Rn.createGroupEntity(); // TransformComponent, SceneGraphComponentを持つ
 const meshEntity = Rn.createMeshEntity(); // TransformComponent, SceneGraphComponent, MeshComponent, MeshRendererComponentを持つ
 ```
+
+<iframe src="https://codesandbox.io/embed/zvssqw?view=editor&module=%2Fsrc%2Findex.ts"
+     style="width:100%; height: 500px; border:0; border-radius: 4px; overflow:hidden;"
+     title="Rhodonite_example (Entity and Components)"
+     allow="accelerometer; ambient-light-sensor; camera; encrypted-media; geolocation; gyroscope; hid; microphone; midi; payment; usb; vr; xr-spatial-tracking"
+     sandbox="allow-forms allow-modals allow-popups allow-presentation allow-same-origin allow-scripts"
+   ></iframe>
 
 ## 代表的なコンポーネント
 
