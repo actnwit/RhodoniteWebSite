@@ -45,6 +45,32 @@
   }
 }
 
+.content-wrapper h4 {
+  font-size: 1.25rem;
+  font-weight: 600;
+  margin: 1.25rem 0 0.75rem;
+  color: var(--heading-color);
+}
+
+@media (max-width: 768px) {
+  .content-wrapper h4 {
+    font-size: 1rem;
+  }
+}
+
+.content-wrapper h5 {
+  font-size: 1.1rem;
+  font-weight: 600;
+  margin: 1rem 0 0.5rem;
+  color: var(--heading-color);
+}
+
+@media (max-width: 768px) {
+  .content-wrapper h5 {
+    font-size: 0.9rem;
+  }
+}
+
 .content-wrapper p {
   margin: 1rem 0;
   line-height: 1.7;
@@ -146,12 +172,16 @@
 
 /* ヘッダーアンカーリンクのスタイル */
 .content-wrapper h2,
-.content-wrapper h3 {
+.content-wrapper h3,
+.content-wrapper h4,
+.content-wrapper h5 {
   position: relative;
 }
 
 .content-wrapper h2 .heading-anchor,
-.content-wrapper h3 .heading-anchor {
+.content-wrapper h3 .heading-anchor,
+.content-wrapper h4 .heading-anchor,
+.content-wrapper h5 .heading-anchor {
   position: absolute;
   visibility: hidden;
   margin-left: 0.5rem;
@@ -162,7 +192,9 @@
 }
 
 .content-wrapper h2:hover .heading-anchor,
-.content-wrapper h3:hover .heading-anchor {
+.content-wrapper h3:hover .heading-anchor,
+.content-wrapper h4:hover .heading-anchor,
+.content-wrapper h5:hover .heading-anchor {
   visibility: visible;
   opacity: 1;
 }
