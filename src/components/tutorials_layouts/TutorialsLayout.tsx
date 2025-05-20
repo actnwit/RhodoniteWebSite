@@ -21,22 +21,22 @@ const tutorialsTableOfContents: {
     {
       title: 'Basic Tutorials',
       items: [
-        { title: 'Displaying Geometries', href: '/en/tutorials/basic/display_geometries' },
-        { title: 'Transform and SceneGraph', href: '/en/tutorials/basic/transform_and_scenegraph' },
+        { title: 'Displaying Geometries', href: '/en/tutorials/basic/display_geometries/' },
+        { title: 'Transform and SceneGraph', href: '/en/tutorials/basic/transform_and_scenegraph/' },
       ]
     },
     {
       title: 'Advanced Tutorials',
       items: [
-        { title: 'Displaying glTF', href: '/en/tutorials/advanced/display_gltf' },
-        { title: 'Creating Materials', href: '/en/tutorials/advanced/materials' },
-        { title: 'Render Pipeline', href: '/en/tutorials/advanced/render_pipeline' },
+        { title: 'Displaying glTF', href: '/en/tutorials/advanced/display_gltf/' },
+        { title: 'Creating Materials', href: '/en/tutorials/advanced/materials/' },
+        { title: 'Render Pipeline', href: '/en/tutorials/advanced/render_pipeline/' },
       ]
     },
     {
       title: 'Examples',
       items: [
-        { title: 'Other Samples', href: '/en/tutorials/others/other_samples' },
+        { title: 'Other Samples', href: '/en/tutorials/others/other_samples/' },
       ]
     }
   ],
@@ -44,22 +44,22 @@ const tutorialsTableOfContents: {
     {
       title: '基本チュートリアル',
       items: [
-        { title: 'ジオメトリの表示', href: '/ja/tutorials/basic/display_geometries' },
-        { title: 'TransformとSceneGraph', href: '/ja/tutorials/basic/transform_and_scenegraph' },
+        { title: 'ジオメトリの表示', href: '/ja/tutorials/basic/display_geometries/' },
+        { title: 'TransformとSceneGraph', href: '/ja/tutorials/basic/transform_and_scenegraph/' },
       ]
     },
     {
       title: '応用チュートリアル',
       items: [
-        { title: 'glTFの表示', href: '/ja/tutorials/advanced/display_gltf' },
-        { title: 'Materialの作成', href: '/ja/tutorials/advanced/materials' },
-        { title: 'Render Pipeline', href: '/ja/tutorials/advanced/render_pipeline' },
+        { title: 'glTFの表示', href: '/ja/tutorials/advanced/display_gltf/' },
+        { title: 'Materialの作成', href: '/ja/tutorials/advanced/materials/' },
+        { title: 'Render Pipeline', href: '/ja/tutorials/advanced/render_pipeline/' },
       ]
     },
     {
       title: 'サンプル',
       items: [
-        { title: 'その他のサンプル', href: '/ja/tutorials/others/other_samples' },
+        { title: 'その他のサンプル', href: '/ja/tutorials/others/other_samples/' },
       ]
     }
   ],
