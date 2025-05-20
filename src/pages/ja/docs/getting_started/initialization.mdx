@@ -57,7 +57,7 @@ await Rn.System.init({
 
 | プロパティ名 | 意味 |
 |:-----------|------------|
-| boneDataType | ボーンデータの型 |
+| boneDataType | スケルタルアニメーション処理で使用するデータ型。 Rn.BoneDataType.Mat43x1、Rn.BoneDataType.Vec4x2、Rn.BoneDataType.Vec4x2Old、Rn.BoneDataType.Vec4x1 のいずれかを指定します。通常はデフォルトの Rn.BoneDataType.Mat43x1 で大丈夫です。 |
 | cacheWebGpuRenderBundles | WebGPUでのレンダーバンドルのキャッシュを有効にするかどうか。通常はtrueで大丈夫です。 |
 | cgApiDebugConsoleOutput | コンソールにWebGL/WebGPUのデバッグ情報を出力するかどうか |
 | dataTextureHeight | データテクスチャの高さ。大きいほどRhodoniteで扱えるデータ量が多くなります。２のべき乗である必要があります。 |
