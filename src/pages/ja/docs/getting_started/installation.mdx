@@ -32,7 +32,7 @@ import Rn from 'rhodonite';
 
 document.body.onload = async function load() {
   await Rn.System.init({
-    approach: Rn.ProcessApproach.Uniform,
+    approach: Rn.ProcessApproach.DataTexture,
     canvas: document.getElementById('world') as HTMLCanvasElement,
   });
 
@@ -58,7 +58,7 @@ import Rn from 'node_modules/rhodonite/dist/esm/index.js'; // ESModuleとして�
 
 document.body.onload = async function load() {
   await Rn.System.init({
-    approach: Rn.ProcessApproach.Uniform,
+    approach: Rn.ProcessApproach.DataTexture,
     canvas: document.getElementById('world') as HTMLCanvasElement,
   });
 
@@ -115,7 +115,7 @@ htmlファイルから`rhodonite.js`を参照することで、グローバル�
   <script>
     document.body.onload = async function load() {
       await Rn.System.init({
-        approach: Rn.ProcessApproach.Uniform,
+        approach: Rn.ProcessApproach.DataTexture,
         canvas: document.getElementById('world'),
       });
 
@@ -139,7 +139,7 @@ declare const Rn: typeof _Rn; // Use the window.Rn as Rn
 
 async function load() {
   Rn.System.init({
-    approach: Rn.ProcessApproach.Uniform,
+    approach: Rn.ProcessApproach.DataTexture,
     canvas: document.getElementById('world') as HTMLCanvasElement
   });
 
