@@ -3,11 +3,21 @@ import TOCComponent from './TOCComponent';
 import ContentStyles from './ContentStyles';
 import { getLangFromUrl, useTranslations } from '../../i18n/utils';
 
+// TOCItemの型定義（TOCComponentと同じ）
+interface TOCItem {
+  title: string;
+  href?: string;
+  items?: Array<{
+    title: string;
+    href: string;
+  }>;
+}
+
 interface ContentLayoutProps {
   tocItems: {
-    en: Array<{ title: string; href: string }>;
-    ja: Array<{ title: string; href: string }>;
-    tr: Array<{ title: string; href: string }>;
+    en: TOCItem[];
+    ja: TOCItem[];
+    tr: TOCItem[];
   };
   children: React.ReactNode;
 }
@@ -69,7 +79,7 @@ const ContentLayout: React.FC<ContentLayoutProps> = ({ tocItems, children }) => 
         type="button"
         className="fixed left-4 bottom-4 z-[9999] w-14 h-14 rounded-full bg-pink-600 text-white flex items-center justify-center shadow-lg"
         onClick={handleMenuClick}
-        aria-label="メニューを開く"
+        aria-label={t('nav.toggleMenu')}
       >
         <span className="text-2xl">
           {isMenuOpen ? (
@@ -104,7 +114,7 @@ const ContentLayout: React.FC<ContentLayoutProps> = ({ tocItems, children }) => 
             type="button"
             className="p-2 text-xl block absolute top-4 right-4"
             onClick={() => setIsMenuOpen(false)}
-            aria-label="閉じる"
+            aria-label={t('toc.collapse')}
           >
             ✕
           </button>

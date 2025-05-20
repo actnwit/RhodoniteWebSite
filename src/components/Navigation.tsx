@@ -21,7 +21,7 @@ export const Navigation: React.FC<NavigationProps> = ({ lang }) => {
   // ナビゲーション項目を配列として定義
   const navItems = [
     { href: getUrl('/'), label: t('nav.home') },
-    { href: getUrl('/docs'), label: t('nav.docs') },
+    { href: getUrl('/docs/'), label: t('nav.docs') },
     { href: getUrl('/tutorials/display_geometries'), label: t('nav.tutorials') },
     { href: getUrl('/api'), label: t('nav.api') },
     {

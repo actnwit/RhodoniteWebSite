@@ -28,6 +28,9 @@ export const ui = {
     'editor.description': '公式エディターでRhodoniteを試してみましょう！ エディターを起動して、glTFファイルまたはVRMファイルを画面にドラッグ＆ドロップしてください。',
     'toc.title': '目次',
     'toc.anchor': 'このセクションへのリンク',
+    'toc.toggle': '開閉',
+    'toc.expand': '展開',
+    'toc.collapse': '折りたたむ',
   },
   en: {
     'hero.description': 'RhodoniteTS is a high-performance 3D graphics library based on WebGL2/WebGPU. Written in modern TypeScript, it provides an intuitive API.',
@@ -50,6 +53,9 @@ export const ui = {
     'editor.description': 'Try Rhodonite with the official editor! Launch the editor and drag-and-drop a glTF or VRM file onto the screen.',
     'toc.title': 'Table of Contents',
     'toc.anchor': 'Link to this section',
+    'toc.toggle': 'Toggle',
+    'toc.expand': 'Expand',
+    'toc.collapse': 'Collapse',
   },
   tr: {
     'hero.description': 'RhodoniteTS, WebGL2/WebGPU tabanlı yüksek performanslı bir 3D grafik kütüphanesidir. Modern TypeScript ile yazılmış olup sezgisel bir API sunar.',
@@ -72,5 +78,8 @@ export const ui = {
     'editor.description': 'Resmi editörde Rhodonite\'ı deneyin! Editörü başlatıp glTF ya da VRM dosyasını ekrana sürükleyip bırakın.',
     'toc.title': 'İçindekiler',
     'toc.anchor': 'Bu bölüme bağlantı',
+    'toc.toggle': 'Aç/Kapat',
+    'toc.expand': 'Genişlet',
+    'toc.collapse': 'Daralt',
   },
 } as const;

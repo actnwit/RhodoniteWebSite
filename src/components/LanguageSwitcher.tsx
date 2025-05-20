@@ -45,20 +45,20 @@ export const LanguageSwitcher = () => {
         onClick={() => setIsMenuOpen(!isMenuOpen)}
       >
         {currentLabel}
-        <span 
+        <span
           className="text-sm transition-transform duration-200 ease-snappy"
           style={{ transform: isMenuOpen ? 'rotate(180deg)' : 'rotate(0deg)' }}
         >
-          ▼
+          ▲
         </span>
       </button>
       <div
         ref={menuRef}
         className={`
-          absolute top-full right-4 mt-1 
+          absolute top-full right-4 mt-1
           bg-white/95 backdrop-blur-sm
-          border border-gray-200/80 rounded-md p-2 
-          flex flex-col gap-1 min-w-[120px] 
+          border border-gray-200/80 rounded-md p-2
+          flex flex-col gap-1 min-w-[120px]
           shadow-lg shadow-gray-200/50
           z-50
           transition-all duration-200 ease-snappy
@@ -70,13 +70,13 @@ export const LanguageSwitcher = () => {
             key={lang}
             href={`/${lang}/${currentPath}`}
             className={`
-              px-3 py-2 rounded-md 
-              text-gray-600 hover:text-gray-900 
+              px-3 py-2 rounded-md
+              text-gray-600 hover:text-gray-900
               hover:bg-gray-50/80
               transition-colors duration-200 ease-snappy
               block
-              ${currentLang === lang 
-                ? 'text-indigo-600 font-medium bg-indigo-50/50 hover:bg-indigo-50' 
+              ${currentLang === lang
+                ? 'text-indigo-600 font-medium bg-indigo-50/50 hover:bg-indigo-50'
                 : ''
               }
             `}
@@ -87,4 +87,4 @@ export const LanguageSwitcher = () => {
       </div>
     </div>
   );
-}; 
+};
