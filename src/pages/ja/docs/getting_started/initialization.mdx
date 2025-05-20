@@ -60,10 +60,21 @@ await Rn.System.init({
 | boneDataType | ボーンデータの型 |
 | cacheWebGpuRenderBundles | WebGPUでのレンダーバンドルのキャッシュを有効にするかどうか。通常はtrueで大丈夫です。 |
 | cgApiDebugConsoleOutput | コンソールにWebGL/WebGPUのデバッグ情報を出力するかどうか |
-| maxEntityNumber | Rhodoniteで扱えるエンティティの最大数 |
-| maxLightNumberInShader | Rhodoniteで扱えるライトの最大数 |
 | dataTextureHeight | データテクスチャの高さ。大きいほどRhodoniteで扱えるデータ量が多くなります。２のべき乗である必要があります。 |
 | dataTextureWidth | データテクスチャの幅。大きいほどRhodoniteで扱えるデータ量が多くなります。２のべき乗である必要があります。 |
+| eventTargetDom | マウスイベントの対象となるDOM要素。デフォルトは描画先のcanvas要素です。 |
+| isMobile | モバイル端末であるかどうかを設定する |
+| isUboEnabled | UBOを有効にするかどうか。falseを推奨します。デフォルトはfalseです。 |
+| maxCameraNumber | Rhodoniteで扱えるカメラの最大数 |
+| maxEntityNumber | Rhodoniteで扱えるエンティティの最大数 |
+| maxLightNumber | Rhodoniteで扱えるライトの最大数 |
+| maxMaterialInstanceForEachType | 各マテリアルタイプのメモリ連続となる最大インスタンス数。メモリレイアウト上の話であり、実際はこの制限を超えたマテリアルの生成が可能です。この制限地を超えたマテリアルインスタンスについては、内部的に異なるマテリアルタイプとして処理されます。 |
+| maxMorphPrimitiveNumberInWebGPU | WebGPUでのモーフプリミティブの最大数。通常、変更する必要はありませんが、モーフを持つモデルの読み込みや表示に問題が生じた場合は値を増やしてください。 |
+| maxMorphTargetNumber | 同時に扱えるモーフターゲットの最大数 |
+| maxSkeletalBoneNumber | 同時に扱える各スケルタルのボーンの最大数 |
+| maxSkeletonNumber | 同時に扱えるスケルタルの最大数 |
+| multiViewForWebVR | WebVRでのマルチビュー拡張の有効/無効を設定する |
+| physicsTimeIntervalScale | 物理演算の時間間隔のスケール値を設定する |
 
 ## Loggerの設定
 

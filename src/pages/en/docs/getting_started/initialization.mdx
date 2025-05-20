@@ -58,10 +58,21 @@ The following is a list of properties and their meanings.
 | boneDataType | The type of bone data |
 | cacheWebGpuRenderBundles | Whether to cache render bundles in WebGPU. Usually true is fine. |
 | cgApiDebugConsoleOutput | Whether to output WebGL/WebGPU debug information to the console |
-| maxEntityNumber | The maximum number of entities that Rhodonite can handle |
-| maxLightNumberInShader | The maximum number of lights that Rhodonite can handle in a shader |
 | dataTextureHeight | The height of the data texture. The larger it is, the more data Rhodonite can handle. It must be a power of 2. |
 | dataTextureWidth | The width of the data texture. The larger it is, the more data Rhodonite can handle. It must be a power of 2. |
+| eventTargetDom | The DOM element that the mouse event targets. The default is the canvas element to draw to. |
+| isMobile | Whether it is a mobile device |
+| isUboEnabled | Whether to enable UBO. Recommended to be false. The default is false. |
+| maxCameraNumber | The maximum number of cameras that Rhodonite can handle |
+| maxEntityNumber | The maximum number of entities that Rhodonite can handle |
+| maxLightNumber | The maximum number of lights that Rhodonite can handle |
+| maxMaterialInstanceForEachType | The maximum number of material instances that can be handled in a memory contiguous manner for each material type. This is a memory layout issue, and Rhodonite can generate more than this limit. For material instances that exceed this limit, they are internally processed as different material types. |
+| maxMorphPrimitiveNumberInWebGPU | The maximum number of morph primitives in WebGPU. Normally, this does not need to be changed, but if there is a problem with loading or displaying a model with morphs, increase the value. |
+| maxMorphTargetNumber | The maximum number of morph targets that can be handled simultaneously |
+| maxSkeletalBoneNumber | The maximum number of bones for each skeletal that can be handled simultaneously |
+| maxSkeletonNumber | The maximum number of skeletons that can be handled simultaneously |
+| multiViewForWebVR | Whether to enable the WebVR multi-view extension |
+| physicsTimeIntervalScale | The scale value of the time interval of the physics calculation |
 
 ## Logger
 
