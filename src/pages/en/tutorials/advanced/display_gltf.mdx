@@ -21,10 +21,19 @@ This expression can be passed directly to the process method of the System class
 
 ```typescript
 const result = await Rn.GltfImporter.import(gltfUrl, loadOption);
-if (result.isOk()) {
-  const expression = result.get();
+if (result.isErr()) {
+  console.error(result.getRnError());
+  return;
 }
+const expression = result.get();
 ```
+
+<iframe src="https://codesandbox.io/embed/yl3gf2?view=preview&module=%2Fsrc%2Findex.ts"
+     style="width:100%; height: 500px; border:0; border-radius: 4px; overflow:hidden;"
+     title="Rhodonite_example (loading glTF)"
+     allow="accelerometer; ambient-light-sensor; camera; encrypted-media; geolocation; gyroscope; hid; microphone; midi; payment; usb; vr; xr-spatial-tracking"
+     sandbox="allow-forms allow-modals allow-popups allow-presentation allow-same-origin allow-scripts"
+   ></iframe>
 
 If checking for success is too much trouble, you can force the retrieval with the unwrapForce() method, but if the result of result is an error, an exception will be raised.
 
@@ -51,6 +60,13 @@ This is passed to ModelConverter to obtain the Entity of the root of the scene g
     renderPass.addEntities([rootGroup]);
     expression.addRenderPasses([renderPass]);
 ```
+
+<iframe src="https://codesandbox.io/embed/3lcjc5?view=preview&module=%2Fsrc%2Findex.ts"
+     style="width:100%; height: 500px; border:0; border-radius: 4px; overflow:hidden;"
+     title="Rhodonite_example (loading glTF, RnM2 to Rn entity)"
+     allow="accelerometer; ambient-light-sensor; camera; encrypted-media; geolocation; gyroscope; hid; microphone; midi; payment; usb; vr; xr-spatial-tracking"
+     sandbox="allow-forms allow-modals allow-popups allow-presentation allow-same-origin allow-scripts"
+   ></iframe>
 
 ## Sample for reference
 
