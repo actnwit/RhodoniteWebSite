@@ -2,7 +2,7 @@
 import rhodoniteLogo from '../assets/Rhodonite_Logo_2.png';
 import editorImage from '../assets/RhodoniteEditor.jpg';
 import { getLangFromUrl, useTranslations } from '../i18n/utils';
-import { RnViewer } from './RnViewer';
+import pollyVideo from '../assets/polly.mp4';
 
 const lang = getLangFromUrl(Astro.url);
 const t = useTranslations(lang);
@@ -17,7 +17,7 @@ function getUrl(path: string) {
 	<main class="p-8 max-w-7xl mx-auto">
 		<section id="hero" class="flex flex-col items-center text-center py-16 px-4 relative">
       <div class="absolute bottom-40 z-0">
-        <RnViewer gltfFilePath="https://storage.googleapis.com/emadurandal-3d.appspot.com/rhodonite/assets/gltf/project_polly.glb" width={1250} height={720} isAnimating={true} client:only="react"  />
+        <video src={pollyVideo} autoplay loop muted playsinline class="object-cover"></video>
         <p class="text-gray-400 text-sm">(This Polly model is from <a href="https://github.com/KhronosGroup/glTF-Blender-Exporter">https://github.com/KhronosGroup/glTF-Blender-Exporter</a>)</p>
       </div>
 			<div class="flex items-center gap-4 mt-10 mb-8" style="pointer-events: none;">
