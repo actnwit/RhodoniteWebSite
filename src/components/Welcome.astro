@@ -15,34 +15,39 @@ function getUrl(path: string) {
 <div class="min-h-screen relative overflow-hidden font-['Inter',system-ui,-apple-system,sans-serif]">
 	<div id="background-canvas" class="fixed inset-0 -z-10 bg-white"></div>
 	<main class="p-8 max-w-7xl mx-auto">
-		<section id="hero" class="flex flex-col items-center text-center py-16 px-4 relative">
-      <div class="absolute bottom-40 z-0">
-        <video src={pollyVideo} autoplay loop muted playsinline class="object-cover" style="width: 1216px; height: 690px; filter: brightness(130%);"></video>
-        <p class="text-gray-400 text-sm">(This Polly model is from <a href="https://github.com/KhronosGroup/glTF-Blender-Exporter">https://github.com/KhronosGroup/glTF-Blender-Exporter</a>)</p>
-      </div>
-			<div class="flex items-center gap-4 mt-10 mb-8" style="pointer-events: none;">
-				<img src={rhodoniteLogo.src} alt="RhodoniteTS Logo" class="drop-shadow-lg" />
+		<section id="hero" class="flex flex-col items-center text-center py-16 px-4 relative min-h-[500px] sm:min-h-[600px]">
+			<!-- ビデオを背景に配置 -->
+			<div class="absolute inset-0 z-0 flex justify-center items-center overflow-hidden">
+				<video src={pollyVideo} autoplay loop muted playsinline class="object-cover w-full h-full" style="filter: brightness(130%);"></video>
+				<p class="text-gray-300 text-sm absolute bottom-4 left-0 right-0 text-center">(This Polly model is from <a href="https://github.com/KhronosGroup/glTF-Blender-Exporter">https://github.com/KhronosGroup/glTF-Blender-Exporter</a>)</p>
 			</div>
-			<p class="text-xl text-gray-200 max-w-2xl mb-40 leading-relaxed z-10">
-				{t('hero.description')}
-			</p>
-			<section id="links" class="flex gap-4 flex-wrap justify-center">
-				<a class="inline-flex items-center gap-2 px-6 py-3 rounded-lg font-medium text-white bg-gradient-to-r from-indigo-500 to-purple-600 shadow-md hover:shadow-lg hover:-translate-y-0.5 transition-all" href={getUrl('/docs')}>
-					{t('hero.docs')}
-				</a>
-				<a class="inline-flex items-center gap-2 px-6 py-3 rounded-lg font-medium text-gray-900 bg-white border border-gray-200 hover:shadow-lg hover:-translate-y-0.5 transition-all" href="https://github.com/actnwit/RhodoniteTS">
-					{t('hero.github')}
-					<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-5 h-5">
-						<path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22"></path>
-					</svg>
-				</a>
-				<a class="inline-flex items-center gap-2 px-6 py-3 rounded-lg font-medium text-gray-900 bg-white border border-gray-200 hover:shadow-lg hover:-translate-y-0.5 transition-all" href="https://discord.gg/VzpCY4jk6j">
-					{t('hero.discord')}
-					<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 127.14 96.36" class="w-5 h-5">
-						<path fill="currentColor" d="M107.7 8.07A105.15 105.15 0 0 0 81.47 0a72.06 72.06 0 0 0-3.36 6.83 97.68 97.68 0 0 0-29.11 0A72.37 72.37 0 0 0 45.64 0a105.89 105.89 0 0 0-26.25 8.09C2.79 32.65-1.71 56.6.54 80.21a105.73 105.73 0 0 0 32.17 16.15 77.7 77.7 0 0 0 6.89-11.11 68.42 68.42 0 0 1-10.85-5.18c.91-.66 1.8-1.34 2.66-2a75.57 75.57 0 0 0 64.32 0c.87.71 1.76 1.39 2.66 2a68.68 68.68 0 0 1-10.87 5.19 77 77 0 0 0 6.89 11.1 105.25 105.25 0 0 0 32.19-16.14c2.64-27.38-4.51-51.11-18.9-72.15Z"/>
-					</svg>
-				</a>
-			</section>
+
+			<!-- メインコンテンツ（ロゴ・テキスト・ボタン） -->
+			<div class="relative mt-16 z-10 flex flex-col items-center">
+				<div class="flex items-center gap-4 mt-10 mb-0">
+					<img src={rhodoniteLogo.src} alt="RhodoniteTS Logo" class="drop-shadow-lg" />
+				</div>
+				<p class="text-xl text-gray-200 max-w-2xl mb-10 sm:mb-30 leading-relaxed">
+					{t('hero.description')}
+				</p>
+				<section id="links" class="flex gap-4 flex-wrap justify-center mt-auto pt-0">
+					<a class="inline-flex items-center gap-2 px-6 py-3 rounded-lg font-medium text-white bg-gradient-to-r from-indigo-500 to-purple-600 shadow-md hover:shadow-lg hover:-translate-y-0.5 transition-all" href={getUrl('/docs')}>
+						{t('hero.docs')}
+					</a>
+					<a class="inline-flex items-center gap-2 px-6 py-3 rounded-lg font-medium text-gray-900 bg-white border border-gray-200 hover:shadow-lg hover:-translate-y-0.5 transition-all" href="https://github.com/actnwit/RhodoniteTS">
+						{t('hero.github')}
+						<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-5 h-5">
+							<path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22"></path>
+						</svg>
+					</a>
+					<a class="inline-flex items-center gap-2 px-6 py-3 rounded-lg font-medium text-gray-900 bg-white border border-gray-200 hover:shadow-lg hover:-translate-y-0.5 transition-all" href="https://discord.gg/VzpCY4jk6j">
+						{t('hero.discord')}
+						<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 127.14 96.36" class="w-5 h-5">
+							<path fill="currentColor" d="M107.7 8.07A105.15 105.15 0 0 0 81.47 0a72.06 72.06 0 0 0-3.36 6.83 97.68 97.68 0 0 0-29.11 0A72.37 72.37 0 0 0 45.64 0a105.89 105.89 0 0 0-26.25 8.09C2.79 32.65-1.71 56.6.54 80.21a105.73 105.73 0 0 0 32.17 16.15 77.7 77.7 0 0 0 6.89-11.11 68.42 68.42 0 0 1-10.85-5.18c.91-.66 1.8-1.34 2.66-2a75.57 75.57 0 0 0 64.32 0c.87.71 1.76 1.39 2.66 2a68.68 68.68 0 0 1-10.87 5.19 77 77 0 0 0 6.89 11.1 105.25 105.25 0 0 0 32.19-16.14c2.64-27.38-4.51-51.11-18.9-72.15Z"/>
+						</svg>
+					</a>
+				</section>
+			</div>
 		</section>
 	</main>
 
