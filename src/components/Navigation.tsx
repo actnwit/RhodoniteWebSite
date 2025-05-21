@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useTranslations } from '../i18n/utils';
 import { LanguageSwitcher } from './LanguageSwitcher';
 
@@ -9,6 +9,21 @@ interface NavigationProps {
 export const Navigation: React.FC<NavigationProps> = ({ lang }) => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const t = useTranslations(lang);
+
+  // メニューが開いた時にbodyに特定のクラスを追加して、メインコンテンツのスタイルを制御
+  useEffect(() => {
+    const body = document.body;
+    if (isMenuOpen) {
+      body.classList.add('menu-open');
+    } else {
+      body.classList.remove('menu-open');
+    }
+
+    // クリーンアップ関数
+    return () => {
+      body.classList.remove('menu-open');
+    };
+  }, [isMenuOpen]);
 
   const toggleMenu = () => {
     setIsMenuOpen(!isMenuOpen);
@@ -114,18 +129,19 @@ export const Navigation: React.FC<NavigationProps> = ({ lang }) => {
       {/* モバイル用メニュー（スライドイン/アウトアニメーション） */}
       <div
         className={`
-          md:hidden fixed top-0 left-0 w-full bg-white shadow-lg transform transition-transform duration-300 ease-in-out z-10
-          ${isMenuOpen ? 'translate-y-0' : '-translate-y-full'}
+          md:hidden fixed top-16 left-0 w-full bg-white shadow-lg transform transition-transform duration-300 ease-in-out z-40
+          ${isMenuOpen ? 'translate-y-0' : '-translate-y-[100vh]'}
           ${isMenuOpen ? 'pointer-events-auto' : 'pointer-events-none'}
         `}
       >
-        <div className="pt-20 pb-3 space-y-1">
+        <div className="pt-4 pb-3 space-y-1">
           {navItems.map((item, index) => (
             <a
               key={`mobile-${index}`}
               href={item.href}
               className="block pl-3 pr-4 py-2 text-base font-medium text-gray-600 hover:text-gray-900 hover:bg-gray-50 flex items-center gap-1"
               {...(item.external ? { target: "_blank", rel: "noopener" } : {})}
+              onClick={() => setIsMenuOpen(false)}
             >
               {item.label}
               {item.icon}
@@ -133,6 +149,14 @@ export const Navigation: React.FC<NavigationProps> = ({ lang }) => {
           ))}
         </div>
       </div>
+
+      {/* オーバーレイ */}
+      {isMenuOpen && (
+        <div
+          className="fixed inset-0 bg-black bg-opacity-50 z-30"
+          onClick={() => setIsMenuOpen(false)}
+        />
+      )}
     </div>
   );
 };
