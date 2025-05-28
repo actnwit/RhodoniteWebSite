@@ -1,0 +1,744 @@
+---
+title: AssetLoader
+description: About Rhodonite's AssetLoader
+---
+
+import DocLayout from '../../../../components/docs_layouts/DocLayout.astro';
+
+<DocLayout>
+
+AssetLoader is a utility class for loading various promises in a type-safe manner in Rhodonite. Compared to the traditional Promise.all loading method, it has the following advantages:
+
+## Features
+
+- **Type Safety**: Uses TypeScript generics to correctly infer the types of the assets being loaded.
+- **Concurrent Control**: Limits the number of simultaneous loads to control network load.
+- **Error Handling**: Built-in timeout and retry functionality.
+- **Loading Status Monitoring**: Allows retrieval of the current loading status.
+- **Intuitive API**: Passes promises in object form and retrieves results in the same structure.
+
+## Basic Usage
+
+### Creating an Instance
+
+```typescript
+import Rn from 'rhodonite';
+
+// Create an instance with default settings
+const assetLoader = new Rn.AssetLoader();
+
+// Create an instance with custom settings
+const customLoader = new Rn.AssetLoader({
+  maxConcurrentLoads: 5,    // Maximum number of simultaneous loads (default: 3)
+  timeout: 60000,           // Timeout time (default: 60000ms)
+});
+
+// Disable timeout (wait indefinitely)
+const noTimeoutLoader = new Rn.AssetLoader({
+  timeout: 0                // 0 or negative value to disable timeout
+});
+
+Rn.defaultAssetLoader; // The default AssetLoader instance that can be used globally is also provided.s
+
+```
+
+### Main API: Load promises in object form
+
+```typescript
+// Load promises in object form
+const assets = await assetLoader.load({
+  environment: Rn.CubeTexture.loadFromUrl({
+    baseUrl: '/assets/ibl/environment/environment',
+    mipmapLevelNumber: 1,
+    isNamePosNeg: true,
+    hdriFormat: Rn.HdriFormat.HDR_LINEAR,
+  }),
+  specular: Rn.CubeTexture.loadFromUrl({
+    baseUrl: '/assets/ibl/specular/specular',
+    mipmapLevelNumber: 10,
+    isNamePosNeg: true,
+    hdriFormat: Rn.HdriFormat.RGBE_PNG,
+  }),
+  diffuse: Rn.CubeTexture.loadFromUrl({
+    baseUrl: '/assets/ibl/diffuse/diffuse',
+    mipmapLevelNumber: 1,
+    isNamePosNeg: true,
+    hdriFormat: Rn.HdriFormat.RGBE_PNG,
+  })
+});
+
+// Access types safely
+console.log(assets.environment); // CubeTexture
+console.log(assets.specular);    // CubeTexture
+console.log(assets.diffuse);     // CubeTexture
+```
+
+### Load promises of different types
+
+```typescript
+// Load promises of different types
+const mixedAssets = await assetLoader.load({
+  cubeTexture: Rn.CubeTexture.loadFromUrl({
+    baseUrl: '/assets/ibl/environment/environment',
+    mipmapLevelNumber: 1,
+    isNamePosNeg: true,
+    hdriFormat: Rn.HdriFormat.HDR_LINEAR,
+  }),
+  texture: Rn.Texture.loadFromUrl('/assets/textures/albedo.jpg'),
+  model: Rn.Gltf2Importer.importFromUri('/assets/models/model.gltf')
+});
+
+// The types of each property are correctly inferred by type inference
+console.log(mixedAssets.cubeTexture); // CubeTexture
+console.log(mixedAssets.texture);     // Texture
+console.log(mixedAssets.model);       // Gltf2
+```
+
+### Other APIs
+
+#### Load a single promise
+
+```typescript
+const texture = await assetLoader.loadSingle(
+  Rn.CubeTexture.loadFromUrl({
+    baseUrl: '/assets/ibl/environment/environment',
+    mipmapLevelNumber: 1,
+    isNamePosNeg: true,
+    hdriFormat: Rn.HdriFormat.HDR_LINEAR,
+  })
+);
+```
+
+#### Load a single promise with retry
+
+```typescript
+const texture = await assetLoader.loadWithRetrySingle([
+  // First attempt
+  () => Rn.CubeTexture.loadFromUrl({
+    baseUrl: 'https://main-server.com/assets/environment',
+    mipmapLevelNumber: 1,
+    isNamePosNeg: true,
+    hdriFormat: Rn.HdriFormat.HDR_LINEAR,
+  }),
+  // First retry
+  () => Rn.CubeTexture.loadFromUrl({
+    baseUrl: 'https://backup-server.com/assets/environment',
+    mipmapLevelNumber: 1,
+    isNamePosNeg: true,
+    hdriFormat: Rn.HdriFormat.HDR_LINEAR,
+  })
+]);
+```
+
+#### Load multiple promises in array form
+
+```typescript
+const [texture1, texture2, texture3] = await assetLoader.loadArray([
+  Rn.CubeTexture.loadFromUrl({
+    baseUrl: '/assets/ibl/environment/environment',
+    mipmapLevelNumber: 1,
+    isNamePosNeg: true,
+    hdriFormat: Rn.HdriFormat.HDR_LINEAR,
+  }),
+  Rn.CubeTexture.loadFromUrl({
+    baseUrl: '/assets/ibl/specular/specular',
+    mipmapLevelNumber: 10,
+    isNamePosNeg: true,
+    hdriFormat: Rn.HdriFormat.RGBE_PNG,
+  }),
+  Rn.CubeTexture.loadFromUrl({
+    baseUrl: '/assets/ibl/diffuse/diffuse',
+    mipmapLevelNumber: 1,
+    isNamePosNeg: true,
+    hdriFormat: Rn.HdriFormat.RGBE_PNG,
+  })
+]);
+```
+
+#### Load multiple promises with retry factory in array form
+
+```typescript
+// Provide multiple retry strategies for each item
+const textures = await assetLoader.loadWithRetryArray([
+  [
+    // First attempt: main server
+    () => Rn.CubeTexture.loadFromUrl({
+      baseUrl: 'https://main-server.com/assets/environment',
+      mipmapLevelNumber: 1,
+      isNamePosNeg: true,
+      hdriFormat: Rn.HdriFormat.HDR_LINEAR,
+    }),
+    // First retry: backup server
+    () => Rn.CubeTexture.loadFromUrl({
+      baseUrl: 'https://backup-server.com/assets/environment',
+      mipmapLevelNumber: 1,
+      isNamePosNeg: true,
+      hdriFormat: Rn.HdriFormat.HDR_LINEAR,
+    }),
+    // Second retry: different format
+    () => Rn.CubeTexture.loadFromUrl({
+      baseUrl: 'https://main-server.com/assets/environment',
+      mipmapLevelNumber: 1,
+      isNamePosNeg: true,
+      hdriFormat: Rn.HdriFormat.RGBE_PNG,
+    })
+  ],
+  [
+    // specular texture strategy
+    () => Rn.CubeTexture.loadFromUrl({
+      baseUrl: 'https://main-server.com/assets/specular',
+      mipmapLevelNumber: 10,
+      isNamePosNeg: true,
+      hdriFormat: Rn.HdriFormat.RGBE_PNG,
+    }),
+    // Retry: try low resolution version
+    () => Rn.CubeTexture.loadFromUrl({
+      baseUrl: 'https://main-server.com/assets/specular_low',
+      mipmapLevelNumber: 5,
+      isNamePosNeg: true,
+      hdriFormat: Rn.HdriFormat.RGBE_PNG,
+    })
+  ]
+]);
+```
+
+#### Load promises in object form with retry factory
+
+```typescript
+// Provide multiple retry strategies for each item in object form
+const assets = await assetLoader.loadWithRetry({
+  environment: [
+    // First attempt
+    () => Rn.CubeTexture.loadFromUrl({
+      baseUrl: 'https://main-server.com/assets/environment',
+      mipmapLevelNumber: 1,
+      isNamePosNeg: true,
+      hdriFormat: Rn.HdriFormat.HDR_LINEAR,
+    }),
+    // First retry: backup server
+    () => Rn.CubeTexture.loadFromUrl({
+      baseUrl: 'https://backup-server.com/assets/environment',
+      mipmapLevelNumber: 1,
+      isNamePosNeg: true,
+      hdriFormat: Rn.HdriFormat.HDR_LINEAR,
+    })
+  ],
+  specular: [
+    // First attempt
+    () => Rn.CubeTexture.loadFromUrl({
+      baseUrl: 'https://main-server.com/assets/specular',
+      mipmapLevelNumber: 10,
+      isNamePosNeg: true,
+      hdriFormat: Rn.HdriFormat.RGBE_PNG,
+    }),
+    // First retry: low resolution version
+    () => Rn.CubeTexture.loadFromUrl({
+      baseUrl: 'https://main-server.com/assets/specular_low',
+      mipmapLevelNumber: 5,
+      isNamePosNeg: true,
+      hdriFormat: Rn.HdriFormat.RGBE_PNG,
+    }),
+    // Second retry: different format
+    () => Rn.CubeTexture.loadFromUrl({
+      baseUrl: 'https://main-server.com/assets/specular',
+      mipmapLevelNumber: 10,
+      isNamePosNeg: true,
+      hdriFormat: Rn.HdriFormat.HDR_LINEAR,
+    })
+  ]
+});
+
+// Access types safely
+console.log(assets.environment); // CubeTexture
+console.log(assets.specular);    // CubeTexture
+```
+
+## Comparison with the traditional method (Promise.all) without AssetLoader
+
+### Traditional method (Promise.all)
+
+```typescript
+// Type safety is not guaranteed and treated as any type
+const promises = [];
+promises.push(Rn.CubeTexture.loadFromUrl({
+  baseUrl: '/assets/ibl/environment/environment',
+  mipmapLevelNumber: 1,
+  isNamePosNeg: true,
+  hdriFormat: Rn.HdriFormat.HDR_LINEAR,
+}));
+promises.push(Rn.CubeTexture.loadFromUrl({
+  baseUrl: '/assets/ibl/specular/specular',
+  mipmapLevelNumber: 10,
+  isNamePosNeg: true,
+  hdriFormat: Rn.HdriFormat.RGBE_PNG,
+}));
+
+const [envTexture, specTexture] = await Promise.all(promises);
+// envTexture, specTexture's type is any
+// It is not clear which is environment and which is specular
+```
+
+### Method using AssetLoader
+
+```typescript
+// Type safe and appropriate type is inferred
+const assets = await assetLoader.load({
+  environment: Rn.CubeTexture.loadFromUrl({
+    baseUrl: '/assets/ibl/environment/environment',
+    mipmapLevelNumber: 1,
+    isNamePosNeg: true,
+    hdriFormat: Rn.HdriFormat.HDR_LINEAR,
+  }),
+  specular: Rn.CubeTexture.loadFromUrl({
+    baseUrl: '/assets/ibl/specular/specular',
+    mipmapLevelNumber: 10,
+    isNamePosNeg: true,
+    hdriFormat: Rn.HdriFormat.RGBE_PNG,
+  })
+});
+
+// assets.environment, assets.specular's type is CubeTexture
+// It is easy to access by name
+console.log(assets.environment); // CubeTexture
+console.log(assets.specular);    // CubeTexture
+```
+
+## Example of replacing the original code
+
+It is easy to replace the original code with AssetLoader:
+
+```typescript
+// Original code
+const promises = [];
+promises.push(Rn.CubeTexture.loadFromUrl({
+  baseUrl: basePathIBL + '/environment/environment',
+  mipmapLevelNumber: 1,
+  isNamePosNeg: true,
+  hdriFormat: Rn.HdriFormat.HDR_LINEAR,
+}));
+promises.push(Rn.CubeTexture.loadFromUrl({
+  baseUrl: basePathIBL + '/specular/specular',
+  mipmapLevelNumber: 10,
+  isNamePosNeg: true,
+  hdriFormat: Rn.HdriFormat.RGBE_PNG,
+}));
+promises.push(Rn.CubeTexture.loadFromUrl({
+  baseUrl: basePathIBL + '/diffuse/diffuse',
+  mipmapLevelNumber: 1,
+  isNamePosNeg: true,
+  hdriFormat: Rn.HdriFormat.RGBE_PNG,
+}));
+const [cubeTextureEnvironment, cubeTextureSpecular, cubeTextureDiffuse] = await Promise.all(promises);
+
+// Replacement using AssetLoader
+const assetLoader = new Rn.AssetLoader();
+const assets = await assetLoader.load({
+  environment: Rn.CubeTexture.loadFromUrl({
+    baseUrl: basePathIBL + '/environment/environment',
+    mipmapLevelNumber: 1,
+    isNamePosNeg: true,
+    hdriFormat: Rn.HdriFormat.HDR_LINEAR,
+  }),
+  specular: Rn.CubeTexture.loadFromUrl({
+    baseUrl: basePathIBL + '/specular/specular',
+    mipmapLevelNumber: 10,
+    isNamePosNeg: true,
+    hdriFormat: Rn.HdriFormat.RGBE_PNG,
+  }),
+  diffuse: Rn.CubeTexture.loadFromUrl({
+    baseUrl: basePathIBL + '/diffuse/diffuse',
+    mipmapLevelNumber: 1,
+    isNamePosNeg: true,
+    hdriFormat: Rn.HdriFormat.RGBE_PNG,
+  })
+});
+
+// Accessible by name
+const cubeTextureEnvironment = assets.environment;
+const cubeTextureSpecular = assets.specular;
+const cubeTextureDiffuse = assets.diffuse;
+```
+
+## Monitoring loading status
+
+```typescript
+// Get loading status
+const status = assetLoader.getLoadingStatus();
+console.log(`Active: ${status.active}, Queue: ${status.queued}`);
+
+await assetLoader.waitForAllLoads();
+console.log('All loads are complete');
+```
+
+## Use cases of `waitForAllLoads()`
+
+`waitForAllLoads()` is used when you want to wait for the completion of **all load processes** instead of the result of the individual `load` method.
+
+### 1. Waiting for the completion of multiple asynchronous load processes
+
+```typescript
+// Start multiple load processes simultaneously (without await)
+const loadPromise1 = assetLoader.load({
+  env1: Rn.CubeTexture.loadFromUrl({...})
+});
+
+const loadPromise2 = assetLoader.load({
+  env2: Rn.CubeTexture.loadFromUrl({...})
+});
+
+const loadPromise3 = assetLoader.load({
+  env3: Rn.CubeTexture.loadFromUrl({...})
+});
+
+// Instead of waiting for individual results, wait until all processes are complete
+await assetLoader.waitForAllLoads();
+console.log('All load processes are complete');
+// At this point, the above three promises are all complete
+```
+
+### 2. I don't need the load result, I just want to know when it's complete
+
+```typescript
+// I don't need the load result, I just want to know when it's complete
+assetLoader.load({ texture1: Rn.CubeTexture.loadFromUrl({...}) });
+assetLoader.load({ texture2: Rn.CubeTexture.loadFromUrl({...}) });
+assetLoader.load({ texture3: Rn.CubeTexture.loadFromUrl({...}) });
+
+// I don't need the load result, I just want to know when it's complete
+await assetLoader.waitForAllLoads();
+console.log('All background loads are complete');
+```
+
+### 3. Application lifecycle management
+
+```typescript
+class GameManager {
+  private assetLoader = new Rn.AssetLoader();
+
+  async preloadAssets() {
+    // Start multiple assets in parallel
+    this.loadCharacterAssets();
+    this.loadEnvironmentAssets();
+    this.loadUIAssets();
+
+    // Wait until all preloads are complete
+    await this.assetLoader.waitForAllLoads();
+    console.log('Game can start');
+  }
+
+  private loadCharacterAssets() {
+    // The result is stored internally, so it is not awaited
+    this.assetLoader.load({
+      character1: Rn.Gltf2Importer.importFromUri('/assets/character1.gltf')
+    }).then(assets => {
+      this.characters.character1 = assets.character1;
+    });
+  }
+
+  private loadEnvironmentAssets() {
+    this.assetLoader.load({
+      skybox: Rn.CubeTexture.loadFromUrl({...})
+    }).then(assets => {
+      this.environment.skybox = assets.skybox;
+    });
+  }
+
+  private loadUIAssets() {
+    this.assetLoader.load({
+      button: Rn.Texture.fromUri('/assets/ui/button.png')
+    }).then(assets => {
+      this.ui.button = assets.button;
+    });
+  }
+}
+```
+
+### 4. Monitoring loading status
+
+```typescript
+// Monitor loading status while waiting for all to complete
+const monitor = setInterval(() => {
+  const status = assetLoader.getLoadingStatus();
+  console.log(`Progress: Active ${status.active}, Queued ${status.queued}`);
+
+  if (status.active === 0 && status.queued === 0) {
+    clearInterval(monitor);
+    console.log('All complete');
+  }
+}, 1000);
+
+// Or wait for completion with waitForAllLoads()
+await assetLoader.waitForAllLoads();
+clearInterval(monitor);
+```
+
+### 5. Before cleanup and resource release
+
+```typescript
+class AssetManager {
+  private assetLoader = new Rn.AssetLoader();
+
+  async dispose() {
+    // Wait until all load processes are complete
+    // Release resources
+    await this.assetLoader.waitForAllLoads();
+
+    // At this point, all load processes are complete
+    // It is safe to release resources
+    this.cleanupResources();
+  }
+}
+```
+
+### Use cases of `await load()` vs `waitForAllLoads()`
+
+| Method | Purpose | What can be obtained |
+|------|------|---------------|
+| `await load()` | Specific load result is required | Loaded asset |
+| `waitForAllLoads()` | Check for completion of all processes | Only completion notification |
+
+```typescript
+// Pattern 1: When a result is required
+const assets = await assetLoader.load({
+  texture: Rn.CubeTexture.loadFromUrl({...})
+});
+console.log(assets.texture); // Actual texture object
+
+// Pattern 2: I just want to know when it's complete
+assetLoader.load({
+  texture: Rn.CubeTexture.loadFromUrl({...})
+}).then(assets => {
+  // The result is processed in another place
+  this.storeTexture(assets.texture);
+});
+
+await assetLoader.waitForAllLoads();
+console.log('Processing complete'); // The result is not obtained
+```
+
+## Configuration options
+
+### Control of timeout
+
+AssetLoader allows you to set the timeout time flexibly:
+
+```typescript
+// Default settings (timeout: 60 seconds)
+const defaultLoader = new Rn.AssetLoader();
+
+// Custom timeout (30 seconds)
+const customTimeoutLoader = new Rn.AssetLoader({
+  timeout: 30000
+});
+
+// Disable timeout (wait indefinitely)
+const noTimeoutLoader = new Rn.AssetLoader({
+  timeout: 0  // Or negative value (e.g., -1)
+});
+
+// For large files, long loading is expected
+const largeFileLoader = new Rn.AssetLoader({
+  timeout: 0  // Disable timeout to ensure loading is complete
+});
+```
+
+**Use cases of disabling timeout:**
+- Loading large asset files
+- Unstable network environment
+- Important assets that need to be loaded reliably
+- Debugging in development environment
+
+## Error handling
+
+```typescript
+try {
+  const assets = await assetLoader.load({
+    environment: Rn.CubeTexture.loadFromUrl({
+      baseUrl: '/invalid/path',
+      mipmapLevelNumber: 1,
+      isNamePosNeg: true,
+      hdriFormat: Rn.HdriFormat.HDR_LINEAR,
+    })
+  });
+} catch (error) {
+  console.error('Loading failed:', error);
+  // Error after automatic retry
+}
+```
+
+## Default instance
+
+The default AssetLoader instance that can be used globally is also provided:
+
+```typescript
+import Rn from 'rhodonite';
+
+// Use default instance
+const assets = await Rn.defaultAssetLoader.load({
+  environment: Rn.CubeTexture.loadFromUrl({
+    baseUrl: '/assets/ibl/environment/environment',
+    mipmapLevelNumber: 1,
+    isNamePosNeg: true,
+    hdriFormat: Rn.HdriFormat.HDR_LINEAR,
+  })
+});
+```
+
+## API reference
+
+### AssetLoaderConfig
+
+```typescript
+interface AssetLoaderConfig {
+  maxConcurrentLoads?: number;  // Limit of concurrent loads (default: 3)
+  timeout?: number;             // Timeout time (milliseconds, default: 60000)
+                               // 0 or negative value to disable timeout (wait indefinitely)
+}
+```
+
+### AssetLoader class
+
+#### `load<T extends Record<string, Promise<any>>>(promiseObject: T): Promise<AwaitedObject<T>>` (Main API)
+
+Load promises in object form. **Main API**
+
+- `promiseObject`: Object with key and value as Promise
+- Return value: Object with the same key and the result of Promise as the value
+
+#### `loadSingle<T>(promise: Promise<T>): Promise<T>`
+
+Load a single Promise (no retry).
+
+- `promise`: Promise to load
+
+#### `loadArray<T>(promises: Promise<T>[]): Promise<T[]>`
+
+Load multiple Promises of the same type in array form.
+
+#### `loadArray<T extends readonly unknown[]>(promises: readonly [...{ [K in keyof T]: Promise<T[K]> }]): Promise<T>`
+
+Load multiple Promises of different types in array form and return as tuple type.
+
+#### `loadWithRetryArray<T>(promiseFactories: Array<Array<() => Promise<T>>>): Promise<T[]>`
+
+Load array form with retry factory. You can provide different retry strategies for each item.
+
+#### `loadWithRetry<T extends Record<string, Promise<any>>>(promiseFactories: { [K in keyof T]: Array<() => T[K]> }): Promise<AwaitedObject<T>>`
+
+Load object form with retry factory.
+
+#### `getLoadingStatus(): { active: number; queued: number }`
+
+Get the current loading status.
+
+#### `waitForAllLoads(): Promise<void>`
+
+Wait until all loads are complete.
+
+#### `loadWithRetrySingle<T>(promiseFactories: Array<() => Promise<T>>): Promise<T>`
+
+Load a single Promise with retry.
+
+- `promiseFactories`: Array of Promise factories for the first try and retry
+
+## Retry strategy
+
+The retry feature of AssetLoader is very simple:
+
+**Retry count = number of provided retry factories**
+
+### Basic retry
+
+```typescript
+// If no retry function is provided, it will not retry
+const assets = await assetLoader.load({
+  environment: Rn.CubeTexture.loadFromUrl({...}) // If it fails, it will fail
+});
+
+// If one retry function is provided, it will retry once
+const assets = await assetLoader.loadWithRetry({
+  environment: [
+    () => loadFromMainServer(),    // First try
+    () => loadFromBackupServer()   // First retry
+  ]
+});
+
+// If two retry functions are provided, it will retry twice
+const assets = await assetLoader.loadWithRetry({
+  environment: [
+    () => loadFromMainServer(),    // First try
+    () => loadFromBackupServer(),  // First retry
+    () => loadFromCDN()            // Second retry
+  ]
+});
+```
+
+### Example of retry strategy
+
+#### 1st retry: Main → Backup
+
+```typescript
+const assets = await assetLoader.loadWithRetry({
+  environment: [
+    () => loadFromMainServer(),
+    () => loadFromBackupServer()
+  ]
+});
+```
+
+#### 2nd retry: Main → Backup → CDN
+
+```typescript
+const assets = await assetLoader.loadWithRetry({
+  environment: [
+    () => loadFromMainServer(),
+    () => loadFromBackupServer(),
+    () => loadFromCDN()
+  ]
+});
+```
+
+#### Quality fallback strategy
+
+```typescript
+const assets = await assetLoader.loadWithRetry({
+  texture: [
+    () => loadHighQuality(),       // First try: High quality
+    () => loadMediumQuality(),     // First retry: Medium quality
+    () => loadLowQuality()         // Second retry: Low quality
+  ]
+});
+```
+
+#### Format fallback strategy
+
+```typescript
+const assets = await assetLoader.loadWithRetry({
+  cubeTexture: [
+    () => loadAsHDR(),             // First try: HDR format
+    () => loadAsRGBE(),            // First retry: RGBE format
+    () => loadAsJPEG()             // Second retry: JPEG format
+  ]
+});
+```
+
+## Advantages
+
+1. **Type safety**: TypeScript's type inference ensures accurate type inference of the return value
+2. **Concurrent control**: Limit the number of concurrent loads to control network load
+3. **Error handling**: Timeout and retry functionality is built in
+4. **Intuitive API**: Named access is possible in object form
+5. **Easy migration**: Existing Promise.all code can be easily replaced
+6. **Readability**: Code is easy to read and maintain
+
+AssetLoader class is a intuitive Promise management solution that combines type safety and ease of use. It is suitable for large applications and contributes to improved development efficiency.
+
+
+
+### Recommendations
+
+1. **Appropriate retry count**: Usually 1-3 retries are appropriate (provide 1-3 retry functions)
+2. **Combination of different strategies**: Combine different approaches such as server, quality, format, etc.
+3. **Simple design**: Provide only the necessary number of retry functions and avoid complex settings
+
+</DocLayout>

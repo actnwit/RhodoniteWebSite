@@ -32,6 +32,7 @@ const docsTableOfContents: {
         { title: 'Entity and Component', href: '/en/docs/core_concepts/entities_and_components/' },
         { title: 'Mesh and Primitive', href: '/en/docs/core_concepts/geometry/' },
         { title: 'Frame, Expression, RenderPass', href: '/en/docs/core_concepts/frame_expression_renderpass/' },
+        { title: 'AssetLoader', href: '/en/docs/core_concepts/asset_loader/' },
       ]
     },
     {
@@ -64,6 +65,7 @@ const docsTableOfContents: {
         { title: 'EntityとComponent', href: '/ja/docs/core_concepts/entities_and_components/' },
         { title: 'MeshとPrimitive', href: '/ja/docs/core_concepts/geometry/' },
         { title: 'FrameとExpressionとRenderPass', href: '/ja/docs/core_concepts/frame_expression_renderpass/' },
+        { title: 'AssetLoader', href: '/ja/docs/core_concepts/asset_loader/' },
       ]
     },
     {
