@@ -50,8 +50,8 @@ export function generateOpenGraphData(
   const baseUrl = `${url.protocol}//${url.host}`;
   const currentUrl = url.toString();
 
-  // デフォルト画像（既存のスクリーンショットを使用）
-  const defaultImage = `${baseUrl}/website_screenshot.jpg`;
+  // デフォルト画像（最適化されたOpen Graph画像を使用）
+  const defaultImage = `${baseUrl}/og-image.jpg`;
 
   return {
     title: customTitle || t('og.title'),

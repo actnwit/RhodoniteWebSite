@@ -44,6 +44,9 @@ const pageTitle = title ? `${title} | ${t('og.site_name')}` : t('og.title');
 
 // 基本的なサイト情報
 const baseUrl = `${Astro.url.protocol}//${Astro.url.host}`;
+
+// 言語プレフィックスを除いたパスを取得
+const pathWithoutLang = pathname.replace(/^\/(en|ja|tr)/, '') || '/';
 ---
 
 <!doctype html>
@@ -95,10 +98,10 @@ const baseUrl = `${Astro.url.protocol}//${Astro.url.host}`;
 		/>
 
 		<!-- 言語代替リンク -->
-		<link rel="alternate" hreflang="en" href={`${Astro.url.origin}/en${pathname.replace(/^\/(ja|tr)/, '')}`} />
-		<link rel="alternate" hreflang="ja" href={`${Astro.url.origin}/ja${pathname.replace(/^\/(en|tr)/, '')}`} />
-		<link rel="alternate" hreflang="tr" href={`${Astro.url.origin}/tr${pathname.replace(/^\/(en|ja)/, '')}`} />
-		<link rel="alternate" hreflang="x-default" href={`${Astro.url.origin}/en${pathname.replace(/^\/(ja|tr)/, '')}`} />
+		<link rel="alternate" hreflang="en" href={`${baseUrl}/en${pathWithoutLang}`} />
+		<link rel="alternate" hreflang="ja" href={`${baseUrl}/ja${pathWithoutLang}`} />
+		<link rel="alternate" hreflang="tr" href={`${baseUrl}/tr${pathWithoutLang}`} />
+		<link rel="alternate" hreflang="x-default" href={`${baseUrl}/en${pathWithoutLang}`} />
 
 		<!-- 正規URL -->
 		<link rel="canonical" href={ogData.url} />
