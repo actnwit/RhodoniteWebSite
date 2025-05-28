@@ -88,26 +88,13 @@
         <a href="/tr/" style="margin: 0 15px; color: #0066cc; text-decoration: none; font-size: 1.1rem;">Türkçe</a>
       </p>
       <p style="margin-top: 1rem; color: #666; font-size: 0.9rem;">
-        Redirecting to English version in <span id="countdown">3</span> seconds...
+        Redirecting to English version...
       </p>
     </main>
 
     <script>
-      // カウントダウンとリダイレクト
-      let countdown = 3;
-      const countdownElement = document.getElementById('countdown');
-
-      const timer = setInterval(() => {
-        countdown--;
-        if (countdownElement) {
-          countdownElement.textContent = countdown.toString();
-        }
-
-        if (countdown <= 0) {
-          clearInterval(timer);
-          window.location.href = '/en/';
-        }
-      }, 1000);
+      // 即座にリダイレクト
+      window.location.href = '/en/';
     </script>
   </body>
 </html>
