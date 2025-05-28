@@ -15,17 +15,11 @@ RhodoniteはglTF1とglTF2、VRMをサポートしています。
 ### GltfImporterを使う
 一番簡単な方法は、GltfImporterクラスを使うことです。
 このクラスはglTF1とglTF2、VRMを自動的に判定して適切にロードします。
-このクラスのimportメソッドはawaitを使って呼び出すとIResult型のオブジェクトを返します。
-読み込みが成功している場合、getメソッドを使って中身のexpressionオブジェクトを取り出すことができます。
+このクラスのimportFromUrlメソッドはawaitを使って呼び出すとExpression型のオブジェクトを返します。
 このexpressionはそのままSystemクラスのprocessメソッドに渡して描画できます。
 
 ```typescript
-const result = await Rn.GltfImporter.import(gltfUrl, loadOption);
-if (result.isErr()) {
-  console.error(result.getRnError());
-  return;
-}
-const expression = result.get();
+const expression = await Rn.GltfImporter.importFromUrl(gltfUrl, loadOption);
 ```
 
 <iframe src="https://codesandbox.io/embed/yl3gf2?view=preview&module=%2Fsrc%2Findex.ts"
@@ -35,13 +29,6 @@ const expression = result.get();
      sandbox="allow-forms allow-modals allow-popups allow-presentation allow-same-origin allow-scripts"
    ></iframe>
 
-成功したかのチェックが面倒な場合は、unwrapForce()メソッドで強制的に取り出すことも可能ですが、resultの結果がエラーだった場合は例外が発生します。
-
-```typescript
-const result = await Rn.GltfImporter.import(gltfUrl, loadOption);
-const expression = result.unwrapForce();
-```
-
 ## Gltf1ImporterまたはGltf2Importerを使う
 
 バージョンを決めうちしたImporterもあります。Gltf1ImporterまたはGltf2Importerです。これらはexpressionではなく、[RnM2](https://github.com/actnwit/RhodoniteTS/blob/master/src/types/RnM2.ts)という独自形式のデータをResultオブジェクトに包んで返します。
@@ -49,11 +36,10 @@ RnMはglTF2の各項目のインデックスで結ばれた論理的な接続関
 これをModelConverterに渡すことで読み込んだglTFのシーングラフのルートのEntityを得ます。
 
 ```typescript
-    const result = await Rn.Gltf2Importer.import(
+    const rnm = await Rn.Gltf2Importer.importFromUrl(
       '../../../assets/gltf/glTF-Sample-Models/2.0/BoxAnimated/glTF/BoxAnimated.gltf'
     );
-    const rnm = result.unwrapForce();
-    const rootGroup = Rn.ModelConverter.convertToRhodoniteObject(rnm);
+    const rootGroup = await Rn.ModelConverter.convertToRhodoniteObject(rnm);
 
     const expression = new Rn.Expression();
     const renderPass = new Rn.RenderPass();
@@ -64,6 +50,53 @@ RnMはglTF2の各項目のインデックスで結ばれた論理的な接続関
 <iframe src="https://codesandbox.io/embed/3lcjc5?view=preview&module=%2Fsrc%2Findex.ts"
      style="width:100%; height: 500px; border:0; border-radius: 4px; overflow:hidden;"
      title="Rhodonite_example (loading glTF, RnM2 to Rn entity)"
+     allow="accelerometer; ambient-light-sensor; camera; encrypted-media; geolocation; gyroscope; hid; microphone; midi; payment; usb; vr; xr-spatial-tracking"
+     sandbox="allow-forms allow-modals allow-popups allow-presentation allow-same-origin allow-scripts"
+   ></iframe>
+
+通常は、これらよりもタイプを自動判別して最終的なexpressionを出力してくれるGltfImporterを使うことをお勧めします。
+
+## AssetLoaderを使う
+
+AssetLoaderを使うと、複数のアセットを一括で読み込むことができます。
+
+```typescript
+const assets = await Rn.AssetLoader.load({
+  gltf: Rn.GltfImporter.importFromUrl(gltfUrl, loadOption),
+  vrm: Rn.GltfImporter.importFromUrl(vrmUrl, loadOption),
+});
+
+const expressions = [
+  assets.gltf,
+  assets.vrm,
+];
+
+Rn.System.process(expressions);
+```
+
+<iframe src="https://codesandbox.io/embed/y3l2d9?view=preview&module=%2Fsrc%2Findex.ts"
+     style="width:100%; height: 500px; border:0; border-radius: 4px; overflow:hidden;"
+     title="Rhodonite_example (loading glTF) (forked)"
+     allow="accelerometer; ambient-light-sensor; camera; encrypted-media; geolocation; gyroscope; hid; microphone; midi; payment; usb; vr; xr-spatial-tracking"
+     sandbox="allow-forms allow-modals allow-popups allow-presentation allow-same-origin allow-scripts"
+   ></iframe>
+
+### AssetLoader.loadArrayを使う
+
+AssetLoader.loadArrayを使うと、複数のアセットを配列形式で受け取ることができます。
+
+```typescript
+const expressions = await Rn.AssetLoader.loadArray({
+  gltf: Rn.GltfImporter.importFromUrl(gltfUrl, loadOption),
+  vrm: Rn.GltfImporter.importFromUrl(vrmUrl, loadOption),
+});
+
+Rn.System.process(expressions);
+```
+
+<iframe src="https://codesandbox.io/embed/yf7752?view=preview"
+     style="width:100%; height: 500px; border:0; border-radius: 4px; overflow:hidden;"
+     title="Rhodonite_example (loading glTF) (forked)"
      allow="accelerometer; ambient-light-sensor; camera; encrypted-media; geolocation; gyroscope; hid; microphone; midi; payment; usb; vr; xr-spatial-tracking"
      sandbox="allow-forms allow-modals allow-popups allow-presentation allow-same-origin allow-scripts"
    ></iframe>

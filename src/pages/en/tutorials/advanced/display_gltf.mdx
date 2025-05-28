@@ -15,17 +15,11 @@ Rhodonite supports glTF1 and glTF2 and VRM.
 ### Using GltfImporter
 The easiest way is to use the GltfImporter class.
 This class automatically determines glTF1, glTF2, and VRM and loads them appropriately.
-The import method of this class returns an object of type IResult when called using await.
-If the loading is successful, the get method can be used to retrieve the expression object.
+The importFromUrl method of this class returns an Expression object when called using await.
 This expression can be passed directly to the process method of the System class for drawing.
 
 ```typescript
-const result = await Rn.GltfImporter.import(gltfUrl, loadOption);
-if (result.isErr()) {
-  console.error(result.getRnError());
-  return;
-}
-const expression = result.get();
+const expression = await Rn.GltfImporter.importFromUrl(gltfUrl, loadOption);
 ```
 
 <iframe src="https://codesandbox.io/embed/yl3gf2?view=preview&module=%2Fsrc%2Findex.ts"
@@ -35,13 +29,6 @@ const expression = result.get();
      sandbox="allow-forms allow-modals allow-popups allow-presentation allow-same-origin allow-scripts"
    ></iframe>
 
-If checking for success is too much trouble, you can force the retrieval with the unwrapForce() method, but if the result of result is an error, an exception will be raised.
-
-```typescript
-const result = await Rn.GltfImporter.import(gltfUrl, loadOption);
-const expression = result.unwrapForce();
-```
-
 ## Use Gltf1Importer or Gltf2Importer
 
 There are also version-specific Importers, such as the Gltf1Importer or Gltf2Importer. These return data in a proprietary format called [RnM2](https://github.com/actnwit/RhodoniteTS/blob/master/src/types/RnM2.ts) in result object rather than expression.
@@ -49,11 +36,10 @@ RnM2 is the glTF2 data in which the logical connection relationships between the
 This is passed to ModelConverter to obtain the Entity of the root of the scene graph of the read glTF.
 
 ```typescript
-    const result = await Rn.Gltf2Importer.import(
+    const rnm = await Rn.Gltf2Importer.importFromUrl(
       '../../../assets/gltf/glTF-Sample-Models/2.0/BoxAnimated/glTF/BoxAnimated.gltf'
     );
-    const rnm = result.unwrapForce();
-    const rootGroup = Rn.ModelConverter.convertToRhodoniteObject(rnm);
+    const rootGroup = await Rn.ModelConverter.convertToRhodoniteObject(rnm);
 
     const expression = new Rn.Expression();
     const renderPass = new Rn.RenderPass();
@@ -64,6 +50,53 @@ This is passed to ModelConverter to obtain the Entity of the root of the scene g
 <iframe src="https://codesandbox.io/embed/3lcjc5?view=preview&module=%2Fsrc%2Findex.ts"
      style="width:100%; height: 500px; border:0; border-radius: 4px; overflow:hidden;"
      title="Rhodonite_example (loading glTF, RnM2 to Rn entity)"
+     allow="accelerometer; ambient-light-sensor; camera; encrypted-media; geolocation; gyroscope; hid; microphone; midi; payment; usb; vr; xr-spatial-tracking"
+     sandbox="allow-forms allow-modals allow-popups allow-presentation allow-same-origin allow-scripts"
+   ></iframe>
+
+Usually, it is recommended to use GltfImporter, which automatically determines the type and outputs the final expression.
+
+## Using AssetLoader
+
+Using AssetLoader, you can load multiple assets at once.
+
+```typescript
+const assets = await Rn.AssetLoader.load({
+  gltf: Rn.GltfImporter.importFromUrl(gltfUrl, loadOption),
+  vrm: Rn.GltfImporter.importFromUrl(vrmUrl, loadOption),
+});
+
+const expressions = [
+  assets.gltf,
+  assets.vrm,
+];
+
+Rn.System.process(expressions);
+```
+
+<iframe src="https://codesandbox.io/embed/y3l2d9?view=preview&module=%2Fsrc%2Findex.ts"
+     style="width:100%; height: 500px; border:0; border-radius: 4px; overflow:hidden;"
+     title="Rhodonite_example (loading glTF) (forked)"
+     allow="accelerometer; ambient-light-sensor; camera; encrypted-media; geolocation; gyroscope; hid; microphone; midi; payment; usb; vr; xr-spatial-tracking"
+     sandbox="allow-forms allow-modals allow-popups allow-presentation allow-same-origin allow-scripts"
+   ></iframe>
+
+### Using AssetLoader.loadArray
+
+Using AssetLoader.loadArray, you can receive multiple assets in array format.
+
+```typescript
+const expressions = await Rn.AssetLoader.loadArray({
+  gltf: Rn.GltfImporter.importFromUrl(gltfUrl, loadOption),
+  vrm: Rn.GltfImporter.importFromUrl(vrmUrl, loadOption),
+});
+
+Rn.System.process(expressions);
+```
+
+<iframe src="https://codesandbox.io/embed/yf7752?view=preview"
+     style="width:100%; height: 500px; border:0; border-radius: 4px; overflow:hidden;"
+     title="Rhodonite_example (loading glTF) (forked)"
      allow="accelerometer; ambient-light-sensor; camera; encrypted-media; geolocation; gyroscope; hid; microphone; midi; payment; usb; vr; xr-spatial-tracking"
      sandbox="allow-forms allow-modals allow-popups allow-presentation allow-same-origin allow-scripts"
    ></iframe>
