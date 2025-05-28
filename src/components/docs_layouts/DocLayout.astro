@@ -2,16 +2,42 @@
 import Layout from '../../layouts/Layout.astro';
 import DocsLayout from './DocsLayout';
 import HeadingAnchorLocalization from '../HeadingAnchorLocalization';
+import { ArticleStructuredData } from '../StructuredData';
+import { getLangFromUrl, useTranslations } from '../../i18n/utils';
 
 interface Props {
   title?: string;
   description?: string;
+  image?: string;
 }
 
-const { title, description } = Astro.props;
+const { title, description, image } = Astro.props;
+const lang = getLangFromUrl(Astro.url);
+const t = useTranslations(lang);
+const baseUrl = `${Astro.url.protocol}//${Astro.url.host}`;
 ---
 
-<Layout title={title} description={description}>
+<Layout title={title} description={description} image={image} type="article">
+  <!-- 記事用構造化データ -->
+  {title && (
+    <ArticleStructuredData
+      headline={title}
+      description={description || t('og.description')}
+      url={Astro.url.toString()}
+      datePublished={new Date().toISOString()}
+      dateModified={new Date().toISOString()}
+      author={{
+        name: "RhodoniteTS Team",
+        url: "https://github.com/actnwit/RhodoniteTS"
+      }}
+      publisher={{
+        name: t('og.site_name'),
+        logo: `${baseUrl}/favicon.svg`
+      }}
+      image={image || `${baseUrl}/website_screenshot.jpg`}
+    />
+  )}
+
   <DocsLayout client:only="react">
     <div class="content-wrapper">
       <HeadingAnchorLocalization client:only="react">

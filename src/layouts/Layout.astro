@@ -1,6 +1,9 @@
 ---
 import { getLangFromUrl, useTranslations } from '../i18n/utils';
 import { Navigation } from '../components/Navigation';
+import { OpenGraphMeta } from '../components/OpenGraphMeta';
+import { WebsiteStructuredData, SoftwareApplicationStructuredData } from '../components/StructuredData';
+import { generateOpenGraphData } from '../utils/openGraph';
 import '../styles/global.css';
 import '../styles/content.css';
 
@@ -21,9 +24,26 @@ function getUrl(path: string) {
 interface Props {
 	title?: string;
 	description?: string;
+	image?: string;
+	type?: 'website' | 'article' | 'profile';
 }
 
-const { title, description } = Astro.props;
+const { title, description, image, type } = Astro.props;
+
+// Open Graphデータを生成
+const ogData = generateOpenGraphData(
+	Astro.url,
+	title,
+	description,
+	image,
+	type
+);
+
+// ページタイトルを生成（カスタムタイトルがある場合はサイト名を追加）
+const pageTitle = title ? `${title} | ${t('og.site_name')}` : t('og.title');
+
+// 基本的なサイト情報
+const baseUrl = `${Astro.url.protocol}//${Astro.url.host}`;
 ---
 
 <!doctype html>
@@ -37,7 +57,51 @@ const { title, description } = Astro.props;
 		<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
 		<meta http-equiv="Pragma" content="no-cache" />
 		<meta http-equiv="Expires" content="0" />
-		<title>RhodoniteTS</title>
+
+		<title>{pageTitle}</title>
+
+		<!-- Open Graph メタタグ -->
+		<OpenGraphMeta
+			title={ogData.title}
+			description={ogData.description}
+			image={ogData.image}
+			url={ogData.url}
+			siteName={ogData.siteName}
+			type={ogData.type}
+			locale={ogData.locale}
+			alternateLocales={ogData.alternateLocales}
+		/>
+
+		<!-- 構造化データ -->
+		<WebsiteStructuredData
+			name={t('og.site_name')}
+			description={t('og.description')}
+			url={baseUrl}
+			logo={`${baseUrl}/favicon.svg`}
+			sameAs={[
+				'https://github.com/actnwit/RhodoniteTS'
+			]}
+		/>
+
+		<SoftwareApplicationStructuredData
+			name="RhodoniteTS"
+			description={t('og.description')}
+			url={baseUrl}
+			applicationCategory="DeveloperApplication"
+			operatingSystem="Web Browser"
+			programmingLanguage="TypeScript"
+			codeRepository="https://github.com/actnwit/RhodoniteTS"
+			license="MIT"
+		/>
+
+		<!-- 言語代替リンク -->
+		<link rel="alternate" hreflang="en" href={`${Astro.url.origin}/en${pathname.replace(/^\/(ja|tr)/, '')}`} />
+		<link rel="alternate" hreflang="ja" href={`${Astro.url.origin}/ja${pathname.replace(/^\/(en|tr)/, '')}`} />
+		<link rel="alternate" hreflang="tr" href={`${Astro.url.origin}/tr${pathname.replace(/^\/(en|ja)/, '')}`} />
+		<link rel="alternate" hreflang="x-default" href={`${Astro.url.origin}/en${pathname.replace(/^\/(ja|tr)/, '')}`} />
+
+		<!-- 正規URL -->
+		<link rel="canonical" href={ogData.url} />
 	</head>
 	<body>
 		<Navigation client:load lang={lang as 'en' | 'ja' | 'tr'} />

@@ -31,6 +31,9 @@ export const ui = {
     'toc.toggle': '開閉',
     'toc.expand': '展開',
     'toc.collapse': '折りたたむ',
+    'og.title': 'RhodoniteTS - 高性能3Dグラフィックスライブラリ',
+    'og.description': 'WebGL2/WebGPUベースの高性能3Dグラフィックスライブラリ。TypeScriptで書かれた直感的なAPIを提供し、モダンなWeb3Dアプリケーション開発を支援します。',
+    'og.site_name': 'RhodoniteTS',
   },
   en: {
     'hero.description': 'RhodoniteTS is a high-performance 3D graphics library based on WebGL2/WebGPU. Written in modern TypeScript, it provides an intuitive API.',
@@ -56,6 +59,9 @@ export const ui = {
     'toc.toggle': 'Toggle',
     'toc.expand': 'Expand',
     'toc.collapse': 'Collapse',
+    'og.title': 'RhodoniteTS - High-Performance 3D Graphics Library',
+    'og.description': 'A high-performance 3D graphics library based on WebGL2/WebGPU. Written in TypeScript with an intuitive API for modern web 3D application development.',
+    'og.site_name': 'RhodoniteTS',
   },
   tr: {
     'hero.description': 'RhodoniteTS, WebGL2/WebGPU tabanlı yüksek performanslı bir 3B grafik kütüphanesidir. Modern TypeScript ile yazılmış olup sezgisel bir API sunar.',
@@ -81,5 +87,8 @@ export const ui = {
     'toc.toggle': 'Aç/Kapat',
     'toc.expand': 'Genişlet',
     'toc.collapse': 'Daralt',
+    'og.title': 'RhodoniteTS - Yüksek Performanslı 3B Grafik Kütüphanesi',
+    'og.description': 'WebGL2/WebGPU tabanlı yüksek performanslı 3B grafik kütüphanesi. Modern web 3B uygulama geliştirme için TypeScript ile yazılmış sezgisel API.',
+    'og.site_name': 'RhodoniteTS',
   },
 } as const;
