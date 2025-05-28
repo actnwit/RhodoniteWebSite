@@ -86,10 +86,10 @@ Rn.System.process(expressions);
 Using AssetLoader.loadArray, you can receive multiple assets in array format.
 
 ```typescript
-const expressions = await Rn.AssetLoader.loadArray({
-  gltf: Rn.GltfImporter.importFromUrl(gltfUrl, loadOption),
-  vrm: Rn.GltfImporter.importFromUrl(vrmUrl, loadOption),
-});
+const expressions = await Rn.AssetLoader.loadArray([
+  Rn.GltfImporter.importFromUrl(gltfUrl, loadOption),
+  Rn.GltfImporter.importFromUrl(vrmUrl, loadOption),
+]);
 
 Rn.System.process(expressions);
 ```

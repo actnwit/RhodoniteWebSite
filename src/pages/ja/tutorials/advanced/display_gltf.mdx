@@ -86,10 +86,10 @@ Rn.System.process(expressions);
 AssetLoader.loadArrayを使うと、複数のアセットを配列形式で受け取ることができます。
 
 ```typescript
-const expressions = await Rn.AssetLoader.loadArray({
-  gltf: Rn.GltfImporter.importFromUrl(gltfUrl, loadOption),
-  vrm: Rn.GltfImporter.importFromUrl(vrmUrl, loadOption),
-});
+const expressions = await Rn.AssetLoader.loadArray([
+  Rn.GltfImporter.importFromUrl(gltfUrl, loadOption),
+  Rn.GltfImporter.importFromUrl(vrmUrl, loadOption),
+]);
 
 Rn.System.process(expressions);
 ```
