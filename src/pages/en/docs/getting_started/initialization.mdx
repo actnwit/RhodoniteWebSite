@@ -39,10 +39,7 @@ If you want to change the default value, set a value to `Rn.Config.xxx`.
 This value should be set before calling the `Rn.System.init` method.
 
 ```typescript
-Rn.Config.maxEntityNumber = 10000;
-Rn.Config.maxLightNumberInShader = 10;
-Rn.Config.dataTextureHeight = 1024;
-Rn.Config.dataTextureWidth = 1024;
+Rn.Config.maxLightNumber = 8;
 Rn.Config.cgApiDebugConsoleOutput = true;
 
 await Rn.System.init({
@@ -58,21 +55,61 @@ The following is a list of properties and their meanings.
 | boneDataType | The data type used in skeletal animation processing. Specify one of Rn.BoneDataType.Mat43x1, Rn.BoneDataType.Vec4x2, Rn.BoneDataType.Vec4x2Old, Rn.BoneDataType.Vec4x1. Usually the default Rn.BoneDataType.Mat43x1 is fine. |
 | cacheWebGpuRenderBundles | Whether to cache render bundles in WebGPU. Usually true is fine. |
 | cgApiDebugConsoleOutput | Whether to output WebGL/WebGPU debug information to the console |
-| dataTextureHeight | The height of the data texture. The larger it is, the more data Rhodonite can handle. It must be a power of 2. |
-| dataTextureWidth | The width of the data texture. The larger it is, the more data Rhodonite can handle. It must be a power of 2. |
 | eventTargetDom | The DOM element that the mouse event targets. The default is the canvas element to draw to. |
 | isMobile | Whether it is a mobile device |
 | isUboEnabled | Whether to enable UBO. Recommended to be false. The default is false. |
-| maxCameraNumber | The maximum number of cameras that Rhodonite can handle |
-| maxEntityNumber | The maximum number of entities that Rhodonite can handle |
+| scenegraphComponentCountPerBufferView | The number of SceneGraph components to allocate memory contiguously when allocating memory. This is a trade-off between performance and memory usage. The default is 10. |
+| cameraComponentCountPerBufferView | The number of Camera components to allocate memory contiguously when allocating memory. This is a trade-off between performance and memory usage. The default is 1. |
+| lightComponentCountPerBufferView | The number of Light components to allocate memory contiguously when allocating memory. This is a trade-off between performance and memory usage. The default is 1. |
+| materialCountPerBufferView | The number of Material components to allocate memory contiguously when allocating memory. This is a trade-off between performance and memory usage. The default is 3. |
 | maxLightNumber | The maximum number of lights that Rhodonite can handle |
-| maxMaterialInstanceForEachType | The maximum number of material instances that can be handled in a memory contiguous manner for each material type. This is a memory layout issue, and Rhodonite can generate more than this limit. For material instances that exceed this limit, they are internally processed as different material types. |
-| maxMorphPrimitiveNumberInWebGPU | The maximum number of morph primitives in WebGPU. Normally, this does not need to be changed, but if there is a problem with loading or displaying a model with morphs, increase the value. |
-| maxMorphTargetNumber | The maximum number of morph targets that can be handled simultaneously |
-| maxSkeletalBoneNumber | The maximum number of bones for each skeletal that can be handled simultaneously |
-| maxSkeletonNumber | The maximum number of skeletons that can be handled simultaneously |
+| maxSkeletalBoneNumberForUniformMode | The maximum number of bones for each skeletal that can be handled simultaneously in Uniform mode |
+| maxBoneNumberForMemoryBoostMode | The maximum number of bones for each skeletal that can be handled simultaneously in MemoryBoost mode |
 | multiViewForWebVR | Whether to enable the WebVR multi-view extension |
 | physicsTimeIntervalScale | The scale value of the time interval of the physics calculation |
+| bufferSizeDivisionRatiosForGPUInstanceDataUsage | The ratio of the buffer size for GPU instance data usage. Normally, this does not need to be changed. |
+
+## MemoryBoost Mode
+
+MemoryBoost Mode is a mode that uses a lot of memory to improve performance.
+By allocating a lot of components in memory contiguously, performance is improved.
+In this mode, there is a limit on the number of bones that can be used for skeletal animation.
+The limit is set by `maxBoneNumberForMemoryBoostMode`.
+
+```typescript
+Rn.setUpAsMemoryBoostMode();
+Rn.Config.maxBoneNumberForMemoryBoostMode = 1000;
+
+await Rn.System.init({
+  approach: Rn.ProcessApproach.DataTexture,
+  canvas: document.getElementById('world')
+};
+```
+
+The `setUpAsMemoryBoostMode` method simply changes several Config values at once.
+
+```typescript
+export function setUpAsMemoryBoostMode() {
+  Config.bufferSizeDivisionRatiosForGPUInstanceDataUsage = [1 / 4, 1 / 4, 1 / 4, 1 / 4];
+  Config.skeletalComponentCountPerBufferView = 100;
+  Config.scenegraphComponentCountPerBufferView = 1000;
+  Config.materialCountPerBufferView = 30;
+}
+```
+
+In MemoryBoost mode, a lot of components are allocated in memory contiguously to improve performance.
+This mode has a limit on the number of bones that can be used for skeletal animation.
+The limit is set by `maxBoneNumberForMemoryBoostMode`.
+
+```typescript
+Rn.setUpAsMemoryBoostMode();
+Rn.Config.maxBoneNumberForMemoryBoostMode = 1000;
+
+await Rn.System.init({
+  approach: Rn.ProcessApproach.DataTexture,
+  canvas: document.getElementById('world')
+};
+```
 
 ## Logger
 

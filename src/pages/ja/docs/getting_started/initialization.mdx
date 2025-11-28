@@ -41,11 +41,7 @@ await Rn.System.init({
 
 
 ```typescript
-Rn.Config.maxEntityNumber = 10000;
-Rn.Config.maxLightNumberInShader = 10;
-Rn.Config.dataTextureHeight = 1024;
-Rn.Config.dataTextureWidth = 1024;
-Rn.Config.cgApiDebugConsoleOutput = true;
+Rn.Config.maxLightNumber = 8;
 
 await Rn.System.init({
   approach: Rn.ProcessApproach.DataTexture,
@@ -60,21 +56,58 @@ await Rn.System.init({
 | boneDataType | スケルタルアニメーション処理で使用するデータ型。 Rn.BoneDataType.Mat43x1、Rn.BoneDataType.Vec4x2、Rn.BoneDataType.Vec4x2Old、Rn.BoneDataType.Vec4x1 のいずれかを指定します。通常はデフォルトの Rn.BoneDataType.Mat43x1 で大丈夫です。 |
 | cacheWebGpuRenderBundles | WebGPUでのレンダーバンドルのキャッシュを有効にするかどうか。通常はtrueで大丈夫です。 |
 | cgApiDebugConsoleOutput | コンソールにWebGL/WebGPUのデバッグ情報を出力するかどうか |
-| dataTextureHeight | データテクスチャの高さ。大きいほどRhodoniteで扱えるデータ量が多くなります。２のべき乗である必要があります。 |
-| dataTextureWidth | データテクスチャの幅。大きいほどRhodoniteで扱えるデータ量が多くなります。２のべき乗である必要があります。 |
 | eventTargetDom | マウスイベントの対象となるDOM要素。デフォルトは描画先のcanvas要素です。 |
 | isMobile | モバイル端末であるかどうかを設定する |
 | isUboEnabled | UBOを有効にするかどうか。falseを推奨します。デフォルトはfalseです。 |
-| maxCameraNumber | Rhodoniteで扱えるカメラの最大数 |
-| maxEntityNumber | Rhodoniteで扱えるエンティティの最大数 |
+| scenegraphComponentCountPerBufferView | SceneGraphコンポーネントをメモリ確保する際、メモリ連続にする個数。パフォーマンスとメモリ使用量のトレードオフになります。デフォルトは10です。 |
+| cameraComponentCountPerBufferView | Cameraコンポーネントをメモリ確保する際、メモリ連続にする個数。パフォーマンスとメモリ使用量のトレードオフになります。デフォルトは1です。 |
+| lightComponentCountPerBufferView | Lightコンポーネントをメモリ確保する際、メモリ連続にする個数。パフォーマンスとメモリ使用量のトレードオフになります。デフォルトは1です。 |
+| materialCountPerBufferView | Materialコンポーネントをメモリ確保する際、メモリ連続にする個数。パフォーマンスとメモリ使用量のトレードオフになります。デフォルトは3です。 |
 | maxLightNumber | Rhodoniteで扱えるライトの最大数 |
-| maxMaterialInstanceForEachType | 各マテリアルタイプのメモリ連続となる最大インスタンス数。メモリレイアウト上の話であり、実際はこの制限を超えたマテリアルの生成が可能です。この制限値を超えたマテリアルインスタンスについては、内部的に異なるマテリアルタイプとして処理されます。 |
-| maxMorphPrimitiveNumberInWebGPU | WebGPUでのモーフプリミティブの最大数。通常、変更する必要はありませんが、モーフを持つモデルの読み込みや表示に問題が生じた場合は値を増やしてください。 |
-| maxMorphTargetNumber | 同時に扱えるモーフターゲットの最大数 |
-| maxSkeletalBoneNumber | 同時に扱える各スケルタルのボーンの最大数 |
-| maxSkeletonNumber | 同時に扱えるスケルタルの最大数 |
+| maxSkeletalBoneNumberForUniformMode | Uniformモードで同時に扱える各スケルタルのボーンの最大数 |
+| maxBoneNumberForMemoryBoostMode | MemoryBoostモードで同時に扱える各スケルタルのボーンの最大数 |
 | multiViewForWebVR | WebVRでのマルチビュー拡張の有効/無効を設定する |
 | physicsTimeIntervalScale | 物理演算の時間間隔のスケール値を設定する |
+| bufferSizeDivisionRatiosForGPUInstanceDataUsage | GPUインスタンスデータのメモリ使用量を調整するためのバッファサイズの分割比率を設定する。基本的に変更の必要はありません. |
+
+
+## MemoryBoostモード
+
+MemoryBoostモードは、メモリを潤沢に使用して、パフォーマンスを向上させるモードです。
+以下のコードに示すように、Rn.System.initメソッドを呼ぶ前に`Rn.setUpAsMemoryBoostMode`メソッドを呼ぶことでMemoryBoostモードを有効にできます。
+
+```typescript
+Rn.setUpAsMemoryBoostMode();
+
+await Rn.System.init({
+  approach: Rn.ProcessApproach.DataTexture,
+  canvas: document.getElementById('world')
+};
+```
+
+`setUpAsMemoryBoostMode`メソッドがやっていることは、いくつかのConfigの値を一括で変更するというシンプルなものです。
+
+```typescript
+export function setUpAsMemoryBoostMode() {
+  Config.bufferSizeDivisionRatiosForGPUInstanceDataUsage = [1 / 4, 1 / 4, 1 / 4, 1 / 4];
+  Config.skeletalComponentCountPerBufferView = 100;
+  Config.scenegraphComponentCountPerBufferView = 1000;
+  Config.materialCountPerBufferView = 30;
+}
+```
+
+MemoryBoostモードでは、多くのComponentをメモリ連続に配置することでパフォーマンスを高めます。
+このモードでは、Skeletalアニメーションで使えるボーンの数に上限があります。その上限は`maxBoneNumberForMemoryBoostMode`で設定できます。
+
+```typescript
+Rn.setUpAsMemoryBoostMode();
+Rn.Config.maxBoneNumberForMemoryBoostMode = 1000;
+
+await Rn.System.init({
+  approach: Rn.ProcessApproach.DataTexture,
+  canvas: document.getElementById('world')
+};
+```
 
 ## Loggerの設定
 
