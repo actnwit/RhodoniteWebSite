@@ -19,7 +19,7 @@ The importFromUrl method of this class returns an Expression object when called 
 This expression can be passed directly to the process method of the System class for drawing.
 
 ```typescript
-const expression = await Rn.GltfImporter.importFromUrl(gltfUrl, loadOption);
+const expression = await Rn.GltfImporter.importFromUrl(engine, gltfUrl, loadOption);
 ```
 
 <iframe src="https://codesandbox.io/embed/yl3gf2?view=preview&module=%2Fsrc%2Findex.ts"
@@ -36,13 +36,13 @@ RnM2 is the glTF2 data in which the logical connection relationships between the
 This is passed to ModelConverter to obtain the Entity of the root of the scene graph of the read glTF.
 
 ```typescript
-    const rnm = await Rn.Gltf2Importer.importFromUrl(
+    const rnm = await Rn.Gltf2Importer.importFromUrl(engine,
       '../../../assets/gltf/glTF-Sample-Models/2.0/BoxAnimated/glTF/BoxAnimated.gltf'
     );
-    const rootGroup = await Rn.ModelConverter.convertToRhodoniteObject(rnm);
+    const rootGroup = await Rn.ModelConverter.convertToRhodoniteObject(engine, rnm);
 
     const expression = new Rn.Expression();
-    const renderPass = new Rn.RenderPass();
+    const renderPass = new Rn.RenderPass(engine);
     renderPass.addEntities([rootGroup]);
     expression.addRenderPasses([renderPass]);
 ```
@@ -62,8 +62,8 @@ Using AssetLoader, you can load multiple assets at once.
 
 ```typescript
 const assets = await Rn.AssetLoader.load({
-  gltf: Rn.GltfImporter.importFromUrl(gltfUrl, loadOption),
-  vrm: Rn.GltfImporter.importFromUrl(vrmUrl, loadOption),
+  gltf: Rn.GltfImporter.importFromUrl(engine, gltfUrl, loadOption),
+  vrm: Rn.GltfImporter.importFromUrl(engine, vrmUrl, loadOption),
 });
 
 const expressions = [
@@ -71,7 +71,7 @@ const expressions = [
   assets.vrm,
 ];
 
-Rn.System.process(expressions);
+engine.process(expressions);
 ```
 
 <iframe src="https://codesandbox.io/embed/y3l2d9?view=preview&module=%2Fsrc%2Findex.ts"
@@ -87,11 +87,11 @@ Using AssetLoader.loadArray, you can receive multiple assets in array format.
 
 ```typescript
 const expressions = await Rn.AssetLoader.loadArray([
-  Rn.GltfImporter.importFromUrl(gltfUrl, loadOption),
-  Rn.GltfImporter.importFromUrl(vrmUrl, loadOption),
+  Rn.GltfImporter.importFromUrl(engine, gltfUrl, loadOption),
+  Rn.GltfImporter.importFromUrl(engine, vrmUrl, loadOption),
 ]);
 
-Rn.System.process(expressions);
+engine.process(expressions);
 ```
 
 <iframe src="https://codesandbox.io/embed/yf7752?view=preview"

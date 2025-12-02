@@ -26,10 +26,10 @@ material.setParameter("baseColorFactor", Rn.Vector4.fromCopy4(1, 1, 1, 1));
 テクスチャをシェーダーに渡す場合は、以下のようにします。
 
 ```typescript
-const rnTexture = new Rn.Texture();
+const rnTexture = new Rn.Texture(engine);
 texture.generateTextureFromUri('/path/to/texture.png');
 
-const rnSampler = new Rn.Sampler({
+const rnSampler = new Rn.Sampler(engine, {
    magFilter: Rn.TextureParameter.Linear,
    minFilter: Rn.TextureParameter.Linear,
    wrapS: Rn.TextureParameter.ClampToEdge,
@@ -46,7 +46,7 @@ material.setTextureParameter("baseColorTexture", rnTexture, rnSampler);
 それらのPrimitiveや[Mesh](https://actnwit.github.io/RhodoniteTS/api/classes/Mesh.html)は指定されたMaterialが適用されて描画されます。
 
 ```typescript
-const primitive = Rn.Primitive.createPrimitive({
+const primitive = Rn.Primitive.createPrimitive(engine, {
   indices: indices,
   attributeSemantics: [Rn.VertexAttribute.Position.XYZ],
   attributes: [positions],
@@ -56,7 +56,7 @@ primitive.material = mateiral;
 ```
 
 ```typescript
-const sphere = Rn.MeshHelper.createSphere({
+const sphere = Rn.MeshHelper.createSphere(engine, {
     radius: 1,
     widthSegments: 10,
     heightSegments: 10,

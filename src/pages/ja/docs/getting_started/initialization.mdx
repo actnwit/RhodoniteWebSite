@@ -17,7 +17,7 @@ Rn.System.initメソッドで、プロセスアプローチと描画先のCanvas
 最新のRhodoniteではDataTextureをお薦めします。
 
 ```javascript
-await Rn.System.init({
+const engine = Rn.Engine.init({
   approach: Rn.ProcessApproach.DataTexture,
   canvas: document.getElementById('world')
 };
@@ -43,7 +43,7 @@ await Rn.System.init({
 ```typescript
 Rn.Config.maxLightNumber = 8;
 
-await Rn.System.init({
+const engine = Rn.Engine.init({
   approach: Rn.ProcessApproach.DataTexture,
   canvas: document.getElementById('world')
 };
@@ -79,7 +79,7 @@ MemoryBoostモードは、メモリを潤沢に使用して、パフォーマン
 ```typescript
 Rn.setUpAsMemoryBoostMode();
 
-await Rn.System.init({
+const engine = Rn.Engine.init({
   approach: Rn.ProcessApproach.DataTexture,
   canvas: document.getElementById('world')
 };
@@ -103,7 +103,7 @@ MemoryBoostモードでは、多くのComponentをメモリ連続に配置する
 Rn.setUpAsMemoryBoostMode();
 Rn.Config.maxBoneNumberForMemoryBoostMode = 1000;
 
-await Rn.System.init({
+const engine = Rn.Engine.init({
   approach: Rn.ProcessApproach.DataTexture,
   canvas: document.getElementById('world')
 };

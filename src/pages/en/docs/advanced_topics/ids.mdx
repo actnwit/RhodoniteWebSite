@@ -34,7 +34,11 @@ In Rhodonite, most objects are assigned IDs so that they can be identified and m
 UniqueID assigned to an instance of Entity. It is often used to retrieve or specify a specific Entity.
 
 ```javascript
-const entityRepository = Rn.EntityRepository.getInstance();
+const engine = Rn.Engine.init({
+  approach: Rn.ProcessApproach.None,
+  canvas: document.getElementById('world')
+});
+const entityRepository = engine.entityRepository;
 const meshEntity = entityRepository.createEntity([Rn.TransformComponent, Rn.SceneGraphComponent]);
 console.log(meshEntity.entityUID)
 ```
@@ -47,7 +51,12 @@ UniqueID assigned to an instance of a class that extends RnObject; since Entity 
 const rnObject = new RnObject();
 console.log(rnObject.objectUID);
 
-const entityRepository = Rn.EntityRepository.getInstance();
+const engine = Rn.Engine.init({
+  approach: Rn.ProcessApproach.None,
+  canvas: document.getElementById('world')
+});
+
+const entityRepository = engine.entityRepository;
 const entity = entityRepository.createEntity([]);
 console.log(entity.objectUID);
 ```
@@ -62,7 +71,11 @@ A typical ComponentTID is [this file in Rhodonite](https://github.com/emaduranda
 ScopedID of the component instance.
 
 ```javascript
-const entityRepository = Rn.EntityRepository.getInstance();
+const engine = Rn.Engine.init({
+  approach: Rn.ProcessApproach.None,
+  canvas: document.getElementById('world')
+});
+const entityRepository = engine.entityRepository;
 const meshEntity = entityRepository.createEntity([Rn.TransformComponent, Rn.SceneGraphComponent]);
 const transformComponent = meshEntity.getTransforom();
 console.log(transformComponent.componentSID);

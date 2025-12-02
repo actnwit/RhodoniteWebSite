@@ -31,7 +31,7 @@ The following is an example using TypeScript.
 import Rn from 'rhodonite';
 
 document.body.onload = async function load() {
-  await Rn.System.init({
+  const engine = Rn.Engine.init({
     approach: Rn.ProcessApproach.DataTexture,
     canvas: document.getElementById('world') as HTMLCanvasElement,
   });
@@ -57,7 +57,7 @@ import Rn from 'node_modules/rhodonite/dist/esm/index.js'; // use as ESModule
 // import Rn from 'node_modules/rhodonite/dist/esmdev/index.js'; // use this if you want to display the source map or step through the library
 
 document.body.onload = async function load() {
-  await Rn.System.init({
+  const engine = Rn.Engine.init({
     approach: Rn.ProcessApproach.DataTexture,
     canvas: document.getElementById('world') as HTMLCanvasElement,
   });
@@ -114,7 +114,7 @@ In this case, you can use Rhodonite from `index.html` as follows
   <script src=". /rhodonite.js"></script>
   <script>
     document.body.onload = async function load() {
-      await Rn.System.init({
+      const engine = Rn.Engine.init({
         approach: Rn.ProcessApproach.DataTexture,
         canvas: document.getElementById('world'),
       });
@@ -138,13 +138,13 @@ declare const Rn: typeof _Rn; // Use the window.Rn as Rn
 
 
 async function load() {
-  Rn.System.init({
+  const engine = Rn.Engine.init({
     approach: Rn.ProcessApproach.DataTexture,
     canvas: document.getElementById('world') as HTMLCanvasElement
   });
 
   // Camera
-  const cameraEntity = Rn.EntityHelper.createCameraControllerEntity();
+  const cameraEntity = Rn.EntityHelper.createCameraControllerEntity(engine);
   const cameraComponent: CameraComponent = cameraEntity.getCamera();
 
   ...

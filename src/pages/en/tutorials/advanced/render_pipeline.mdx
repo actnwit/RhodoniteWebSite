@@ -33,7 +33,7 @@ declare const window: any;
 (async () => {
   Rn.Config.isUboEnabled = false;
   const canvas = document.getElementById('world') as HTMLCanvasElement;
-  await Rn.System.init({
+  const engine = Rn.Engine.init({
     approach: Rn.ProcessApproach.FastestWebGL2,
     canvas,
   });
@@ -41,14 +41,14 @@ declare const window: any;
   Rn.MeshRendererComponent.isDepthMaskTrueForTransparencies = true;
 
   // create ForwardRenderPipeline
-  const forwardRenderPipeline = new Rn.ForwardRenderPipeline();
+  const forwardRenderPipeline = new Rn.ForwardRenderPipeline(engine);
   forwardRenderPipeline.setup(canvas.width, canvas.height);
 
   // camera
   const {cameraComponent, cameraEntity} = createCamera();
 
   // gltf
-  const mainExpression = await Rn.GltfImporter.import(
+  const mainExpression = await Rn.GltfImporter.importFromUrl(engine,
     '... /... /... /assets/gltf/glTF-Sample-Models/2.0/IridescentDishWithOlives/glTF-Binary/IridescentDishWithOlives.glb',
     {
       cameraComponent: cameraComponent,
@@ -61,7 +61,7 @@ declare const window: any;
   );
 
   // env
-  const envExpression = createEnvCubeExpression(
+  const envExpression = createEnvCubeExpression(engine,
     '. /... /... /... /assets/ibl/papermill',
     cameraEntity
   );
@@ -77,10 +77,10 @@ declare const window: any;
   forwardRenderPipeline.setExpressions([envExpression, mainExpression]);
 
   // lighting
-  setIBL('. /... /... /... /assets/ibl/papermill');
+  setIBL(engine, '. /... /... /... /assets/ibl/papermill');
 
   const draw = function (frame) {
-    Rn.System.process(frame);
+    engine.process(frame);
   };
 
   forwardRenderPipeline.startRenderLoop(draw);
@@ -93,7 +93,7 @@ First, create the ForwardRenderPipeline with new, then call the setup method.
 
 ```ts
   // create ForwardRenderPipeline
-  const forwardRenderPipeline = new Rn.ForwardRenderPipeline();
+  const forwardRenderPipeline = new Rn.ForwardRenderPipeline(engine);
   forwardRenderPipeline.setup(canvas.width, canvas.height);
 ```
 
@@ -107,7 +107,7 @@ Call forwardRenderPipeline's startRenderLoop() method instead of Rn.System.start
 
 ```ts
   const draw = function (frame) {
-    Rn.System.process(frame);
+    engine.process(frame);
   };
   forwardRenderPipeline.startRenderLoop(draw);
 ```

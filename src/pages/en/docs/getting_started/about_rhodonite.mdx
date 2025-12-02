@@ -99,13 +99,13 @@ import Rn from "rhodonite";
 
 (async () => {
   // Initialize Rhodonite. Specify the drawing method (Uniform in this case) and the canvas to draw on
-  await Rn.System.init({
+  const engine = Rn.Engine.init({
     approach: Rn.ProcessApproach.DataTexture,
     canvas: document.getElementById("world") as HTMLCanvasElement,
   });
 
   // Create an entity with components
-  const firstEntity = Rn.createMeshEntity();
+  const firstEntity = Rn.createMeshEntity(engine);
 
   // Create vertex data
   const indices = new Uint32Array([0, 1, 3, 3, 1, 2]);
@@ -119,7 +119,7 @@ import Rn from "rhodonite";
   ]);
 
   // Create a Primitive object by specifying the vertex data
-  const primitive = Rn.Primitive.createPrimitive({
+  const primitive = Rn.Primitive.createPrimitive(engine, {
     indices: indices,
     attributeSemantics: [
       Rn.VertexAttribute.Position.XYZ,
@@ -137,8 +137,8 @@ import Rn from "rhodonite";
 
   // Render the scene.
   // The existence of the entity is internally managed by Rhodonite at the time of creation, so the programmer does not need to explicitly register the entity with the system.
-  Rn.System.startRenderLoop(() => {
-    Rn.System.processAuto();
+  engine.startRenderLoop(() => {
+    engine.processAuto();
   });
 })();
 ```

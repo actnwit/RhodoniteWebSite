@@ -35,7 +35,11 @@ Rhodoniteでは殆どのオブジェクトにIDが割り当てられており、
 Entityのインスタンスに割り当てられるUniqueIDです。特定のEntityを取り出したり指定したりするときによく使います。
 
 ```javascript
-const entityRepository = Rn.EntityRepository.getInstance();
+const engine = Rn.Engine.init({
+  approach: Rn.ProcessApproach.None,
+  canvas: document.getElementById('world')
+});
+const entityRepository = engine.entityRepository;
 const meshEntity = entityRepository.createEntity([Rn.TransformComponent, Rn.SceneGraphComponent]);
 console.log(meshEntity.entityUID)
 ```
@@ -48,7 +52,11 @@ RnObjectを継承しているクラスのインスタンスに割り当てられ
 const rnObject = new RnObject();
 console.log(rnObject.objectUID);
 
-const entityRepository = Rn.EntityRepository.getInstance();
+const engine = Rn.Engine.init({
+  approach: Rn.ProcessApproach.None,
+  canvas: document.getElementById('world')
+});
+const entityRepository = engine.entityRepository;
 const entity = entityRepository.createEntity([]);
 console.log(entity.objectUID);
 ```
@@ -63,7 +71,11 @@ console.log(entity.objectUID);
 コンポーネントのインスタンスのScopedIDです。
 
 ```javascript
-const entityRepository = Rn.EntityRepository.getInstance();
+const engine = Rn.Engine.init({
+  approach: Rn.ProcessApproach.None,
+  canvas: document.getElementById('world')
+});
+const entityRepository = engine.entityRepository;
 const meshEntity = entityRepository.createEntity([Rn.TransformComponent, Rn.SceneGraphComponent]);
 const transformComponent = meshEntity.getTransforom();
 console.log(transfomrComponent.componentSID);

@@ -99,13 +99,13 @@ import Rn from "rhodonite";
 
 (async () => {
   // Rhodoniteの初期化。描画処理方法（今回はUniform）と描画先canvasを指定
-  await Rn.System.init({
+  const engine = Rn.Engine.init({
     approach: Rn.ProcessApproach.DataTexture,
     canvas: document.getElementById("world") as HTMLCanvasElement,
   });
 
   // Component搭載済みEntityの作成
-  const firstEntity = Rn.createMeshEntity();
+  const firstEntity = Rn.createMeshEntity(engine);
 
   // 頂点データの作成
   const indices = new Uint32Array([0, 1, 3, 3, 1, 2]);
@@ -119,7 +119,7 @@ import Rn from "rhodonite";
   ]);
 
   // 頂点データを指定してPrimitiveオブジェクトを作成
-  const primitive = Rn.Primitive.createPrimitive({
+  const primitive = Rn.Primitive.createPrimitive(engine, {
     indices: indices,
     attributeSemantics: [
       Rn.VertexAttribute.Position.XYZ,
@@ -137,8 +137,8 @@ import Rn from "rhodonite";
 
   // 描画する。
   // Entityの存在は作成した時点でRhodoniteが内部的に把握しているため、プログラマが明示的にシステムにEntityを登録する必要はありません。
-  Rn.System.startRenderLoop(() => {
-    Rn.System.processAuto();
+  engine.startRenderLoop(() => {
+    engine.processAuto();
   });
 })();
 ```

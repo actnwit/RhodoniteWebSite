@@ -31,7 +31,7 @@ WebpackやViteなどのバンドラーを使うことで、Rhodoniteを容易に
 import Rn from 'rhodonite';
 
 document.body.onload = async function load() {
-  await Rn.System.init({
+  const engine = Rn.Engine.init({
     approach: Rn.ProcessApproach.DataTexture,
     canvas: document.getElementById('world') as HTMLCanvasElement,
   });
@@ -57,7 +57,7 @@ import Rn from 'node_modules/rhodonite/dist/esm/index.js'; // ESModuleとして�
 // import Rn from 'node_modules/rhodonite/dist/esmdev/index.js'; // ライブラリ内のソースマップ表示やステップ実行をしたい場合はこちらを使う
 
 document.body.onload = async function load() {
-  await Rn.System.init({
+  const engine = Rn.Engine.init({
     approach: Rn.ProcessApproach.DataTexture,
     canvas: document.getElementById('world') as HTMLCanvasElement,
   });
@@ -114,7 +114,7 @@ htmlファイルから`rhodonite.js`を参照することで、グローバル�
   <script src="./rhodonite.js"></script>
   <script>
     document.body.onload = async function load() {
-      await Rn.System.init({
+      const engine = Rn.Engine.init({
         approach: Rn.ProcessApproach.DataTexture,
         canvas: document.getElementById('world'),
       });
@@ -138,13 +138,13 @@ declare const Rn: typeof _Rn; // Use the window.Rn as Rn
 
 
 async function load() {
-  Rn.System.init({
+  const engine = Rn.Engine.init({
     approach: Rn.ProcessApproach.DataTexture,
     canvas: document.getElementById('world') as HTMLCanvasElement
   });
 
   // Camera
-  const cameraEntity = Rn.EntityHelper.createCameraControllerEntity();
+  const cameraEntity = Rn.EntityHelper.createCameraControllerEntity(engine);
   const cameraComponent: CameraComponent = cameraEntity.getCamera();
 
   ...

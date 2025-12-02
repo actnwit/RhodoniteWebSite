@@ -18,13 +18,18 @@ By adding components with various functions to the Entity, the Entity can perfor
 To create an Entity, do the following
 
 ```ts
-const entity = Rn.EntityRepository.createEntity();
+const engine = Rn.Engine.init({
+  approach: Rn.ProcessApproach.DataTexture,
+  canvas: document.getElementById('world')
+});
+const entityRepository = engine.entityRepository;
+const entity = entityRepository.createEntity();
 ```
 
 To add a component to an Entity, do the following.
 
 ```ts
-const entityAddedComponent = Rn.EntityRepository.addComponentToEntity(
+const entityAddedComponent = entityRepository.addComponentToEntity(
   Rn.TransformComponent,
   entity
 );
@@ -33,8 +38,8 @@ const entityAddedComponent = Rn.EntityRepository.addComponentToEntity(
 In practice, we would use the `createXXXEntity` methods that return a Component-loaded Entity.
 
 ```ts
-const groupEntity = Rn.createGroupEntity(); // with TransformComponent, SceneGraphComponent
-const meshEntity = Rn.createMeshEntity(); // with TransformComponent, SceneGraphComponent, MeshComponent, MeshRendererComponent
+const groupEntity = Rn.createGroupEntity(engine); // with TransformComponent, SceneGraphComponent
+const meshEntity = Rn.createMeshEntity(engine); // with TransformComponent, SceneGraphComponent, MeshComponent, MeshRendererComponent
 ```
 
 <iframe src="https://codesandbox.io/embed/zvssqw?view=editor&module=%2Fsrc%2Findex.ts"
@@ -64,8 +69,8 @@ cubeTransformComponent.scale = Rn.Vector3.fromCopy3(2, 2, 2);
 This component forms the parent-child relationship (scene graph) of an object and generates a world matrix by integrating the transformation matrix of the Transform component. This component is also required for Entity that places objects in 3D space.
 
 ```typescript
-const groupEntity = Rn.createGroupEntity();
-const cubeEntity = Rn.MeshHelper.createCube();
+const groupEntity = Rn.createGroupEntity(engine);
+const cubeEntity = Rn.MeshHelper.createCube(engine);
 const groupSceneGraphComponent = groupEntity.getSceneGraph();
 groupSceneGraphComponent.addChild(cubeEntity.getSceneGraph());
 ```
@@ -102,7 +107,7 @@ Rhodonite first creates a System instance, then builds an Expression, and finall
 
 ```javascript
 // Initializes Rhodonite
-const gl = system.init({
+const engine = Rn.Engine.init({
   approach: Rn.ProcessApproach.DataTexture,
   canvas: document.getElementById('world')
 });
@@ -111,15 +116,10 @@ const gl = system.init({
 ...
 
 // drawing
-const draw = function (time) {
-
-  Rn.System.process([expression]);
-
-  requestAnimationFrame(draw);
-};
-
-draw();
-````
+engine.startRenderLoop(()=>{
+  engine.process([expression]);
+});
+```
 
 So basically, the system.process method, which is called once for each drawing frame, is the starting point for processing.
 

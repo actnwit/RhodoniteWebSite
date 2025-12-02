@@ -26,9 +26,9 @@ material.setParameter("baseColorFactor", Rn.Vector4.fromCopy4(1, 1, 1, 1));
 To pass the texture to the shader, do the following
 
 ```typescript
-const rnTexture = new Rn.Texture();
+const rnTexture = new Rn.Texture(engine);
 texture.generateTextureFromUri('/path/to/texture.png');
-const rnSampler = new Rn.Sampler({
+const rnSampler = new Rn.Sampler(engine, {
    magFilter: Rn.TextureParameter.Linear,
    minFilter: Rn.TextureParameter.Linear,
    wrapS: Rn.TextureParameter.ClampToEdge,
@@ -44,7 +44,7 @@ material.setTextureParameter("baseColorTexture", rnTexture, rnSampler);
 The created materials can be used in Primitive and MeshHelper class methods.
 
 ```typescript
-const primitive = Rn.Primitive.createPrimitive({
+const primitive = Rn.Primitive.createPrimitive(engine, {
   indices: indices,
   attributeSemantics: [Rn.VertexAttribute.Position.XYZ],
   attributes: [positions],
@@ -54,7 +54,7 @@ primitive.material = mateiral;
 ```
 
 ```typescript
-const sphere = Rn.MeshHelper.createSphere({
+const sphere = Rn.MeshHelper.createSphere(engine, {
     radius: 1,
     widthSegments: 10,
     heightSegments: 10,

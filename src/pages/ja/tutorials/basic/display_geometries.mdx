@@ -13,12 +13,12 @@ import DocLayout from '../../../../components/tutorials_layouts/DocLayout.astro'
 各PrimitiveクラスはMaterialクラスのインスタンスを所有します。
 
 ```typescript
-const primitive = new Rn.Plane();
+const primitive = new Rn.Plane(engine);
 primitive.generate({
   width: 1, height: 1, uSpan: 1, vSpan: 1, isUVRepeat: false,
   material: Rn.MaterialHelper.createPbrUberMaterial();
 });
-const mesh = new Mesh();
+const mesh = new Rn.Mesh(engine);
 mesh.addPrimitive(primitive);
 ```
 
@@ -27,7 +27,7 @@ mesh.addPrimitive(primitive);
 meshがセットアップできたら、Meshを持たせたいEntityのMeshComponentにmeshを追加します。
 
 ```typescript
-const meshEntity = Rn.EntityHelper.createMeshEntity();
+const meshEntity = Rn.EntityHelper.createMeshEntity(engine);
 const meshComponent = meshEntity.getMesh();
 meshComponent.setMesh(mesh);
 ```
@@ -37,8 +37,8 @@ meshComponent.setMesh(mesh);
 Rhodoniteの最も簡単な使い方では、ここまでのコーディングだけでRhodoniteエンジンが生成されたMeshとEntityを自動的に認識し、以下のレンダーループを回すだけでメッシュの描画が行われます。
 
 ```typescript
-Rn.System.startRenderLoop(()=>{
-  Rn.System.processAuto();
+engine.startRenderLoop(()=>{
+  engine.processAuto();
 });
 ```
 
@@ -46,13 +46,13 @@ Rn.System.startRenderLoop(()=>{
 Expressionは一つのCG表現の単位と考えてください。Expressionは複数のRenderPassを持ちます。RenderPassはリアルタイムグラフィックスにおけるレンダーパスの概念に相当します。
 
 ```typescript
-const renderPass = new Rn.RenderPass();
+const renderPass = new Rn.RenderPass(engine);
 renderPass.addEntities([meshEntity]);
 const expression = new Rn.Expression();
 expression.addRenderPasses([renderPass]);
 
-Rn.System.startRenderLoop(()=>{
-  Rn.System.process([expression]);
+engine.startRenderLoop(()=>{
+  engine.process([expression]);
 });
 ```
 
@@ -61,7 +61,7 @@ Rn.System.startRenderLoop(()=>{
 [MeshHelper](https://actnwit.github.io/RhodoniteTS/api/variables/MeshHelper.html)オブジェクトを使って、いくつかの基本形状を作ることができます。これらの関数は作成した基本形状のentityを返します。
 
 ```typescript
-const cubeEntity = Rn.MeshHelper.createCube();
+const cubeEntity = Rn.MeshHelper.createCube(engine);
 cubeEntity.eulerAngles = Rn.Vector3.fromCopy3(90, 0, 0);
 cubeEntity.position = Rn.Vector3.fromCopy3(0, 3, 0);
 ```
@@ -118,7 +118,7 @@ function readyBasicVerticesData() {
         0, 1, 2
     ]);
 
-    const primitive = Rn.Primitive.createPrimitive({
+    const primitive = Rn.Primitive.createPrimitive(engine, {
         indices: indices,
         attributeSemantics: [Rn.VertexAttribute.Position.XYZ, Rn.VertexAttribute.Color0.XYZ],
         attributes: [positions, colors],
@@ -162,7 +162,7 @@ function readyBasicVerticesData() {
 
 const load = async function () {
     const c = document.getElementById('world');
-    await Rn.System.init({
+    const engine = Rn.Engine.init({
       approach: Rn.ProcessApproach.DataTexture,
       canvas: c
     });
@@ -181,16 +181,16 @@ const load = async function () {
 
     const primitive = readyBasicVerticesData();
 
-    const originalMesh = new Rn.Mesh();
+    const originalMesh = new Rn.Mesh(engine);
     originalMesh.addPrimitive(primitive);
 
-    const firstEntity = Rn.EntityHelper.createMeshEntity();
+    const firstEntity = Rn.EntityHelper.createMeshEntity(engine);
 
     const meshComponent = firstEntity.getMesh();
     meshComponent.setMesh(originalMesh);
 
-    Rn.System.startRenderLoop(()=>{
-      Rn.System.processAuto();
+    engine.startRenderLoop(()=>{
+      engine.processAuto();
     });
 }
 

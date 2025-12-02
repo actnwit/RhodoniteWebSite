@@ -17,7 +17,7 @@ Depending on which process approach is chosen, the internal processing of WebGL 
 For the latest Rhodonite we recommend DataTexture.
 
 ```javascript
-await Rn.System.init({
+const engine = Rn.Engine.init({
   approach: Rn.ProcessApproach.DataTexture,
   canvas: document.getElementById('world')
 };
@@ -42,7 +42,7 @@ This value should be set before calling the `Rn.System.init` method.
 Rn.Config.maxLightNumber = 8;
 Rn.Config.cgApiDebugConsoleOutput = true;
 
-await Rn.System.init({
+const engine = Rn.Engine.init({
   approach: Rn.ProcessApproach.DataTexture,
   canvas: document.getElementById('world')
 };
@@ -80,7 +80,7 @@ The limit is set by `maxBoneNumberForMemoryBoostMode`.
 Rn.setUpAsMemoryBoostMode();
 Rn.Config.maxBoneNumberForMemoryBoostMode = 1000;
 
-await Rn.System.init({
+const engine = Rn.Engine.init({
   approach: Rn.ProcessApproach.DataTexture,
   canvas: document.getElementById('world')
 };
@@ -105,7 +105,7 @@ The limit is set by `maxBoneNumberForMemoryBoostMode`.
 Rn.setUpAsMemoryBoostMode();
 Rn.Config.maxBoneNumberForMemoryBoostMode = 1000;
 
-await Rn.System.init({
+const engine = Rn.Engine.init({
   approach: Rn.ProcessApproach.DataTexture,
   canvas: document.getElementById('world')
 };

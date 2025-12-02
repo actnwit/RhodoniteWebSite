@@ -47,19 +47,19 @@ Rn.defaultAssetLoader; // The default AssetLoader instance that can be used glob
 ```typescript
 // Load promises in object form
 const assets = await assetLoader.load({
-  environment: Rn.CubeTexture.loadFromUrl({
+  environment: Rn.CubeTexture.loadFromUrl(engine, {
     baseUrl: '/assets/ibl/environment/environment',
     mipmapLevelNumber: 1,
     isNamePosNeg: true,
     hdriFormat: Rn.HdriFormat.HDR_LINEAR,
   }),
-  specular: Rn.CubeTexture.loadFromUrl({
+  specular: Rn.CubeTexture.loadFromUrl(engine, {
     baseUrl: '/assets/ibl/specular/specular',
     mipmapLevelNumber: 10,
     isNamePosNeg: true,
     hdriFormat: Rn.HdriFormat.RGBE_PNG,
   }),
-  diffuse: Rn.CubeTexture.loadFromUrl({
+  diffuse: Rn.CubeTexture.loadFromUrl(engine, {
     baseUrl: '/assets/ibl/diffuse/diffuse',
     mipmapLevelNumber: 1,
     isNamePosNeg: true,
@@ -78,14 +78,14 @@ console.log(assets.diffuse);     // CubeTexture
 ```typescript
 // Load promises of different types
 const mixedAssets = await assetLoader.load({
-  cubeTexture: Rn.CubeTexture.loadFromUrl({
+  cubeTexture: Rn.CubeTexture.loadFromUrl(engine, {
     baseUrl: '/assets/ibl/environment/environment',
     mipmapLevelNumber: 1,
     isNamePosNeg: true,
     hdriFormat: Rn.HdriFormat.HDR_LINEAR,
   }),
-  texture: Rn.Texture.loadFromUrl('/assets/textures/albedo.jpg'),
-  model: Rn.Gltf2Importer.importFromUrl('/assets/models/model.gltf')
+  texture: Rn.Texture.loadFromUrl(engine, '/assets/textures/albedo.jpg'),
+  model: Rn.Gltf2Importer.importFromUrl(engine, '/assets/models/model.gltf')
 });
 
 // The types of each property are correctly inferred by type inference
@@ -100,7 +100,7 @@ console.log(mixedAssets.model);       // Gltf2
 
 ```typescript
 const texture = await assetLoader.loadSingle(
-  Rn.CubeTexture.loadFromUrl({
+  Rn.CubeTexture.loadFromUrl(engine, {
     baseUrl: '/assets/ibl/environment/environment',
     mipmapLevelNumber: 1,
     isNamePosNeg: true,
@@ -114,14 +114,14 @@ const texture = await assetLoader.loadSingle(
 ```typescript
 const texture = await assetLoader.loadWithRetrySingle([
   // First attempt
-  () => Rn.CubeTexture.loadFromUrl({
+  () => Rn.CubeTexture.loadFromUrl(engine, {
     baseUrl: 'https://main-server.com/assets/environment',
     mipmapLevelNumber: 1,
     isNamePosNeg: true,
     hdriFormat: Rn.HdriFormat.HDR_LINEAR,
   }),
   // First retry
-  () => Rn.CubeTexture.loadFromUrl({
+  () => Rn.CubeTexture.loadFromUrl(engine, {
     baseUrl: 'https://backup-server.com/assets/environment',
     mipmapLevelNumber: 1,
     isNamePosNeg: true,
@@ -134,19 +134,19 @@ const texture = await assetLoader.loadWithRetrySingle([
 
 ```typescript
 const [texture1, texture2, texture3] = await assetLoader.loadArray([
-  Rn.CubeTexture.loadFromUrl({
+  Rn.CubeTexture.loadFromUrl(engine, {
     baseUrl: '/assets/ibl/environment/environment',
     mipmapLevelNumber: 1,
     isNamePosNeg: true,
     hdriFormat: Rn.HdriFormat.HDR_LINEAR,
   }),
-  Rn.CubeTexture.loadFromUrl({
+  Rn.CubeTexture.loadFromUrl(engine, {
     baseUrl: '/assets/ibl/specular/specular',
     mipmapLevelNumber: 10,
     isNamePosNeg: true,
     hdriFormat: Rn.HdriFormat.RGBE_PNG,
   }),
-  Rn.CubeTexture.loadFromUrl({
+  Rn.CubeTexture.loadFromUrl(engine, {
     baseUrl: '/assets/ibl/diffuse/diffuse',
     mipmapLevelNumber: 1,
     isNamePosNeg: true,
@@ -162,21 +162,21 @@ const [texture1, texture2, texture3] = await assetLoader.loadArray([
 const textures = await assetLoader.loadWithRetryArray([
   [
     // First attempt: main server
-    () => Rn.CubeTexture.loadFromUrl({
+    () => Rn.CubeTexture.loadFromUrl(engine, {
       baseUrl: 'https://main-server.com/assets/environment',
       mipmapLevelNumber: 1,
       isNamePosNeg: true,
       hdriFormat: Rn.HdriFormat.HDR_LINEAR,
     }),
     // First retry: backup server
-    () => Rn.CubeTexture.loadFromUrl({
+    () => Rn.CubeTexture.loadFromUrl(engine, {
       baseUrl: 'https://backup-server.com/assets/environment',
       mipmapLevelNumber: 1,
       isNamePosNeg: true,
       hdriFormat: Rn.HdriFormat.HDR_LINEAR,
     }),
     // Second retry: different format
-    () => Rn.CubeTexture.loadFromUrl({
+    () => Rn.CubeTexture.loadFromUrl(engine, {
       baseUrl: 'https://main-server.com/assets/environment',
       mipmapLevelNumber: 1,
       isNamePosNeg: true,
@@ -185,14 +185,14 @@ const textures = await assetLoader.loadWithRetryArray([
   ],
   [
     // specular texture strategy
-    () => Rn.CubeTexture.loadFromUrl({
+    () => Rn.CubeTexture.loadFromUrl(engine, {
       baseUrl: 'https://main-server.com/assets/specular',
       mipmapLevelNumber: 10,
       isNamePosNeg: true,
       hdriFormat: Rn.HdriFormat.RGBE_PNG,
     }),
     // Retry: try low resolution version
-    () => Rn.CubeTexture.loadFromUrl({
+    () => Rn.CubeTexture.loadFromUrl(engine, {
       baseUrl: 'https://main-server.com/assets/specular_low',
       mipmapLevelNumber: 5,
       isNamePosNeg: true,
@@ -209,14 +209,14 @@ const textures = await assetLoader.loadWithRetryArray([
 const assets = await assetLoader.loadWithRetry({
   environment: [
     // First attempt
-    () => Rn.CubeTexture.loadFromUrl({
+    () => Rn.CubeTexture.loadFromUrl(engine, {
       baseUrl: 'https://main-server.com/assets/environment',
       mipmapLevelNumber: 1,
       isNamePosNeg: true,
       hdriFormat: Rn.HdriFormat.HDR_LINEAR,
     }),
     // First retry: backup server
-    () => Rn.CubeTexture.loadFromUrl({
+    () => Rn.CubeTexture.loadFromUrl(engine, {
       baseUrl: 'https://backup-server.com/assets/environment',
       mipmapLevelNumber: 1,
       isNamePosNeg: true,
@@ -225,21 +225,21 @@ const assets = await assetLoader.loadWithRetry({
   ],
   specular: [
     // First attempt
-    () => Rn.CubeTexture.loadFromUrl({
+    () => Rn.CubeTexture.loadFromUrl(engine, {
       baseUrl: 'https://main-server.com/assets/specular',
       mipmapLevelNumber: 10,
       isNamePosNeg: true,
       hdriFormat: Rn.HdriFormat.RGBE_PNG,
     }),
     // First retry: low resolution version
-    () => Rn.CubeTexture.loadFromUrl({
+    () => Rn.CubeTexture.loadFromUrl(engine, {
       baseUrl: 'https://main-server.com/assets/specular_low',
       mipmapLevelNumber: 5,
       isNamePosNeg: true,
       hdriFormat: Rn.HdriFormat.RGBE_PNG,
     }),
     // Second retry: different format
-    () => Rn.CubeTexture.loadFromUrl({
+    () => Rn.CubeTexture.loadFromUrl(engine, {
       baseUrl: 'https://main-server.com/assets/specular',
       mipmapLevelNumber: 10,
       isNamePosNeg: true,
@@ -260,13 +260,13 @@ console.log(assets.specular);    // CubeTexture
 ```typescript
 // Type safety is not guaranteed and treated as any type
 const promises = [];
-promises.push(Rn.CubeTexture.loadFromUrl({
+promises.push(Rn.CubeTexture.loadFromUrl(engine, {
   baseUrl: '/assets/ibl/environment/environment',
   mipmapLevelNumber: 1,
   isNamePosNeg: true,
   hdriFormat: Rn.HdriFormat.HDR_LINEAR,
 }));
-promises.push(Rn.CubeTexture.loadFromUrl({
+promises.push(Rn.CubeTexture.loadFromUrl(engine, {
   baseUrl: '/assets/ibl/specular/specular',
   mipmapLevelNumber: 10,
   isNamePosNeg: true,
@@ -283,13 +283,13 @@ const [envTexture, specTexture] = await Promise.all(promises);
 ```typescript
 // Type safe and appropriate type is inferred
 const assets = await assetLoader.load({
-  environment: Rn.CubeTexture.loadFromUrl({
+  environment: Rn.CubeTexture.loadFromUrl(engine, {
     baseUrl: '/assets/ibl/environment/environment',
     mipmapLevelNumber: 1,
     isNamePosNeg: true,
     hdriFormat: Rn.HdriFormat.HDR_LINEAR,
   }),
-  specular: Rn.CubeTexture.loadFromUrl({
+  specular: Rn.CubeTexture.loadFromUrl(engine, {
     baseUrl: '/assets/ibl/specular/specular',
     mipmapLevelNumber: 10,
     isNamePosNeg: true,
@@ -310,19 +310,19 @@ It is easy to replace the original code with AssetLoader:
 ```typescript
 // Original code
 const promises = [];
-promises.push(Rn.CubeTexture.loadFromUrl({
+promises.push(Rn.CubeTexture.loadFromUrl(engine, {
   baseUrl: basePathIBL + '/environment/environment',
   mipmapLevelNumber: 1,
   isNamePosNeg: true,
   hdriFormat: Rn.HdriFormat.HDR_LINEAR,
 }));
-promises.push(Rn.CubeTexture.loadFromUrl({
+promises.push(Rn.CubeTexture.loadFromUrl(engine, {
   baseUrl: basePathIBL + '/specular/specular',
   mipmapLevelNumber: 10,
   isNamePosNeg: true,
   hdriFormat: Rn.HdriFormat.RGBE_PNG,
 }));
-promises.push(Rn.CubeTexture.loadFromUrl({
+promises.push(Rn.CubeTexture.loadFromUrl(engine, {
   baseUrl: basePathIBL + '/diffuse/diffuse',
   mipmapLevelNumber: 1,
   isNamePosNeg: true,
@@ -333,19 +333,19 @@ const [cubeTextureEnvironment, cubeTextureSpecular, cubeTextureDiffuse] = await 
 // Replacement using AssetLoader
 const assetLoader = new Rn.AssetLoader();
 const assets = await assetLoader.load({
-  environment: Rn.CubeTexture.loadFromUrl({
+  environment: Rn.CubeTexture.loadFromUrl(engine, {
     baseUrl: basePathIBL + '/environment/environment',
     mipmapLevelNumber: 1,
     isNamePosNeg: true,
     hdriFormat: Rn.HdriFormat.HDR_LINEAR,
   }),
-  specular: Rn.CubeTexture.loadFromUrl({
+  specular: Rn.CubeTexture.loadFromUrl(engine, {
     baseUrl: basePathIBL + '/specular/specular',
     mipmapLevelNumber: 10,
     isNamePosNeg: true,
     hdriFormat: Rn.HdriFormat.RGBE_PNG,
   }),
-  diffuse: Rn.CubeTexture.loadFromUrl({
+  diffuse: Rn.CubeTexture.loadFromUrl(engine, {
     baseUrl: basePathIBL + '/diffuse/diffuse',
     mipmapLevelNumber: 1,
     isNamePosNeg: true,
@@ -379,15 +379,15 @@ console.log('All loads are complete');
 ```typescript
 // Start multiple load processes simultaneously (without await)
 const loadPromise1 = assetLoader.load({
-  env1: Rn.CubeTexture.loadFromUrl({...})
+  env1: Rn.CubeTexture.loadFromUrl(engine, {...})
 });
 
 const loadPromise2 = assetLoader.load({
-  env2: Rn.CubeTexture.loadFromUrl({...})
+  env2: Rn.CubeTexture.loadFromUrl(engine, {...})
 });
 
 const loadPromise3 = assetLoader.load({
-  env3: Rn.CubeTexture.loadFromUrl({...})
+  env3: Rn.CubeTexture.loadFromUrl(engine, {...})
 });
 
 // Instead of waiting for individual results, wait until all processes are complete
@@ -400,9 +400,9 @@ console.log('All load processes are complete');
 
 ```typescript
 // I don't need the load result, I just want to know when it's complete
-assetLoader.load({ texture1: Rn.CubeTexture.loadFromUrl({...}) });
-assetLoader.load({ texture2: Rn.CubeTexture.loadFromUrl({...}) });
-assetLoader.load({ texture3: Rn.CubeTexture.loadFromUrl({...}) });
+assetLoader.load({ texture1: Rn.CubeTexture.loadFromUrl(engine, {...}) });
+assetLoader.load({ texture2: Rn.CubeTexture.loadFromUrl(engine, {...}) });
+assetLoader.load({ texture3: Rn.CubeTexture.loadFromUrl(engine, {...}) });
 
 // I don't need the load result, I just want to know when it's complete
 await assetLoader.waitForAllLoads();
@@ -429,7 +429,7 @@ class GameManager {
   private loadCharacterAssets() {
     // The result is stored internally, so it is not awaited
     this.assetLoader.load({
-      character1: Rn.Gltf2Importer.importFromUrl('/assets/character1.gltf')
+      character1: Rn.Gltf2Importer.importFromUrl(engine, '/assets/character1.gltf')
     }).then(assets => {
       this.characters.character1 = assets.character1;
     });
@@ -437,7 +437,7 @@ class GameManager {
 
   private loadEnvironmentAssets() {
     this.assetLoader.load({
-      skybox: Rn.CubeTexture.loadFromUrl({...})
+      skybox: Rn.CubeTexture.loadFromUrl(engine, {...})
     }).then(assets => {
       this.environment.skybox = assets.skybox;
     });
@@ -445,7 +445,7 @@ class GameManager {
 
   private loadUIAssets() {
     this.assetLoader.load({
-      button: Rn.Texture.loadFromUrl('/assets/ui/button.png')
+      button: Rn.Texture.loadFromUrl(engine, '/assets/ui/button.png')
     }).then(assets => {
       this.ui.button = assets.button;
     });
@@ -500,13 +500,13 @@ class AssetManager {
 ```typescript
 // Pattern 1: When a result is required
 const assets = await assetLoader.load({
-  texture: Rn.CubeTexture.loadFromUrl({...})
+  texture: Rn.CubeTexture.loadFromUrl(engine, {...})
 });
 console.log(assets.texture); // Actual texture object
 
 // Pattern 2: I just want to know when it's complete
 assetLoader.load({
-  texture: Rn.CubeTexture.loadFromUrl({...})
+  texture: Rn.CubeTexture.loadFromUrl(engine, {...})
 }).then(assets => {
   // The result is processed in another place
   this.storeTexture(assets.texture);
@@ -553,7 +553,7 @@ const largeFileLoader = new Rn.AssetLoader({
 ```typescript
 try {
   const assets = await assetLoader.load({
-    environment: Rn.CubeTexture.loadFromUrl({
+    environment: Rn.CubeTexture.loadFromUrl(engine, {
       baseUrl: '/invalid/path',
       mipmapLevelNumber: 1,
       isNamePosNeg: true,
@@ -575,7 +575,7 @@ import Rn from 'rhodonite';
 
 // Use default instance
 const assets = await Rn.defaultAssetLoader.load({
-  environment: Rn.CubeTexture.loadFromUrl({
+  environment: Rn.CubeTexture.loadFromUrl(engine, {
     baseUrl: '/assets/ibl/environment/environment',
     mipmapLevelNumber: 1,
     isNamePosNeg: true,
@@ -652,7 +652,7 @@ The retry feature of AssetLoader is very simple:
 ```typescript
 // If no retry function is provided, it will not retry
 const assets = await assetLoader.load({
-  environment: Rn.CubeTexture.loadFromUrl({...}) // If it fails, it will fail
+  environment: Rn.CubeTexture.loadFromUrl(engine, {...}) // If it fails, it will fail
 });
 
 // If one retry function is provided, it will retry once

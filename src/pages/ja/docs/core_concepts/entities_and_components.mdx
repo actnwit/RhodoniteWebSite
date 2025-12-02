@@ -18,13 +18,18 @@ RhodoniteではUnityやUnreal Engineでも見られる、コンポーネント�
 Entityを作るには次のようにします。
 
 ```ts
-const entity = Rn.EntityRepository.createEntity();
+const engine = Rn.Engine.init({
+  approach: Rn.ProcessApproach.DataTexture,
+  canvas: document.getElementById('world')
+});
+const entityRepository = engine.entityRepository;
+const entity = entityRepository.createEntity();
 ```
 
 Entityにコンポーネントを追加するには、次のようにします。
 
 ```ts
-  const entityAddedComponent = Rn.EntityRepository.addComponentToEntity(
+  const entityAddedComponent = entityRepository.addComponentToEntity(
     Rn.TransformComponent,
     entity
   );
@@ -33,8 +38,8 @@ Entityにコンポーネントを追加するには、次のようにします�
 実際には、Componentを搭載済みのEntityを返してくれる`createXXXEntity`メソッド群を使うことになるでしょう。
 
 ```ts
-const groupEntity = Rn.createGroupEntity(); // TransformComponent, SceneGraphComponentを持つ
-const meshEntity = Rn.createMeshEntity(); // TransformComponent, SceneGraphComponent, MeshComponent, MeshRendererComponentを持つ
+const groupEntity = Rn.createGroupEntity(engine); // TransformComponent, SceneGraphComponentを持つ
+const meshEntity = Rn.createMeshEntity(engine); // TransformComponent, SceneGraphComponent, MeshComponent, MeshRendererComponentを持つ
 ```
 
 <iframe src="https://codesandbox.io/embed/zvssqw?view=editor&module=%2Fsrc%2Findex.ts"
@@ -64,8 +69,8 @@ cubeTransformComponent.scale = Rn.Vector3.fromCopy3(2, 2, 2);
 物体の親子関係（シーングラフ）を形成するコンポーネントです。Transformコンポーネントが持つ姿勢の変換行列を積算してワールド行列を生成します。こちらも、3D空間上に配置するEntityであれば必須のコンポーネントです。
 
 ```typescript
-const groupEntity = Rn.createGroupEntity();
-const cubeEntity = Rn.MeshHelper.createCube();
+const groupEntity = Rn.createGroupEntity(engine);
+const cubeEntity = Rn.MeshHelper.createCube(engine);
 const groupSceneGraphComponent = groupEntity.getSceneGraph();
 groupSceneGraphComponent.addChild(cubeEntity.getSceneGraph());
 ```
@@ -102,7 +107,7 @@ Rhodoniteでは、まずSystemインスタンスを生成して、次にExpressi
 
 ```ts
 // Initializes Rhodonite
-Rn.System.init({
+const engine = Rn.Engine.init({
   approach: Rn.ProcessApproach.DataTexture,
   canvas: document.getElementById('world')
 });
@@ -111,8 +116,8 @@ Rn.System.init({
 ...
 
 // drawing
-Rn.System.startRenderLoop(()=>{
-  system.process([expression]);
+engine.startRenderLoop(()=>{
+  engine.process([expression]);
 });
 ```
 

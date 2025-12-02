@@ -19,7 +19,7 @@ RhodoniteはglTF1とglTF2、VRMをサポートしています。
 このexpressionはそのままSystemクラスのprocessメソッドに渡して描画できます。
 
 ```typescript
-const expression = await Rn.GltfImporter.importFromUrl(gltfUrl, loadOption);
+const expression = await Rn.GltfImporter.importFromUrl(engine, gltfUrl, loadOption);
 ```
 
 <iframe src="https://codesandbox.io/embed/yl3gf2?view=preview&module=%2Fsrc%2Findex.ts"
@@ -36,13 +36,13 @@ RnMはglTF2の各項目のインデックスで結ばれた論理的な接続関
 これをModelConverterに渡すことで読み込んだglTFのシーングラフのルートのEntityを得ます。
 
 ```typescript
-    const rnm = await Rn.Gltf2Importer.importFromUrl(
+    const rnm = await Rn.Gltf2Importer.importFromUrl(engine,
       '../../../assets/gltf/glTF-Sample-Models/2.0/BoxAnimated/glTF/BoxAnimated.gltf'
     );
-    const rootGroup = await Rn.ModelConverter.convertToRhodoniteObject(rnm);
+    const rootGroup = await Rn.ModelConverter.convertToRhodoniteObject(engine, rnm);
 
     const expression = new Rn.Expression();
-    const renderPass = new Rn.RenderPass();
+    const renderPass = new Rn.RenderPass(engine);
     renderPass.addEntities([rootGroup]);
     expression.addRenderPasses([renderPass]);
 ```

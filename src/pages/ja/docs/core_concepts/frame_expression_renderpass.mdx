@@ -55,13 +55,13 @@ CGで表現したい映像は、複雑なものになるとマルチパスレン
 
 ```javascript
 const expression = new Rn.Expression();
-const renderPass1 = new Rn.RenderPass();
+const renderPass1 = new Rn.RenderPass(engine);
 renderPass1.toClearColorBuffer = true;
 renderPass1.cameraComponent = cameraComponent;
-const renderPass2 = new Rn.RenderPass();
+const renderPass2 = new Rn.RenderPass(engine);
 renderPass2.toClearColorBuffer = true;
 renderPass2.cameraComponent = cameraComponent;
-const renderPass_fxaa = new Rn.RenderPass();
+const renderPass_fxaa = new Rn.RenderPass(engine);
 renderPass_fxaa.toClearColorBuffer = true;
 const cameraEntity_fxaa = entityRepository.createEntity([Rn.TransformComponent, Rn.SceneGraphComponent, Rn.CameraComponent])
 const cameraComponent_fxaa = cameraEntity_fxaa.getComponent(Rn.CameraComponent);
@@ -80,7 +80,7 @@ renderPass2.setFramebuffer(framebuffer_fxaatarget);
 ...
 ...
 
-system.process([expression]);
+engine.process([expression]);
 ```
 
 ## Frame
