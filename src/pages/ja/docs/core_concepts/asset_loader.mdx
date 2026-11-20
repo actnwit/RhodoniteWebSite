@@ -85,13 +85,13 @@ const mixedAssets = await assetLoader.load({
     hdriFormat: Rn.HdriFormat.HDR_LINEAR,
   }),
   texture: Rn.Texture.loadFromUrl(engine, '/assets/textures/albedo.jpg'),
-  model: Rn.Gltf2Importer.importFromUrl(engine, '/assets/models/model.gltf')
+  model: Rn.GltfImporter.importFromUrl(engine, '/assets/models/model.gltf')
 });
 
 // 型推論により、各プロパティの型が正確に推論される
 console.log(mixedAssets.cubeTexture); // CubeTexture
 console.log(mixedAssets.texture);     // Texture
-console.log(mixedAssets.model);       // Gltf2
+console.log(mixedAssets.model);       // Expression
 ```
 
 ### その他のAPI
@@ -430,7 +430,7 @@ class GameManager {
   private loadCharacterAssets() {
     // 結果は内部で保存するため、awaitしない
     this.assetLoader.load({
-      character1: Rn.Gltf2Importer.importFromUrl(engine, '/assets/character1.gltf')
+      character1: Rn.GltfImporter.importFromUrl(engine, '/assets/character1.gltf')
     }).then(assets => {
       this.characters.character1 = assets.character1;
     });

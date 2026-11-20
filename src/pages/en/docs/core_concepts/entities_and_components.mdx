@@ -18,8 +18,8 @@ By adding components with various functions to the Entity, the Entity can perfor
 To create an Entity, do the following
 
 ```ts
-const engine = Rn.Engine.init({
-  approach: Rn.ProcessApproach.DataTexture,
+const engine = await Rn.Engine.init({
+  approach: Rn.ProcessApproach.WebGL2,
   canvas: document.getElementById('world')
 });
 const entityRepository = engine.entityRepository;
@@ -55,13 +55,13 @@ Here are some typical components.
 
 ### Transform component
 
-This component internally generates a transformation matrix that indicates the object's orientation based on the translate, rotate, and scale settings.
+This component internally generates a transformation matrix that indicates the object's orientation based on the local position, rotation, and scale settings.
 
 ```typescript
 const cubeTransformComponent = cubeEntity.getTransform();
-cubeTransformComponent.translate = Rn.Vector3.fromCopy3(0, 3, 0);
-cubeTransformComponent.rotate = Rn.Vector3.fromCopy3(90, 0, 0);
-cubeTransformComponent.scale = Rn.Vector3.fromCopy3(2, 2, 2);
+cubeTransformComponent.localPosition = Rn.Vector3.fromCopy3(0, 3, 0);
+cubeTransformComponent.localEulerAngles = Rn.Vector3.fromCopy3(Math.PI / 2, 0, 0); // radians
+cubeTransformComponent.localScale = Rn.Vector3.fromCopy3(2, 2, 2);
 ```
 
 ### SceneGraph component
@@ -94,21 +94,39 @@ This component is responsible for camera functions.
 ### Light component
 
 This component is responsible for light functions. Currently supports point light, directional light, and spot light.
+With Clustered Forward rendering (enabled by default), a large number of point and spot lights can be handled efficiently.
 
 ### Effekseer component
 
-Components for playing back effects from the open-source effects tool `Effekseer`.
+Components for playing back effects from the open-source effects tool `Effekseer`. It works in both WebGL2 and WebGPU.
+
+### Other components
+
+| Component | Role |
+|:-----------|------------|
+| CameraController | Controls the camera (Orbit / WalkThrough) |
+| Animation | Plays keyframe animations (such as glTF animations) |
+| AnimationState | Manages animation blending and track transitions |
+| BlendShape | Morph target (blend shape) deformation |
+| Vrm | Manages VRM expressions and their blend shapes |
+| Constraint | VRM constraints |
+| Physics | Physics simulation (Rapier) |
+| CharacterController | Physics-based character movement |
+| Shape | Lightweight analytic shapes (such as collision shapes) |
+| Trigger | Trigger volumes made of physics sensors (enter / stay / exit events) |
+| Raymarching | Raymarching entities |
 
 ### Component Processing Flow
 
 #### Starting point for processing
 
-Rhodonite first creates a System instance, then builds an Expression, and finally starts the process by specifying an array of Expressions in the system.process method.
+Rhodonite first creates an Engine instance with `Rn.Engine.init`, then builds Expressions, and finally starts the process by specifying an array of Expressions in the `engine.process` method.
+(When you just want to draw all entities, you can use `engine.processAuto()` instead.)
 
 ```javascript
 // Initializes Rhodonite
-const engine = Rn.Engine.init({
-  approach: Rn.ProcessApproach.DataTexture,
+const engine = await Rn.Engine.init({
+  approach: Rn.ProcessApproach.WebGL2,
   canvas: document.getElementById('world')
 });
 
@@ -121,7 +139,7 @@ engine.startRenderLoop(()=>{
 });
 ```
 
-So basically, the system.process method, which is called once for each drawing frame, is the starting point for processing.
+So basically, the `engine.process` method, which is called once for each drawing frame, is the starting point for processing.
 
 #### Data Hierarchy
 
@@ -149,98 +167,87 @@ The image is as follows
 
 In addition, components have the concept of "stages of processing". These are the following stages
 
-- ProcessStage.Create
 - ProcessStage.Load
-- Logic
-- PreRender
-- Render
+- ProcessStage.Logic
+- ProcessStage.Render
+
+(The `ProcessStage` enum also defines `Create`, `Mount`, `PreRender`, `Unmount` and `Discard`, but the engine currently executes the three stages above.)
 
 Basically, in each component, the stage of processing transitions from top to bottom.
-No component belongs to more than one stage at a time, and each component always processes only one stage at a time.
+No component belongs to more than one stage at a time, and each component always processes only one stage at a time (a component moves to another stage with the `moveStageTo` method).
 Each Component has a method with a name that corresponds to each stage.
-For example, the method of the Component corresponding to `ProcessStage.Create` is the `$Create` method.
-In the Create stage, the $Create method would be executed.
+For example, the method of the Component corresponding to `ProcessStage.Logic` is the `$logic` method.
+In the Logic stage, the `$logic` method of the components currently in the Logic stage would be executed.
 
 
 ### Actual Processing Process
 
 Although the data hierarchy has been explained, the actual order of execution is not simply from top to bottom of this data hierarchy.
-Let's look at the actual contents of the System.process method. The loop structure is as follows.
+Let's look at the actual contents of the `engine.process` method. The following is a simplified excerpt of the WebGL2 path. The loop structure is as follows.
 
 ````typescript
-  process(expressions: Expression[]) {
+  // Simplified excerpt of Engine.process (WebGL2 path)
+  for (const stage of Component._processStages) { // Load, Logic, Render
+    const commonMethodName = `common_${stage.methodName}`;
 
-    // First, execute the loop in the order of the "stage of processing" type
-    for (let stage of this.__processStages) {
-      const methodName = stage.methodName;
-      const commonMethodName = 'common_' + methodName;
-      const componentTids = this.__componentRepository.getComponentTIDs();
-      // Next, loop through the components in order of type
-      for (let componentTid of componentTids) {
-        // Loop through an array of expressions
-        for (let exp of expressions) {
-          let loopN = 1;
-          if (componentTid === MeshRendererComponent.componentTID) {
-            loopN = exp!.renderPasses.length;
-          }
-          // Looping over an array of render paths held by the expression
-          for (let i = 0; i < loopN; i++) {
-            const renderPass = exp!
-            if (componentTid === MeshRendererComponent.componentTID && (stage == ProcessStage.Render)) {
-              this.__webglResourceRepository.bindFramebuffer(renderPass.getFramebuffer());
-              this.__webglResourceRepository.setViewport(renderPass.getViewport());
-              this.__webglResourceRepository.setDrawTargets(renderPass.getFramebuffer());
-              clearFrameBuffer(renderPass); this.__webglResourceRepository.clearFrameBuffer(renderPass);
+    if (stage === ProcessStage.Render) {
+      // Update the light clusters (Clustered Forward) and the GPU data before drawing
+      this.__lightClusterSystem.update(expressions);
+      MeshRendererComponent.common_$prerender(this);
+
+      // Loop through an array of expressions
+      for (const exp of expressions) {
+        // Loop through the rendering component types (MeshRenderer, Effekseer, ...)
+        for (const componentTid of renderingComponentTids) {
+          const componentClass = ComponentRepository.getComponentClass(componentTid)!;
+          // Loop through the expression's array of render passes
+          for (const renderPass of exp.renderPasses) {
+            renderPass.doPreRender();
+            this.bindFramebufferWebGL(renderPass);
+            this.setViewportForNormalRendering(renderPass);
+            if (componentTid === WellKnownComponentTIDs.MeshRendererComponentTID) {
+              this.__cgApiResourceRepository.clearFrameBuffer(this, renderPass);
             }
 
-            const componentClass: typeof Component = ComponentRepository.getComponentClass(componentTid)! ;
-            // Update the Entity list to be processed in the component's current processing stage and pipeline
-            componentClass.updateComponentsOfEachProcessStage(componentClass, stage, this.__componentRepository, renderPass);
+            // Sort the primitives to draw in this render pass (opaque, translucent, etc.)
+            const primitiveUids = MeshRendererComponent.sort_$render(this, renderPass);
+            // Draw them
+            componentClass[commonMethodName]({ renderPass, primitiveUids, processStage: stage, engine: this, ... });
 
-            const componentClass_commonMethod = (componentClass as any)[commonMethodName];
-
-            // common to all Entities to be processed in the component's current processing stage.
-            if (componentClass_commonMethod) {
-              componentClass_commonMethod({ processApproach: this.__processApproach, renderPass: renderPass, processStage: stage, renderPassTickCount: this.__renderPassTickCount });
-            }
-
-            // Process components. Specifically, the Entity group to be processed in the current processing stage is processed by the instance method of the Component class corresponding to the current processing stage.
-            componentClass.process({
-              componentType: componentClass,
-              processStage: stage,
-              processApproach: this.__processApproach,
-              componentRepository: this.__componentRepository,
-              strategy: this.__webglStrategy!
-              renderPass: renderPass,
-              renderPassTickCount: this.__renderPassTickCount
-            });
-
-            this.__renderPassTickCount++;
-
-            if (stage === ProcessStage.Render && renderPass.getResolveFramebuffer()) {
-              renderPass.copyFramebufferToResolveFramebuffer();
-            }
+            // Resolve MSAA if a resolve framebuffer is set
+            renderPass._copyFramebufferToResolveFramebuffersWebGL();
+            renderPass.doPostRender();
           }
         }
       }
+    } else {
+      // Load and Logic stages (skipped when nothing has changed: transforms, cameras, lights, animation, ...)
+      // Loop through the component types
+      for (const componentTid of componentTids) {
+        const componentClass = ComponentRepository.getComponentClass(componentTid)!;
+        // Processing common to all components of this type
+        componentClass[commonMethodName]?.({ processStage: stage, engine: this, ... });
+        // Execute the method ($load / $logic) of each component that is in the current stage
+        Component.process(this, componentClass, stage);
+      }
     }
-
-    Time._processEnd();
   }
 ````
 
 In a simplified, bulleted format, the loop process goes around in the following flow.
 
-- Loops are executed in order of "processing stage" type.
-  - Loop process executed in order of component type
+- Loops are executed in order of "processing stage" type (Load → Logic → Render).
+  - In the Load and Logic stages
+    - Loop process executed in order of component type
+      - Perform processing common to all components of that type
+      - Execute the method corresponding to the current stage for each component in that stage
+  - In the Render stage
     - Looping through an array of expressions
-      - Loop through the expression's array of render paths
-        - Update the Entity list to be processed in the component's current processing stage and render pass
-        - In the current processing stage of the component, perform processing common to all Entities to be processed
-        - Process components
-          - The group of Entities to be processed in the current processing stage is processed by the instance method of the Component class corresponding to the current processing stage.
+      - Loop process executed in order of rendering component type
+        - Loop through the expression's array of render passes
+          - Sort the primitives to be drawn in the render pass and draw them
 
-Simply put, the "processing stages" such as Create, Load, and Render are the largest processing stages.
+Simply put, the "processing stages" such as Load, Logic, and Render are the largest processing stages.
 In each processing stage, further processing is performed on a component-by-component basis, and in the processing of that component, a large number of component instances are processed so that they flow at once, as many as the number of Entities that possess that component.
 
 </DocLayout>

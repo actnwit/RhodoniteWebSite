@@ -31,8 +31,8 @@ The following is an example using TypeScript.
 import Rn from 'rhodonite';
 
 document.body.onload = async function load() {
-  const engine = Rn.Engine.init({
-    approach: Rn.ProcessApproach.DataTexture,
+  const engine = await Rn.Engine.init({
+    approach: Rn.ProcessApproach.WebGL2,
     canvas: document.getElementById('world') as HTMLCanvasElement,
   });
 
@@ -57,8 +57,8 @@ import Rn from 'node_modules/rhodonite/dist/esm/index.js'; // use as ESModule
 // import Rn from 'node_modules/rhodonite/dist/esmdev/index.js'; // use this if you want to display the source map or step through the library
 
 document.body.onload = async function load() {
-  const engine = Rn.Engine.init({
-    approach: Rn.ProcessApproach.DataTexture,
+  const engine = await Rn.Engine.init({
+    approach: Rn.ProcessApproach.WebGL2,
     canvas: document.getElementById('world') as HTMLCanvasElement,
   });
 
@@ -87,14 +87,19 @@ In this method, you copy the Rhodonite runtime (the js file for execution) to th
 ### Copy the Rhodonite runtime
 
 There is a `dist` directory in the Rhodonite GitHub repository.
-Clone the repository and do build, Rhodonite runtime will be generated under the dist/iife directory.
+Clone the repository and build it (Node.js 22 or later and pnpm are required), and the Rhodonite runtime will be generated under the `dist/iife` and `dist/iifedev` directories.
+
+```bash
+$ pnpm install
+$ pnpm run build
+```
 
 ![dist_dir](https://user-images.githubusercontent.com/3821214/161363331-ff417948-228b-460e-a11a-2cc8481f6df0.png)
 
 Or, the CI (automated testing) results page ([https://github.com/actnwit/RhodoniteTS/actions/workflows/test.yml](https://github.com/actnwit/RhodoniteTS/actions/workflows/test.yml)).
 ![image](https://user-images.githubusercontent.com/3821214/161414183-1d070606-771a-47e4-b5c3-330bcd5170d9.png)
 
-Copy `rhodonite.js` in the `dist/iife` directory or its minify version `rhodonite.min.js` under the project folder. The following example uses `rhodonite.js`, but you can replace it with `rhodonite.min.js`.
+Copy `rhodonite.js` in the `dist/iifedev` directory (development build) or the minified version `rhodonite.min.js` in the `dist/iife` directory under the project folder. The following example uses `rhodonite.js`, but you can replace it with `rhodonite.min.js`.
 
 ### Coding example using JavaScript
 
@@ -111,11 +116,11 @@ In this case, you can use Rhodonite from `index.html` as follows
 // index.html
 <body>
   <canvas id="world"></canvas>
-  <script src=". /rhodonite.js"></script>
+  <script src="./rhodonite.js"></script>
   <script>
     document.body.onload = async function load() {
-      const engine = Rn.Engine.init({
-        approach: Rn.ProcessApproach.DataTexture,
+      const engine = await Rn.Engine.init({
+        approach: Rn.ProcessApproach.WebGL2,
         canvas: document.getElementById('world'),
       });
 
@@ -138,13 +143,13 @@ declare const Rn: typeof _Rn; // Use the window.Rn as Rn
 
 
 async function load() {
-  const engine = Rn.Engine.init({
-    approach: Rn.ProcessApproach.DataTexture,
+  const engine = await Rn.Engine.init({
+    approach: Rn.ProcessApproach.WebGL2,
     canvas: document.getElementById('world') as HTMLCanvasElement
   });
 
   // Camera
-  const cameraEntity = Rn.EntityHelper.createCameraControllerEntity(engine);
+  const cameraEntity = Rn.createCameraControllerEntity(engine, true);
   const cameraComponent: CameraComponent = cameraEntity.getCamera();
 
   ...
@@ -153,16 +158,16 @@ async function load() {
 
 ```
 
-Convey the TypeScript code as follows.
+Compile the TypeScript code as follows.
 
 ```bash
-$ npx tsc . /main.ts --lib es2015,dom --target es2015 --module umd --moduleResolution node
+$ npx tsc ./main.ts --lib es2015,dom --target es2015 --module umd --moduleResolution node
 ```
 
 Now that we have compiled the TypeScript code as a UMD, we can use reqiurejs or something similar to load it in the browser.
 
 ```html
-<script src="dist/iife/rhodonite.js"></script>
+<script src="./rhodonite.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.6/require.min.js" data-main="main.js"></script>
 ```
 

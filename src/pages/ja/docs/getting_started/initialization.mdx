@@ -11,118 +11,131 @@ import DocLayout from '../../../../components/docs_layouts/DocLayout.astro';
 
 Rhodoniteの初期化は簡単です。
 
-Rn.System.initメソッドで、プロセスアプローチと描画先のCanvasを指定します。awaitの指定を忘れないでください。
-
-どのプロセスアプローチを選ぶかによってWebGLの内部処理が異なります。
-最新のRhodoniteではDataTextureをお薦めします。
+`Rn.Engine.init`メソッドで、プロセスアプローチと描画先のCanvasを指定します。`Rn.Engine.init`は非同期メソッドなので、`await`の指定を忘れないでください。
+戻り値として`Engine`インスタンスが返ります。エンティティやマテリアル、テクスチャの生成など、Rhodoniteの多くのAPIはこの`engine`を第一引数に取ります。
 
 ```javascript
-const engine = Rn.Engine.init({
-  approach: Rn.ProcessApproach.DataTexture,
-  canvas: document.getElementById('world')
-};
+const engine = await Rn.Engine.init({
+  approach: Rn.ProcessApproach.WebGL2,
+  canvas: document.getElementById('world'),
+});
 ```
 
 ### プロセスアプローチの一覧
 
 | 種類 | 特徴 |
 |:-----------|------------|
-| Uniform | WebGL2で動作します。シェーダパラメータの受け渡しにUniform変数を使います。spector.jsなどでUniform変数へ渡すパラメータを確認できるため、トラブルシュートに向きます。 |
-| DataTexture | WebGL2で動作します。シェーダパラメータの受け渡しに浮動小数点テクスチャを使います。普段の利用ではUniformではなくこちらの利用を推奨します。 |
-| WebGPU | WebGPUで動作します。 |
+| WebGL2 | WebGL2で動作します。シェーダパラメータは浮動小数点データテクスチャ経由でGPUに渡されます（ブリッタブルメモリアーキテクチャ）。 |
+| WebGPU | WebGPUで動作します。シェーダパラメータはストレージバッファ経由でGPUに渡されます。 |
+| None | グラフィックスAPIを使用しません。エンティティやコンポーネントなど、描画以外の機能だけを使う場合に指定します。 |
 
+> **注意:** 以前の`Uniform`および`DataTexture`アプローチは削除されました。
+> `ProcessApproach.DataTexture`は`ProcessApproach.WebGL2`に名称変更され、`ProcessApproach.Uniform`は廃止されました（代わりに`ProcessApproach.WebGL2`を使用してください）。
+> 削除されたアプローチを`Rn.Engine.init`に渡すとエラーになります。
+
+### エンジンの破棄
+
+エンジンが不要になったら`engine.destroy()`を呼び出します。
+レンダーループが停止し、エンジンが保持しているすべてのリソース（エンティティ、マテリアル、テクスチャ、GPUリソースなど）が解放されます。
+このメソッドを呼んだ後は、そのエンジンインスタンスを使用しないでください。
+
+```javascript
+engine.destroy();
+```
 
 ## Rn.Configによる設定
 
 この設定はオプショナルです。
-[Rn.Config](https://actnwit.github.io/RhodoniteTS/api/variables/default.Config.html)はRhodoniteの設定を行うためのオブジェクトです。
-初期設定値を変えたい場合に、`Rn.Config.xxx` に値を設定します。
-この値の設定は、`Rn.System.init` メソッドを呼ぶ前に行ってください。
-
+[Rn.Config](https://actnwit.github.io/RhodoniteTS/api/classes/default.Config.html)はRhodoniteの設定を行うためのクラスです。
+変更したい値を指定して`Rn.Config`のインスタンスを生成し、`Rn.Engine.init`の`config`オプションに渡します。
+指定しなかったプロパティはデフォルト値のままになります。設定はエンジンインスタンスごとに保持され、後から`engine.config`で参照できます。
 
 ```typescript
-Rn.Config.maxLightNumber = 8;
-
-const engine = Rn.Engine.init({
-  approach: Rn.ProcessApproach.DataTexture,
-  canvas: document.getElementById('world')
-};
+const engine = await Rn.Engine.init({
+  approach: Rn.ProcessApproach.WebGL2,
+  canvas: document.getElementById('world') as HTMLCanvasElement,
+  config: new Rn.Config({
+    maxLightNumber: 8,
+    cgApiDebugConsoleOutput: true,
+  }),
+});
 ```
 
-各プロパティの意味については以下の表を参照してください。
+主なプロパティの意味については以下の表を参照してください。
 
-| プロパティ名 | 意味 |
-|:-----------|------------|
-| boneDataType | スケルタルアニメーション処理で使用するデータ型。 Rn.BoneDataType.Mat43x1、Rn.BoneDataType.Vec4x2、Rn.BoneDataType.Vec4x2Old、Rn.BoneDataType.Vec4x1 のいずれかを指定します。通常はデフォルトの Rn.BoneDataType.Mat43x1 で大丈夫です。 |
-| cacheWebGpuRenderBundles | WebGPUでのレンダーバンドルのキャッシュを有効にするかどうか。通常はtrueで大丈夫です。 |
-| cgApiDebugConsoleOutput | コンソールにWebGL/WebGPUのデバッグ情報を出力するかどうか |
-| eventTargetDom | マウスイベントの対象となるDOM要素。デフォルトは描画先のcanvas要素です。 |
-| isMobile | モバイル端末であるかどうかを設定する |
-| isUboEnabled | UBOを有効にするかどうか。falseを推奨します。デフォルトはfalseです。 |
-| scenegraphComponentCountPerBufferView | SceneGraphコンポーネントをメモリ確保する際、メモリ連続にする個数。パフォーマンスとメモリ使用量のトレードオフになります。デフォルトは10です。 |
-| cameraComponentCountPerBufferView | Cameraコンポーネントをメモリ確保する際、メモリ連続にする個数。パフォーマンスとメモリ使用量のトレードオフになります。デフォルトは1です。 |
-| lightComponentCountPerBufferView | Lightコンポーネントをメモリ確保する際、メモリ連続にする個数。パフォーマンスとメモリ使用量のトレードオフになります。デフォルトは1です。 |
-| materialCountPerBufferView | Materialコンポーネントをメモリ確保する際、メモリ連続にする個数。パフォーマンスとメモリ使用量のトレードオフになります。デフォルトは3です。 |
-| maxLightNumber | Rhodoniteで扱えるライトの最大数 |
-| maxSkeletalBoneNumberForUniformMode | Uniformモードで同時に扱える各スケルタルのボーンの最大数 |
-| maxBoneNumberForMemoryBoostMode | MemoryBoostモードで同時に扱える各スケルタルのボーンの最大数 |
-| multiViewForWebVR | WebVRでのマルチビュー拡張の有効/無効を設定する |
-| physicsTimeIntervalScale | 物理演算の時間間隔のスケール値を設定する |
-| bufferSizeDivisionRatiosForGPUInstanceDataUsage | GPUインスタンスデータのメモリ使用量を調整するためのバッファサイズの分割比率を設定する。基本的に変更の必要はありません. |
+| プロパティ名 | デフォルト値 | 意味 |
+|:-----------|:-----------|------------|
+| boneDataType | undefined | すべてのSkeletalComponentのボーンデータ型を強制します。`Rn.BoneDataType.Mat43x1`、`Rn.BoneDataType.Vec4x2`、`Rn.BoneDataType.Vec4x1` のいずれかを指定します。undefinedの場合は各SkeletalComponentが自身の型を使います（インポーターがVec4x1またはVec4x2を自動選択します）。通常は設定不要です。 |
+| cacheWebGpuRenderBundles | true | WebGPUでのレンダーバンドルのキャッシュを有効にするかどうか。通常はtrueで大丈夫です。 |
+| cgApiDebugConsoleOutput | false | コンソールにWebGL/WebGPUのデバッグ情報（シェーダーの詳細なコンパイルエラーなど）を出力するかどうか |
+| eventTargetDom | （描画先canvas） | マウスイベントの対象となるDOM要素。デフォルトは描画先のcanvas要素です。 |
+| isMobile | false | モバイル端末であるかどうかを設定する |
+| isUboEnabled | false | UBOを有効にするかどうか。falseを推奨します。 |
+| logLevel | `Rn.LogLevel.Warn` | 出力する最小のログレベル。[Loggerの設定](#loggerの設定)を参照してください。 |
+| maxLightNumber | 6 | 同時に影を落とせるライトの最大数。0にするとライトのシャドウマップ枠が無効になります（シーン内のライト数の上限ではありません。`maxLightListLength`を参照）。 |
+| maxLightListLength | 1024 | シェーディングされる有効なライトの最大数。これを超えたライトは無視されます。 |
+| scenegraphComponentCountPerBufferView | 1000 | SceneGraphコンポーネントをメモリ確保する際、メモリ連続にする個数。パフォーマンスとメモリ使用量のトレードオフになります。 |
+| skeletalComponentCountPerBufferView | 100 | Skeletalコンポーネントをメモリ確保する際、メモリ連続にする個数。 |
+| cameraComponentCountPerBufferView | 1 | Cameraコンポーネントをメモリ確保する際、メモリ連続にする個数。 |
+| lightComponentCountPerBufferView | 64 | Lightコンポーネントをメモリ確保する際、メモリ連続にする個数。 |
+| materialCountPerBufferView | 100 | 各マテリアル種類のインスタンスをメモリ連続に配置する個数。生成できるマテリアルインスタンス数を制限するものではありません。 |
+| multiViewForWebVR | false | WebXR(VR)描画でのマルチビュー拡張の有効/無効を設定する |
+| physicsTimeIntervalScale | 1 | 物理演算の時間間隔のスケール値を設定する |
+| bufferSizeDivisionRatiosForGPUInstanceDataUsage | [1/32, 5/32, 6/32, 12/32] | GPUインスタンスデータのメモリ使用量を調整するためのバッファサイズの分割比率を設定する。基本的に変更の必要はありません。 |
+| isMultiDrawEnabled | true | WebGLのマルチドロー描画（`WEBGL_multi_draw`）を有効にするかどうか。同じソースバッファを共有するプリミティブがまとめて描画されます。 |
+| isDepthPrepassEnabled | false | 不透明プリミティブに対してデプスプリパスを行うかどうか（WebGPUのみ）。オーバードローの多いシーンで効果があります。 |
+| isClusteredForwardEnabled | true | Clustered Forwardレンダリングを有効にするかどうか。後述します。 |
+| clusteredForwardBuildMode | 'auto' | ライトクラスタの構築場所。`'auto'`: WebGPUではコンピュートシェーダー、WebGL2ではCPU。`'cpu'`: 両方ともCPU。 |
+| clusteredForwardGridSize | [48, 27, 48] | スクリーンX、スクリーンY、ビュー深度方向のクラスタ分割数 |
+| clusteredForwardMaxViewNumber | 4 | 1フレームでライトクラスタを構築するカメラの最大数 |
+| clusteredForwardLightCapacityPerCluster | 96 | 各クラスタのライトリストに入るライトの最大数 |
+| clusteredForwardMinLocalLightNumber | 1 | カリング可能なローカルライトがこの数以上ある場合にのみライトクラスタを構築します |
+| lightAutoRangeThreshold | 0 | 0より大きい場合、rangeが未設定のポイントライト・スポットライトに、強度がこの値まで減衰する距離を有効範囲として与えます。これによりClustered Forwardでカリングできるようになります。 |
+| lightRangeScale | 1 | ポイントライト・スポットライトの有効範囲を (0, 1] の値でスケールし、強度を補正します。小さくするほど描画コストが下がります。 |
 
+### Clustered Forwardレンダリング
 
-## MemoryBoostモード
+Rhodoniteはデフォルトで Clustered Forward レンダリングを使用します。
+視錐台をクラスタ（フロクセル）に分割し、各フラグメントは自分のクラスタに範囲が届くライトだけを評価します。
+これにより、ポイントライトやスポットライトが大量にあるシーンでも描画コストを抑えられます。
+ディレクショナルライトと範囲制限のないライトは常に評価されます。
 
-MemoryBoostモードは、メモリを潤沢に使用して、パフォーマンスを向上させるモードです。
-以下のコードに示すように、Rn.System.initメソッドを呼ぶ前に`Rn.setUpAsMemoryBoostMode`メソッドを呼ぶことでMemoryBoostモードを有効にできます。
-
-```typescript
-Rn.setUpAsMemoryBoostMode();
-
-const engine = Rn.Engine.init({
-  approach: Rn.ProcessApproach.DataTexture,
-  canvas: document.getElementById('world')
-};
-```
-
-`setUpAsMemoryBoostMode`メソッドがやっていることは、いくつかのConfigの値を一括で変更するというシンプルなものです。
-
-```typescript
-export function setUpAsMemoryBoostMode() {
-  Config.bufferSizeDivisionRatiosForGPUInstanceDataUsage = [1 / 4, 1 / 4, 1 / 4, 1 / 4];
-  Config.skeletalComponentCountPerBufferView = 100;
-  Config.scenegraphComponentCountPerBufferView = 1000;
-  Config.materialCountPerBufferView = 30;
-}
-```
-
-MemoryBoostモードでは、多くのComponentをメモリ連続に配置することでパフォーマンスを高めます。
-このモードでは、Skeletalアニメーションで使えるボーンの数に上限があります。その上限は`maxBoneNumberForMemoryBoostMode`で設定できます。
+`range`を持たないポイントライト・スポットライトもカリングの対象にしたい場合は、`lightAutoRangeThreshold`（例: `0.001`）を設定してください。
 
 ```typescript
-Rn.setUpAsMemoryBoostMode();
-Rn.Config.maxBoneNumberForMemoryBoostMode = 1000;
-
-const engine = Rn.Engine.init({
-  approach: Rn.ProcessApproach.DataTexture,
-  canvas: document.getElementById('world')
-};
+const engine = await Rn.Engine.init({
+  approach: Rn.ProcessApproach.WebGPU,
+  canvas: document.getElementById('world') as HTMLCanvasElement,
+  config: new Rn.Config({
+    isClusteredForwardEnabled: true, // デフォルト
+    lightAutoRangeThreshold: 0.001,
+  }),
+});
 ```
 
 ## Loggerの設定
 
 この設定はオプショナルです。
-`Rn.Logger.loglevel` には以下の値を設定できます。
+ログレベルは`Rn.Config`の`logLevel`プロパティで指定できます。
+指定したレベル未満のメッセージは出力されません。レベルは以下の通りです（上ほど詳細）。
 
 | 値 | 意味 |
 |:-----------|------------|
-| `Rn.LogLevel.Error` | エラーを出力します。 |
-| `Rn.LogLevel.Warn` | エラーと警告を出力します。 |
-| `Rn.LogLevel.Debug` | エラー、警告、デバッグ情報を出力します。 |
-| `Rn.LogLevel.Info` | エラー、警告、デバッグ情報、細部の情報を出力します。 |
+| `Rn.LogLevel.Debug` | デバッグ情報を含むすべてのログを出力します。 |
+| `Rn.LogLevel.Info` | 情報、警告、エラーを出力します。 |
+| `Rn.LogLevel.Warn` | 警告とエラーを出力します（デフォルト）。 |
+| `Rn.LogLevel.Error` | エラーのみを出力します。 |
+| `Rn.LogLevel.Assert` | アサーション失敗のみを出力します。 |
 
 ```typescript
-Rn.Logger.loglevel = Rn.LogLevel.Info;
+const engine = await Rn.Engine.init({
+  approach: Rn.ProcessApproach.WebGL2,
+  canvas: document.getElementById('world') as HTMLCanvasElement,
+  config: new Rn.Config({ logLevel: Rn.LogLevel.Info }),
+});
+
+// 初期化後にログレベルを変更することもできます
+engine.logger.logLevel = Rn.LogLevel.Debug;
 ```
 
 設定することで、ブラウザの開発者コンソールへの望んだレベルでのログ出力がなされます。
@@ -130,8 +143,14 @@ Rn.Logger.loglevel = Rn.LogLevel.Info;
 特に、以下の設定をすることで、シェーダービルドに失敗した際に詳細なシェーダーのエラーを出力することができます。
 
 ```typescript
-Rn.Config.cgApiDebugConsoleOutput = true;
-Rn.Logger.loglevel = Rn.LogLevel.Info;
+const engine = await Rn.Engine.init({
+  approach: Rn.ProcessApproach.WebGL2,
+  canvas: document.getElementById('world') as HTMLCanvasElement,
+  config: new Rn.Config({
+    cgApiDebugConsoleOutput: true,
+    logLevel: Rn.LogLevel.Info,
+  }),
+});
 ```
 
 ## まとめ

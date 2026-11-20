@@ -31,8 +31,8 @@ WebpackやViteなどのバンドラーを使うことで、Rhodoniteを容易に
 import Rn from 'rhodonite';
 
 document.body.onload = async function load() {
-  const engine = Rn.Engine.init({
-    approach: Rn.ProcessApproach.DataTexture,
+  const engine = await Rn.Engine.init({
+    approach: Rn.ProcessApproach.WebGL2,
     canvas: document.getElementById('world') as HTMLCanvasElement,
   });
 
@@ -57,8 +57,8 @@ import Rn from 'node_modules/rhodonite/dist/esm/index.js'; // ESModuleとして�
 // import Rn from 'node_modules/rhodonite/dist/esmdev/index.js'; // ライブラリ内のソースマップ表示やステップ実行をしたい場合はこちらを使う
 
 document.body.onload = async function load() {
-  const engine = Rn.Engine.init({
-    approach: Rn.ProcessApproach.DataTexture,
+  const engine = await Rn.Engine.init({
+    approach: Rn.ProcessApproach.WebGL2,
     canvas: document.getElementById('world') as HTMLCanvasElement,
   });
 
@@ -87,14 +87,19 @@ document.body.onload = async function load() {
 ### Rhodoniteランタイムのコピー
 
 RhodoniteのGitHubリポジトリには`dist`ディレクトリが存在します。
-リポジトリをCloneしてbuildを行うと、dist/iifeディレクトリ以下にRhodoniteランタイムが生成されます。
+リポジトリをCloneしてbuildを行うと（Node.js 22以降とpnpmが必要です）、`dist/iife`および`dist/iifedev`ディレクトリ以下にRhodoniteランタイムが生成されます。
+
+```bash
+$ pnpm install
+$ pnpm run build
+```
 
 ![dist_dir](https://user-images.githubusercontent.com/3821214/161363331-ff417948-228b-460e-a11a-2cc8481f6df0.png)
 
 または、CI(自動テスト)結果ページ([https://github.com/actnwit/RhodoniteTS/actions/workflows/test.yml](https://github.com/actnwit/RhodoniteTS/actions/workflows/test.yml))のテストが成功したリンク先のArtifactの欄からdistフォルダの内容をZipダウンロードして入手することも可能です。
 ![image](https://user-images.githubusercontent.com/3821214/161414183-1d070606-771a-47e4-b5c3-330bcd5170d9.png)
 
-`dist/iife`ディレクトリ内の`rhodonite.js`、またはそのminify版の`rhodonite.min.js`をプロジェクトフォルダー以下にコピーします。以下では`rhodonite.js`を用いた例を扱いますが、`rhodonite.min.js`に読み換えても問題ありません。
+`dist/iifedev`ディレクトリ内の`rhodonite.js`（開発用ビルド）、または`dist/iife`ディレクトリ内のminify版`rhodonite.min.js`をプロジェクトフォルダー以下にコピーします。以下では`rhodonite.js`を用いた例を扱いますが、`rhodonite.min.js`に読み換えても問題ありません。
 
 ### JavaScriptを用いたコーディング例
 
@@ -114,8 +119,8 @@ htmlファイルから`rhodonite.js`を参照することで、グローバル�
   <script src="./rhodonite.js"></script>
   <script>
     document.body.onload = async function load() {
-      const engine = Rn.Engine.init({
-        approach: Rn.ProcessApproach.DataTexture,
+      const engine = await Rn.Engine.init({
+        approach: Rn.ProcessApproach.WebGL2,
         canvas: document.getElementById('world'),
       });
 
@@ -138,13 +143,13 @@ declare const Rn: typeof _Rn; // Use the window.Rn as Rn
 
 
 async function load() {
-  const engine = Rn.Engine.init({
-    approach: Rn.ProcessApproach.DataTexture,
+  const engine = await Rn.Engine.init({
+    approach: Rn.ProcessApproach.WebGL2,
     canvas: document.getElementById('world') as HTMLCanvasElement
   });
 
   // Camera
-  const cameraEntity = Rn.EntityHelper.createCameraControllerEntity(engine);
+  const cameraEntity = Rn.createCameraControllerEntity(engine, true);
   const cameraComponent: CameraComponent = cameraEntity.getCamera();
 
   ...
@@ -153,7 +158,7 @@ async function load() {
 
 ```
 
-TypeScriptコードを次のようにコンバイルします。
+TypeScriptコードを次のようにコンパイルします。
 
 ```bash
 $ npx tsc ./main.ts --lib es2015,dom --target es2015 --module umd --moduleResolution node
@@ -162,7 +167,7 @@ $ npx tsc ./main.ts --lib es2015,dom --target es2015 --module umd --moduleResolu
 TypeScriptコードをUMDとしてコンパイルしたので、それをブラウザで読み込むためにreqiurejsなどを利用します。
 
 ```html
-<script src="dist/iife/rhodonite.js"></script>
+<script src="./rhodonite.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.6/require.min.js" data-main="main.js"></script>
 ```
 

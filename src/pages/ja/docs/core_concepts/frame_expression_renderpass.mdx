@@ -15,12 +15,18 @@ RenderPassにはレンダリング出力先のフレームバッファを指定�
 また、そのレンダーパスで表示対象とするEntity群を指定することができます。指定されていないEntityはそのレンダーパスでは処理されません。
 そのレンダーパスで描画する際に使用するカメラを指定することもできます。
 
-レンダーパスは、そのままではSystem.processメソッドに渡すことができません。
+レンダーパスは、そのままでは`engine.process`メソッドに渡すことができません。
 レンダーパスをまとめるエクスプレッションと呼ばれるクラスに追加する必要があります。
 
 ```javascript
-const renderPass1 = new Rn.RenderPass();
-const framebuffer = Rn.RenderableHelper.createTexturesForRenderTarget(600, 600, 1, {})
+const renderPass1 = new Rn.RenderPass(engine);
+const framebuffer = Rn.RenderableHelper.createFrameBuffer(engine, {
+  width: 600,
+  height: 600,
+  textureNum: 1,
+  textureFormats: [Rn.TextureFormat.RGBA8],
+  createDepthBuffer: true,
+});
 renderPass1.toClearColorBuffer = true;
 renderPass1.cameraComponent = cameraComponent;
 renderPass1.setFramebuffer(framebuffer);
@@ -32,17 +38,26 @@ RenderPassではMSAAの設定を行うことができます。
 ResolveというMSAAを行うために必要な追加のレンダーターゲットをsetResolveFramebufferメソッドで設定します。
 
 ```javascript
-const renderPass1 = new Rn.RenderPass();
-const framebufferMsaa = Rn.RenderableHelper.createTexturesForRenderTarget(600, 600, 0, {
-    isMSAA: true,
-    sampleCountMSAA: 4,
-    createDepthBuffer: true,
+const renderPass1 = new Rn.RenderPass(engine);
+const framebufferMsaa = Rn.RenderableHelper.createFrameBufferMSAA(engine, {
+  width: 600,
+  height: 600,
+  colorBufferNum: 1,
+  colorFormats: [Rn.TextureFormat.RGBA8],
+  sampleCountMSAA: 4,
+  depthBufferFormat: Rn.TextureFormat.Depth32F,
 });
-const framebufferResolve = Rn.RenderableHelper.createTexturesForRenderTarget(600, 600, 1, {});
+const framebufferResolve = Rn.RenderableHelper.createFrameBuffer(engine, {
+  width: 600,
+  height: 600,
+  textureNum: 1,
+  textureFormats: [Rn.TextureFormat.RGBA8],
+  createDepthBuffer: false,
+});
 renderPass1.toClearColorBuffer = true;
 renderPass1.cameraComponent = cameraComponent;
 renderPass1.setFramebuffer(framebufferMsaa);
-renderPass1.setResolveFramebuffer(framebufferMsaa);
+renderPass1.setResolveFramebuffer(framebufferResolve);
 ```
 
 ## Expression
@@ -50,8 +65,8 @@ renderPass1.setResolveFramebuffer(framebufferMsaa);
 Expressionとは、複数のレンダーパスをまとめたもので、RhodoniteによるリアルタイムCGにおいて何らかのCG表現を実現する単位となります。
 CGで表現したい映像は、複雑なものになるとマルチパスレンダリングが必要となります。Expressionに複数のRenderPassを追加することで、そうした表現も可能になります。
 
-また、System.processメソッドはExpressionの配列を引数として受ける仕様になっています。
-表示したいCG表現をひとつひとつExpressionとして記述していき、それら複数の表現（＝Expression）を配列としてSystem.processメソッドに渡すことで、複数の表現からなる複雑なCG映像を表示することが可能になります。
+また、`engine.process`メソッドはExpressionの配列を引数として受ける仕様になっています。
+表示したいCG表現をひとつひとつExpressionとして記述していき、それら複数の表現（＝Expression）を配列として`engine.process`メソッドに渡すことで、複数の表現からなる複雑なCG映像を表示することが可能になります。
 
 ```javascript
 const expression = new Rn.Expression();
@@ -63,17 +78,29 @@ renderPass2.toClearColorBuffer = true;
 renderPass2.cameraComponent = cameraComponent;
 const renderPass_fxaa = new Rn.RenderPass(engine);
 renderPass_fxaa.toClearColorBuffer = true;
-const cameraEntity_fxaa = entityRepository.createEntity([Rn.TransformComponent, Rn.SceneGraphComponent, Rn.CameraComponent])
-const cameraComponent_fxaa = cameraEntity_fxaa.getComponent(Rn.CameraComponent);
+const cameraEntity_fxaa = Rn.createCameraEntity(engine, false);
+const cameraComponent_fxaa = cameraEntity_fxaa.getCamera();
 cameraComponent_fxaa.type = Rn.CameraType.Orthographic;
 renderPass_fxaa.cameraComponent = cameraComponent_fxaa;
 
 expression.addRenderPasses([renderPass1, renderPass2, renderPass_fxaa]);
 
-const framebuffer = Rn.RenderableHelper.createTexturesForRenderTarget(600, 600, 1, {})
+const framebuffer = Rn.RenderableHelper.createFrameBuffer(engine, {
+  width: 600,
+  height: 600,
+  textureNum: 1,
+  textureFormats: [Rn.TextureFormat.RGBA8],
+  createDepthBuffer: true,
+});
 renderPass1.setFramebuffer(framebuffer);
 
-const framebuffer_fxaatarget = Rn.RenderableHelper.createTexturesForRenderTarget(600, 600, 1, {})
+const framebuffer_fxaatarget = Rn.RenderableHelper.createFrameBuffer(engine, {
+  width: 600,
+  height: 600,
+  textureNum: 1,
+  textureFormats: [Rn.TextureFormat.RGBA8],
+  createDepthBuffer: true,
+});
 renderPass2.setFramebuffer(framebuffer_fxaatarget);
 
 ...
@@ -86,9 +113,10 @@ engine.process([expression]);
 ## Frame
 
 フレーム(Frame)は１フレーム分の描画情報を持っており、具体的には内部にエクスプレッション（Expression）の配列を持ちます。
-System.process()メソッドにFrameインスタンスを渡すことで、その１フレーム分の描画が行われます。
+`engine.process()`メソッドにFrameインスタンスを渡すことで、その１フレーム分の描画が行われます。
 
-比較的最近登場したクラスであるため、描画のために必須ではありません。従来通り、System.process()メソッドはExpressionの配列も受け入れます。
+描画のために必須ではありません。`engine.process()`メソッドはExpressionの配列も受け入れます。
+`ForwardRenderPipeline`などのレンダーパイプラインは、描画関数にFrameを渡します。
 
 ## 全体のイメージ
 次のようなイメージです。

@@ -16,94 +16,103 @@ Rhodoniteでは屈折表現やMSAAなどの込み入った表現ができます�
 レンダーパイプラインは複雑なマルチパスの設定をすでに構築ずみのクラスであり、ユーザーはこれを使うことで屈折表現やMSAAなどの高度な表現の恩恵を簡単に受けることができます。
 （UnityエンジンのURP(Universal Render Pipeline)のようなものです）
 
-現在、ForwardRenderPipelineというレンダリングパイプラインのみが存在しますが、今後別のパイプラインが追加される可能性があります。
+現在、利用可能なレンダーパイプラインはForwardRenderPipelineです。
 
 ## ForwardRenderPipeline
 
-Forwardレンダリング方式のレンダーパイプラインです。
+Forwardレンダリング方式のレンダーパイプラインです（ライティングにはデフォルトでClustered Forwardレンダリングが使われます）。
+MSAA、透過（屈折）、シャドウ、ブルーム、トーンマッピング、IBLに対応しており、WebXRのマルチビュー描画にも対応しています。
 
 ```ts
-import Rn from '../../../dist/esm/index.mjs';
+import Rn from 'rhodonite';
 
-const p = document.createElement('p');
-document.body.appendChild(p);
+const canvas = document.getElementById('world') as HTMLCanvasElement;
+const engine = await Rn.Engine.init({
+  approach: Rn.ProcessApproach.WebGL2,
+  canvas,
+  config: new Rn.Config({ isUboEnabled: false }),
+});
 
-declare const window: any;
+// camera
+const cameraEntity = Rn.createCameraControllerEntity(engine, true);
+const cameraComponent = cameraEntity.getCamera();
+cameraComponent.zNear = 0.1;
+cameraComponent.zFar = 1000.0;
+cameraComponent.setFovyAndChangeFocalLength(30.0);
+cameraComponent.aspect = 1.0;
 
-(async () => {
-  Rn.Config.isUboEnabled = false;
-  const canvas = document.getElementById('world') as HTMLCanvasElement;
-  const engine = Rn.Engine.init({
-    approach: Rn.ProcessApproach.FastestWebGL2,
-    canvas,
-  });
+// load the glTF model and the IBL textures
+const assets = await Rn.defaultAssetLoader.load({
+  mainExpression: Rn.GltfImporter.importFromUrl(engine, './assets/IridescentDishWithOlives.glb', {
+    cameraComponent,
+    defaultMaterialHelperArgumentArray: [{ makeOutputSrgb: false }],
+  }),
+  diffuse: Rn.CubeTexture.loadFromUrl(engine, {
+    baseUrl: './assets/ibl/papermill/diffuse/diffuse',
+    mipmapLevelNumber: 1,
+    isNamePosNeg: true,
+    hdriFormat: Rn.HdriFormat.RGBE_PNG,
+  }),
+  specular: Rn.CubeTexture.loadFromUrl(engine, {
+    baseUrl: './assets/ibl/papermill/specular/specular',
+    mipmapLevelNumber: 10,
+    isNamePosNeg: true,
+    hdriFormat: Rn.HdriFormat.RGBE_PNG,
+  }),
+});
 
-  Rn.MeshRendererComponent.isDepthMaskTrueForTransparencies = true;
+// create ForwardRenderPipeline
+const forwardRenderPipeline = new Rn.ForwardRenderPipeline(engine);
+await forwardRenderPipeline.setup(canvas.width, canvas.height, {
+  isShadow: false,
+  isBloom: false,
+});
 
-  // create ForwardRenderPipeline
-  const forwardRenderPipeline = new Rn.ForwardRenderPipeline(engine);
-  forwardRenderPipeline.setup(canvas.width, canvas.height);
+// cameraController
+const mainRenderPass = assets.mainExpression.renderPasses[0];
+const controller = cameraEntity.getCameraController().controller as Rn.OrbitCameraController;
+controller.setTarget(mainRenderPass.sceneTopLevelGraphComponents[0].entity);
+controller.dolly = 0.83;
 
-  // camera
-  const {cameraComponent, cameraEntity} = createCamera();
+forwardRenderPipeline.setExpressions([assets.mainExpression]);
 
-  // gltf
-  const mainExpression = await Rn.GltfImporter.importFromUrl(engine,
-    '../../../assets/gltf/glTF-Sample-Models/2.0/IridescentDishWithOlives/glTF-Binary/IridescentDishWithOlives.glb',
-    {
-      cameraComponent: cameraComponent,
-      defaultMaterialHelperArgumentArray: [
-        {
-          makeOutputSrgb: false,
-        },
-      ],
-    }
-  );
+// lighting (IBL)
+forwardRenderPipeline.setIBLTextures(assets.diffuse, assets.specular);
 
-  // env
-  const envExpression = createEnvCubeExpression(engine,
-    './../../../assets/ibl/papermill',
-    cameraEntity
-  );
+const draw = (frame: Rn.Frame) => {
+  engine.process(frame);
+};
 
-  const mainRenderPass = mainExpression.renderPasses[0];
-  // cameraController
-  const mainCameraControllerComponent = cameraEntity.getCameraController();
-  const controller =
-    mainCameraControllerComponent.controller as Rn.OrbitCameraController;
-  controller.setTarget(mainRenderPass.sceneTopLevelGraphComponents[0].entity);
-  controller.dolly = 0.83;
-
-  forwardRenderPipeline.setExpressions([envExpression, mainExpression]);
-
-  // lighting
-  setIBL(engine, './../../../assets/ibl/papermill');
-
-  const draw = function (frame) {
-    engine.process(frame);
-  };
-
-  forwardRenderPipeline.startRenderLoop(draw);
-})();
+forwardRenderPipeline.startRenderLoop(draw);
 ```
 
 ### 使い方
 
-まず、ForwardRenderPipelineをnewで生成し、次にsetupメソッドを呼びます。
+まず、ForwardRenderPipelineをnewで生成し、次にsetupメソッドを呼びます。`setup`は非同期メソッドなので`await`を付けて呼び出してください。
+第3引数で`isShadow`（シャドウマッピング）、`isBloom`（ブルーム効果）、`shadowMapSize`などのオプションを指定できます。
 
 ```ts
   // create ForwardRenderPipeline
   const forwardRenderPipeline = new Rn.ForwardRenderPipeline(engine);
-  forwardRenderPipeline.setup(canvas.width, canvas.height);
+  await forwardRenderPipeline.setup(canvas.width, canvas.height, {
+    isShadow: false,
+    isBloom: false,
+  });
 ```
 
 次に、描画させたいExpressionの配列をsetExpressionsメソッドでセットします。
 
 ```ts
-  forwardRenderPipeline.setExpressions([envExpression, mainExpression]);
+  forwardRenderPipeline.setExpressions([assets.mainExpression]);
 ```
 
-Rn.System.startRenderLoop()ではなく、forwardRenderPipelineのstartRenderLoop()メソッドを呼びます。引数として描画関数をセットします。渡した関数の第一引数にはforwardRenderPipelineからframeオブジェクトが渡されるので、それを使ってRn.System.processメソッドを呼び出します。
+IBL(Image Based Lighting)を使う場合は、setIBLTexturesメソッドでdiffuseとspecularのキューブテクスチャをセットします。
+
+```ts
+  forwardRenderPipeline.setIBLTextures(assets.diffuse, assets.specular);
+```
+
+engine.startRenderLoop()ではなく、forwardRenderPipelineのstartRenderLoop()メソッドを呼びます。引数として描画関数をセットします。渡した関数の第一引数にはforwardRenderPipelineからframeオブジェクトが渡されるので、それを使ってengine.processメソッドを呼び出します。
 
 ```ts
   const draw = function (frame) {

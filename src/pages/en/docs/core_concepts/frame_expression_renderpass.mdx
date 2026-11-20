@@ -15,12 +15,18 @@ RenderPass can specify the framebuffer to which the rendering output will be dir
 The renderPass can also specify a group of entities to be displayed in the render pass. Entities that are not specified will not be processed in that render pass.
 You can also specify the camera to be used for rendering in the render pass.
 
-A render pass cannot be passed to the System.process method without modification.
+A render pass cannot be passed to the `engine.process` method without modification.
 It must be added to a class called expression that summarizes the render path.
 
 ```javascript
 const renderPass1 = new Rn.RenderPass(engine);
-const framebuffer = Rn.RenderableHelper.createTexturesForRenderTarget(600, 600, 1, {})
+const framebuffer = Rn.RenderableHelper.createFrameBuffer(engine, {
+  width: 600,
+  height: 600,
+  textureNum: 1,
+  textureFormats: [Rn.TextureFormat.RGBA8],
+  createDepthBuffer: true,
+});
 renderPass1.toClearColorBuffer = true;
 renderPass1.cameraComponent = cameraComponent;
 renderPass1.setFramebuffer(framebuffer);
@@ -33,16 +39,25 @@ An additional render target required to perform MSAA called Resolve is set with 
 
 ```javascript
 const renderPass1 = new Rn.RenderPass(engine);
-const framebufferMsaa = Rn.RenderableHelper.createTexturesForRenderTarget(600, 600, 0, {
-    isMSAA: true,
-    sampleCountMSAA: 4,
-    createDepthBuffer: true,
+const framebufferMsaa = Rn.RenderableHelper.createFrameBufferMSAA(engine, {
+  width: 600,
+  height: 600,
+  colorBufferNum: 1,
+  colorFormats: [Rn.TextureFormat.RGBA8],
+  sampleCountMSAA: 4,
+  depthBufferFormat: Rn.TextureFormat.Depth32F,
 });
-const framebufferResolve = Rn.RenderableHelper.createTexturesForRenderTarget(600, 600, 1, {});
+const framebufferResolve = Rn.RenderableHelper.createFrameBuffer(engine, {
+  width: 600,
+  height: 600,
+  textureNum: 1,
+  textureFormats: [Rn.TextureFormat.RGBA8],
+  createDepthBuffer: false,
+});
 renderPass1.toClearColorBuffer = true;
 renderPass1.cameraComponent = cameraComponent;
 renderPass1.setFramebuffer(framebufferMsaa);
-renderPass1.setResolveFramebuffer(framebufferMsaa);
+renderPass1.setResolveFramebuffer(framebufferResolve);
 ```
 
 ## Expression
@@ -50,8 +65,8 @@ renderPass1.setResolveFramebuffer(framebufferMsaa);
 An Expression is a grouping of multiple render passes and is the unit for realizing some kind of CG expression in real-time CG with Rhodonite.
 By adding multiple RenderPasses to an Expression, it is possible to achieve such a rendering.
 
-In addition, the System.process method accepts an array of Expression as its argument.
-By writing the CG expressions you want to display one by one as an Expression, and passing these multiple expressions (=Expression) as an array to the System.process method, it is possible to display complex CG images consisting of multiple expressions.
+In addition, the `engine.process` method accepts an array of Expression as its argument.
+By writing the CG expressions you want to display one by one as an Expression, and passing these multiple expressions (=Expression) as an array to the `engine.process` method, it is possible to display complex CG images consisting of multiple expressions.
 
 ```javascript
 const expression = new Rn.Expression();
@@ -64,17 +79,29 @@ renderPass2.cameraComponent = cameraComponent;
 
 const renderPass_fxaa = new Rn.RenderPass(engine);
 renderPass_fxaa.toClearColorBuffer = true;
-const cameraEntity_fxaa = entityRepository.createEntity([Rn.TransformComponent, Rn.SceneGraphComponent, Rn.CameraComponent])
-const cameraComponent_fxaa = cameraEntity_fxaa.getComponent(Rn.CameraComponent);
+const cameraEntity_fxaa = Rn.createCameraEntity(engine, false);
+const cameraComponent_fxaa = cameraEntity_fxaa.getCamera();
 cameraComponent_fxaa.type = Rn.CameraType.Orthographic;
 renderPass_fxaa.cameraComponent = cameraComponent_fxaa;
 
 expression.addRenderPasses([renderPass1, renderPass2, renderPass_fxaa]);
 
-const framebuffer = Rn.RenderableHelper.createTexturesForRenderTarget(600, 600, 1, {})
+const framebuffer = Rn.RenderableHelper.createFrameBuffer(engine, {
+  width: 600,
+  height: 600,
+  textureNum: 1,
+  textureFormats: [Rn.TextureFormat.RGBA8],
+  createDepthBuffer: true,
+});
 renderPass1.setFramebuffer(framebuffer);
 
-const framebuffer_fxaatarget = Rn.RenderableHelper.createTexturesForRenderTarget(600, 600, 1, {})
+const framebuffer_fxaatarget = Rn.RenderableHelper.createFrameBuffer(engine, {
+  width: 600,
+  height: 600,
+  textureNum: 1,
+  textureFormats: [Rn.TextureFormat.RGBA8],
+  createDepthBuffer: true,
+});
 renderPass2.setFramebuffer(framebuffer_fxaatarget);
 
 ...
@@ -87,9 +114,10 @@ engine.process([expression]);
 ## Frame
 
 A Frame holds drawing information for one frame, specifically, it has an array of Expressions inside.
-By passing a Frame instance to the System.process() method, a frame is drawn.
+By passing a Frame instance to the `engine.process()` method, a frame is drawn.
 
-As a relatively recently introduced class, it is not required for drawing. As before, the System.process() method also accepts an array of Expression.
+It is not required for drawing. The `engine.process()` method also accepts an array of Expressions.
+Render pipelines such as `ForwardRenderPipeline` pass a Frame to the drawing function.
 
 ## Overall image
 The image is as follows

@@ -9,10 +9,10 @@ import DocLayout from '../../../../components/tutorials_layouts/DocLayout.astro'
 
 ## Create Material
 
-Rhodonite has many material classes. To generate them, use the [MaterialHelper object](https://github.com/actnwit/RhodoniteTS/blob/4219ddad/src/foundation/helpers/MaterialHelper.ts#L1001).
+Rhodonite has many material classes. To generate them, use the [MaterialHelper object](https://actnwit.github.io/RhodoniteTS/api/variables/default.MaterialHelper.html).
 
 ```typescript
-const material = Rn.MaterialHelper.createPbrUberMaterial()
+const material = Rn.MaterialHelper.createPbrUberMaterial(engine);
 ```
 
 ## Setting shader parameters to Material
@@ -26,8 +26,7 @@ material.setParameter("baseColorFactor", Rn.Vector4.fromCopy4(1, 1, 1, 1));
 To pass the texture to the shader, do the following
 
 ```typescript
-const rnTexture = new Rn.Texture(engine);
-texture.generateTextureFromUri('/path/to/texture.png');
+const rnTexture = await Rn.Texture.loadFromUrl(engine, '/path/to/texture.png');
 const rnSampler = new Rn.Sampler(engine, {
    magFilter: Rn.TextureParameter.Linear,
    minFilter: Rn.TextureParameter.Linear,
@@ -50,7 +49,7 @@ const primitive = Rn.Primitive.createPrimitive(engine, {
   attributes: [positions],
   primitiveMode: Rn.PrimitiveMode.Lines,
 });
-primitive.material = mateiral;
+primitive.material = material;
 ```
 
 ```typescript

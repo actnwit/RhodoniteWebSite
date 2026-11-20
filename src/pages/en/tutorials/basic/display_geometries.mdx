@@ -14,7 +14,7 @@ The class that stores the actual vertex data is the Primitive class.The Mesh cla
 const primitive = new Rn.Plane(engine);
 primitive.generate({
   width: 1, height: 1, uSpan: 1, vSpan: 1, isUVRepeat: false,
-  material: Rn.MaterialHelper.createPbrUberMaterial();
+  material: Rn.MaterialHelper.createPbrUberMaterial(engine),
 });
 const mesh = new Rn.Mesh(engine);
 mesh.addPrimitive(primitive);
@@ -24,7 +24,7 @@ mesh.addPrimitive(primitive);
 Once the mesh is set up, add the mesh to the MeshComponent of the Entity that wants to have the mesh.
 
 ```typescript
-const meshEntity = Rn.EntityHelper.createMeshEntity(engine);
+const meshEntity = Rn.createMeshEntity(engine);
 const meshComponent = meshEntity.getMesh();
 meshComponent.setMesh(mesh);
 ```
@@ -53,28 +53,34 @@ engine.startRenderLoop(()=>{
 
 ## Basic Shapes
 
-Several basic shapes can be created using the MeshHelper class. These functions return the entities of the basic shapes created.
+Several basic shapes can be created using the [MeshHelper](https://actnwit.github.io/RhodoniteTS/api/variables/default.MeshHelper.html) object. These functions return the entities of the basic shapes created.
 
 ```typescript
   const cubeEntity = Rn.MeshHelper.createCube(engine);
-  cubeEntity.rotate = Rn.Vector3.fromCopy3(90, 0, 0);
-  cubeEntity.translate = Rn.Vector3.fromCopy3(0, 3, 0);
+  cubeEntity.localEulerAngles = Rn.Vector3.fromCopy3(Math.PI / 2, 0, 0); // radians
+  cubeEntity.localPosition = Rn.Vector3.fromCopy3(0, 3, 0);
 ```
 
 The following basic shapes are available.
 
-* Plane - [Rn.MeshHelper.createPlane()](https://github.com/actnwit/RhodoniteTS/blob/4219ddad/src/foundation/helpers/MeshHelper.ts#L14)
-* Grid - [Rn.MeshHelper.createGrid()](https://github.com/actnwit/RhodoniteTS/blob/4219ddad/src/foundation/helpers/MeshHelper.ts#L42)
-* Cube - [Rn.MeshHelper.createCube()](https://github.com/actnwit/RhodoniteTS/blob/4219ddad/src/foundation/helpers/MeshHelper.ts#L57)
-* Axis - [Rn.MeshHelper.createAxis()](https://github.com/actnwit/RhodoniteTS/blob/4219ddad/src/foundation/helpers/MeshHelper.ts#L88)
-* Joint - [Rn.MeshHelper.createJoint()](https://github.com/actnwit/RhodoniteTS/blob/4219ddad/src/foundation/helpers/MeshHelper.ts#L81)
-* Line - [Rn.MeshHelper.createLine()](https://github.com/actnwit/RhodoniteTS/blob/4219ddad/src/foundation/helpers/MeshHelper.ts#L29)
-* Sphere - [Rn.MeshHelper.creteSphere()](https://github.com/actnwit/RhodoniteTS/blob/4219ddad/src/foundation/helpers/MeshHelper.ts#L68)
+* Plane - `Rn.MeshHelper.createPlane(engine)`
+* Grid - `Rn.MeshHelper.createGrid(engine)`
+* Cube - `Rn.MeshHelper.createCube(engine)`
+* Cubes (multiple cubes) - `Rn.MeshHelper.createCubes(engine)`
+* Sphere - `Rn.MeshHelper.createSphere(engine)`
+* Spheres (multiple spheres) - `Rn.MeshHelper.createSpheres(engine)`
+* Cone - `Rn.MeshHelper.createCone(engine)`
+* Cylinder - `Rn.MeshHelper.createCylinder(engine)`
+* Capsule - `Rn.MeshHelper.createCapsule(engine)`
+* Ring - `Rn.MeshHelper.createRing(engine)`
+* Axis - `Rn.MeshHelper.createAxis(engine)`
+* Joint - `Rn.MeshHelper.createJoint(engine)`
+* Line - `Rn.MeshHelper.createLine(engine)`
 
 
 Here is a sample for reference.
 
-- [Primitives](https://github.com/actnwit/RhodoniteTS/blob/master/samples/test_e2e/Primitives/main.ts)
+- [Primitives](https://github.com/actnwit/RhodoniteTS/blob/main/samples/test_e2e/Primitives/main.ts)
 
 ![image](https://user-images.githubusercontent.com/3821214/205436440-8f9d271b-c083-41f4-8b61-04fe9b09eecc.png)
 
@@ -85,7 +91,7 @@ The defined vertex data is set to the Primitive class.
 
 
 ```typescript
-function readyBasicVerticesData() {
+function readyBasicVerticesData(engine: Rn.Engine) {
 
     const positions = new Float32Array([
          0.0,  0.5, 0.0, // v0
@@ -107,7 +113,7 @@ function readyBasicVerticesData() {
         indices: indices,
         attributeSemantics: [Rn.VertexAttribute.Position.XYZ, Rn.VertexAttribute.Color0.XYZ],
         attributes: [positions, colors],
-        material: void 0,
+        material: undefined,
         primitiveMode: Rn.PrimitiveMode.Triangles
     });
 
@@ -119,7 +125,7 @@ function readyBasicVerticesData() {
 The entire code is shown below.
 
 ```typescript
-function readyBasicVerticesData() {
+function readyBasicVerticesData(engine: Rn.Engine) {
 
     const positions = new Float32Array([
          0.0,  0.5, 0.0, // v0
@@ -141,7 +147,7 @@ function readyBasicVerticesData() {
         indices: indices,
         attributeSemantics: [Rn.VertexAttribute.Position.XYZ, Rn.VertexAttribute.Color0.XYZ],
         attributes: [positions, colors],
-        material: void 0,
+        material: undefined,
         primitiveMode: Rn.PrimitiveMode.Triangles
     });
 
@@ -149,9 +155,9 @@ function readyBasicVerticesData() {
 }
 
 const load = async function () {
-    const c = document.getElementById('world');
-    const engine = Rn.Engine.init({
-      approach: Rn.ProcessApproach.FastestWebGL2,
+    const c = document.getElementById('world') as HTMLCanvasElement;
+    const engine = await Rn.Engine.init({
+      approach: Rn.ProcessApproach.WebGL2,
       canvas: c,
     });
 
@@ -164,15 +170,15 @@ const load = async function () {
     function resizeCanvas() {
         c.width = window.innerWidth;
         c.height = window.innerHeight;
-        system.resizeCanvas(c.width, c.height);
+        engine.resizeCanvas(c.width, c.height);
     }
 
-    const primitive = readyBasicVerticesData();
+    const primitive = readyBasicVerticesData(engine);
 
     const originalMesh = new Rn.Mesh(engine);
     originalMesh.addPrimitive(primitive);
 
-    const firstEntity = Rn.EntityHelper.createMeshEntity(engine);
+    const firstEntity = Rn.createMeshEntity(engine);
 
     const meshComponent = firstEntity.getMesh();
     meshComponent.setMesh(originalMesh);
@@ -185,7 +191,7 @@ const load = async function () {
 document.body.onload = load;
 ```
 
-jsfiddle版はこちらです。
+Here is the jsfiddle version (it may use an older version of Rhodonite).
 
 https://jsfiddle.net/emadurandal/xgw9e3y7/4/
 

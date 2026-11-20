@@ -34,13 +34,13 @@ In Rhodonite, most objects are assigned IDs so that they can be identified and m
 UniqueID assigned to an instance of Entity. It is often used to retrieve or specify a specific Entity.
 
 ```javascript
-const engine = Rn.Engine.init({
+const engine = await Rn.Engine.init({
   approach: Rn.ProcessApproach.None,
   canvas: document.getElementById('world')
 });
 const entityRepository = engine.entityRepository;
-const meshEntity = entityRepository.createEntity([Rn.TransformComponent, Rn.SceneGraphComponent]);
-console.log(meshEntity.entityUID)
+const entity = Rn.createGroupEntity(engine); // with TransformComponent and SceneGraphComponent
+console.log(entity.entityUID);
 ```
 
 ### ObjectUID
@@ -48,36 +48,36 @@ console.log(meshEntity.entityUID)
 UniqueID assigned to an instance of a class that extends RnObject; since Entity is also a RnObject, Entity has both an entityUID and an objectUID.
 
 ```javascript
-const rnObject = new RnObject();
+const rnObject = new Rn.RnObject();
 console.log(rnObject.objectUID);
 
-const engine = Rn.Engine.init({
+const engine = await Rn.Engine.init({
   approach: Rn.ProcessApproach.None,
   canvas: document.getElementById('world')
 });
 
 const entityRepository = engine.entityRepository;
-const entity = entityRepository.createEntity([]);
+const entity = entityRepository.createEntity();
 console.log(entity.objectUID);
 ```
 
 ### ComponentTID
 
 TypeID representing the type of component. It is also a static ID whose value is fixed at the time of compilation.
-A typical ComponentTID is [this file in Rhodonite](https://github.com/emadurandal/RhodoniteTS/blob/master/src/foundation/components/ WellKnownComponentTIDs.ts).
+A typical ComponentTID is [this file in Rhodonite](https://github.com/actnwit/RhodoniteTS/blob/main/src/foundation/components/WellKnownComponentTIDs.ts).
 
 ### ComponentSID
 
 ScopedID of the component instance.
 
 ```javascript
-const engine = Rn.Engine.init({
+const engine = await Rn.Engine.init({
   approach: Rn.ProcessApproach.None,
   canvas: document.getElementById('world')
 });
 const entityRepository = engine.entityRepository;
-const meshEntity = entityRepository.createEntity([Rn.TransformComponent, Rn.SceneGraphComponent]);
-const transformComponent = meshEntity.getTransforom();
+const entity = Rn.createGroupEntity(engine);
+const transformComponent = entity.getTransform();
 console.log(transformComponent.componentSID);
 ```
 

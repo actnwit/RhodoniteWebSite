@@ -46,12 +46,13 @@ Also, by using the method takeOne, one piece of data can be retrieved as a Typed
 ## Blittable Memory Architecture
 
 One of Rhodonite's unique features is its "blittable memory architecture.
-Using the memory management mechanism described so far, the Bufer class manages contiguous memory areas as a huge ArrayBuffer pool.
+Using the memory management mechanism described so far, the Buffer class manages contiguous memory areas as a huge ArrayBuffer pool.
 Then, some of the data is extracted using the takeOne method of the Accessor class and assigned as the storage area for the individual properties of components and materials.
 
 This means that when you change a property of a component or material, that change actually rewrites the inside of the huge ArrayBuffer memory pool represented by the Buffer class.
 
-The beauty of this is that with this mechanism, after the various library calculations, the ArrayBuffer memory pool indicated by Buffer is simply sent to the GPU as a floating-point texture, and the GPU has access to almost all data through the texture. It is.
+The beauty of this is that with this mechanism, after the various library calculations, the ArrayBuffer memory pool indicated by Buffer is simply sent to the GPU as a floating-point texture, and the GPU has access to almost all data through the texture.
+In WebGPU mode, the same memory pool is sent to the GPU as storage buffers instead of a floating-point texture.
 
 Another benefit is that the cost of setting up uniform variables (copying values to retrieve them and the overhead of WebGL's uniform function itself) is eliminated.
 
