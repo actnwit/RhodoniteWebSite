@@ -41,7 +41,7 @@ export const LanguageSwitcher = () => {
     <div className="relative p-4 flex justify-end">
       <button
         ref={buttonRef}
-        className="flex items-center gap-2 px-4 py-2 border border-gray-200 rounded-md bg-white text-gray-700 hover:bg-gray-50 transition-colors duration-200 text-base cursor-pointer shadow-sm hover:shadow-md"
+        className="flex items-center gap-2 px-4 py-2 border border-gray-200 rounded-md bg-white text-gray-700 hover:bg-gray-50 transition-colors duration-200 text-base cursor-pointer shadow-xs hover:shadow-md"
         onClick={() => setIsMenuOpen(!isMenuOpen)}
       >
         {currentLabel}
