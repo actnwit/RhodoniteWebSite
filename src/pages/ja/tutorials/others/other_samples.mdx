@@ -9,16 +9,15 @@ import DocLayout from '../../../../components/tutorials_layouts/DocLayout.astro'
 
 チュートリアルは以上ですが、もっと参考となるコードが欲しい場合は、Rhodoniteプロジェクトの[samples](https://github.com/actnwit/RhodoniteTS/tree/main/samples)ディレクトリを覗いてください。様々なサンプルのソースコードがあるのでコーディングの際の参考となるでしょう。
 
-Rhodoniteプロジェクトをcloneし、プロジェクト直下で以下のコマンドを打つと、ローカルサーバーが起動します。
+Rhodoniteプロジェクトをcloneし、プロジェクト直下で以下のコマンドを打つと、ライブラリとサンプルがビルドされ、ローカルサーバーが起動します（Node.js 22以降とpnpmが必要です）。
 
-```
-$ yarn start
-yarn run v1.22.19
-node server.js
-Express server is running at http://localhost:8082
+```bash
+$ pnpm install
+$ pnpm run build
+$ pnpm run watch-samples
 ```
 
-`http://localhost:8082`にアクセスすると、実際のサンプルの動作を確認することができます。
+`http://localhost:8082`にアクセスすると、実際のサンプルの動作を確認することができます。終了するときはctrl + cを押してください。
 
 ![image](https://github.com/actnwit/RhodoniteTS/assets/3821214/12a85a79-0cf9-4cc7-b9f9-050c05f3f012)
 

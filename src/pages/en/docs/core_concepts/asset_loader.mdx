@@ -85,13 +85,13 @@ const mixedAssets = await assetLoader.load({
     hdriFormat: Rn.HdriFormat.HDR_LINEAR,
   }),
   texture: Rn.Texture.loadFromUrl(engine, '/assets/textures/albedo.jpg'),
-  model: Rn.Gltf2Importer.importFromUrl(engine, '/assets/models/model.gltf')
+  model: Rn.GltfImporter.importFromUrl(engine, '/assets/models/model.gltf')
 });
 
 // The types of each property are correctly inferred by type inference
 console.log(mixedAssets.cubeTexture); // CubeTexture
 console.log(mixedAssets.texture);     // Texture
-console.log(mixedAssets.model);       // Gltf2
+console.log(mixedAssets.model);       // Expression
 ```
 
 ### Other APIs
@@ -429,7 +429,7 @@ class GameManager {
   private loadCharacterAssets() {
     // The result is stored internally, so it is not awaited
     this.assetLoader.load({
-      character1: Rn.Gltf2Importer.importFromUrl(engine, '/assets/character1.gltf')
+      character1: Rn.GltfImporter.importFromUrl(engine, '/assets/character1.gltf')
     }).then(assets => {
       this.characters.character1 = assets.character1;
     });

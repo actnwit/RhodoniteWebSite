@@ -8,15 +8,15 @@ import DocLayout from '../../../../components/tutorials_layouts/DocLayout.astro'
 <DocLayout>
 
 This section explains how to display glTF in Rhodonite.
-Rhodonite supports glTF1 and glTF2 and VRM.
+Rhodonite supports glTF2 (.gltf / .glb) and VRM (VRM0.x / VRM1.0).
 
 ## How to import glTF
 
 ### Using GltfImporter
 The easiest way is to use the GltfImporter class.
-This class automatically determines glTF1, glTF2, and VRM and loads them appropriately.
+This class automatically determines the file type (glTF2, GLB, VRM, etc.) and loads it appropriately.
 The importFromUrl method of this class returns an Expression object when called using await.
-This expression can be passed directly to the process method of the System class for drawing.
+This expression can be passed directly to the `engine.process` method for drawing.
 
 ```typescript
 const expression = await Rn.GltfImporter.importFromUrl(engine, gltfUrl, loadOption);
@@ -29,14 +29,14 @@ const expression = await Rn.GltfImporter.importFromUrl(engine, gltfUrl, loadOpti
      sandbox="allow-forms allow-modals allow-popups allow-presentation allow-same-origin allow-scripts"
    ></iframe>
 
-## Use Gltf1Importer or Gltf2Importer
+## Use Gltf2Importer
 
-There are also version-specific Importers, such as the Gltf1Importer or Gltf2Importer. These return data in a proprietary format called [RnM2](https://github.com/actnwit/RhodoniteTS/blob/master/src/types/RnM2.ts) in result object rather than expression.
+There is also the Gltf2Importer, which is specific to glTF2. It returns data in a proprietary format called [RnM2](https://github.com/actnwit/RhodoniteTS/blob/main/src/types/RnM2.ts) rather than an expression.
 RnM2 is the glTF2 data in which the logical connection relationships between the indexes of the glTF items are resolved to references to the actual objects.
 This is passed to ModelConverter to obtain the Entity of the root of the scene graph of the read glTF.
 
 ```typescript
-    const rnm = await Rn.Gltf2Importer.importFromUrl(engine,
+    const rnm = await Rn.Gltf2Importer.importFromUrl(
       '../../../assets/gltf/glTF-Sample-Models/2.0/BoxAnimated/glTF/BoxAnimated.gltf'
     );
     const rootGroup = await Rn.ModelConverter.convertToRhodoniteObject(engine, rnm);
@@ -58,10 +58,10 @@ Usually, it is recommended to use GltfImporter, which automatically determines t
 
 ## Using AssetLoader
 
-Using AssetLoader, you can load multiple assets at once.
+Using [AssetLoader](/en/docs/core_concepts/asset_loader/), you can load multiple assets at once. `Rn.defaultAssetLoader` is a globally available AssetLoader instance.
 
 ```typescript
-const assets = await Rn.AssetLoader.load({
+const assets = await Rn.defaultAssetLoader.load({
   gltf: Rn.GltfImporter.importFromUrl(engine, gltfUrl, loadOption),
   vrm: Rn.GltfImporter.importFromUrl(engine, vrmUrl, loadOption),
 });
@@ -83,10 +83,10 @@ engine.process(expressions);
 
 ### Using AssetLoader.loadArray
 
-Using AssetLoader.loadArray, you can receive multiple assets in array format.
+Using the loadArray method of AssetLoader, you can receive multiple assets in array format.
 
 ```typescript
-const expressions = await Rn.AssetLoader.loadArray([
+const expressions = await Rn.defaultAssetLoader.loadArray([
   Rn.GltfImporter.importFromUrl(engine, gltfUrl, loadOption),
   Rn.GltfImporter.importFromUrl(engine, vrmUrl, loadOption),
 ]);
@@ -103,8 +103,8 @@ engine.process(expressions);
 
 ## Sample for reference
 
-- [glTFImporter](https://github.com/actnwit/RhodoniteTS/tree/master/samples/test_e2e/GltfImporter-draco-extension)
-- [glTF1Importer Sample](https://github.com/actnwit/RhodoniteTS/tree/master/samples/test_e2e/Gltf1Importer)
-- [glTF2Importer Sample](https://github.com/actnwit/RhodoniteTS/tree/master/samples/test_e2e/Gltf2Importer)
+- [GltfImporter Sample](https://github.com/actnwit/RhodoniteTS/tree/main/samples/test_e2e/GltfImporter)
+- [GltfImporter (Draco extension) Sample](https://github.com/actnwit/RhodoniteTS/tree/main/samples/test_e2e/GltfImporter-draco-extension)
+- [Gltf2Importer + ModelConverter Sample](https://github.com/actnwit/RhodoniteTS/tree/main/samples/test_e2e/Gltf2Importer-MSAA)
 
 </DocLayout>

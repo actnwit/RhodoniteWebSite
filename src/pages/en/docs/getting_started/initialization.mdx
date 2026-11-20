@@ -11,120 +11,131 @@ import DocLayout from '../../../../components/docs_layouts/DocLayout.astro';
 
 Initialization of Rhodonite is simple.
 
-In the Rn.System.init method, specify the process approach and the Canvas to draw to. Don't forget to specify `await`.
-
-Depending on which process approach is chosen, the internal processing of WebGL differs.
-For the latest Rhodonite we recommend DataTexture.
+Call the `Rn.Engine.init` method with the process approach and the Canvas to draw to. `Rn.Engine.init` is asynchronous, so don't forget to specify `await`.
+It returns an `Engine` instance. Most Rhodonite APIs (creating entities, materials, textures, etc.) take this `engine` as their first argument.
 
 ```javascript
-const engine = Rn.Engine.init({
-  approach: Rn.ProcessApproach.DataTexture,
-  canvas: document.getElementById('world')
-};
+const engine = await Rn.Engine.init({
+  approach: Rn.ProcessApproach.WebGL2,
+  canvas: document.getElementById('world'),
+});
 ```
 
 ### List of Process Approaches
 
 | Type | Characteristics |
 |:-----------|------------|
-| Uniform | Works with WebGL2. Uses Uniform variables for passing shader parameters, suitable for troubleshooting as you can check the parameters passed to Uniform variables in e.g. specter.js. |
-| DataTexture | Works with WebGL2. Uses floating point textures for passing shader parameters. Normally recommended to use this instead of Uniform. |
-| WebGPU | Works with WebGPU |
+| WebGL2 | Works with WebGL2. Shader parameters are passed to the GPU through a floating-point data texture (Blittable Memory Architecture). |
+| WebGPU | Works with WebGPU. Shader parameters are passed to the GPU through storage buffers. |
+| None | Does not use any graphics API. Use this when you only need non-rendering features such as entities and components. |
+
+> **Note:** The former `Uniform` and `DataTexture` approaches have been removed.
+> `ProcessApproach.DataTexture` was renamed to `ProcessApproach.WebGL2`, and `ProcessApproach.Uniform` no longer exists (use `ProcessApproach.WebGL2` instead).
+> Passing a removed approach to `Rn.Engine.init` throws an error.
+
+### Destroying the Engine
+
+When the engine is no longer needed, call `engine.destroy()`.
+This stops the render loop and releases all resources held by the engine (entities, materials, textures, GPU resources, etc.).
+The engine instance must not be used after calling this method.
+
+```javascript
+engine.destroy();
+```
 
 ## Rn.Config
 
 This configuration is optional.
-[Rn.Config](https://actnwit.github.io/RhodoniteTS/api/variables/default.Config.html) is an object used to configure Rhodonite.
-If you want to change the default value, set a value to `Rn.Config.xxx`.
-This value should be set before calling the `Rn.System.init` method.
+[Rn.Config](https://actnwit.github.io/RhodoniteTS/api/classes/default.Config.html) is a class used to configure Rhodonite.
+Create a `Rn.Config` instance with the values you want to change, and pass it to the `config` option of `Rn.Engine.init`.
+Properties you don't specify keep their default values. The configuration belongs to each engine instance and can be read later through `engine.config`.
 
 ```typescript
-Rn.Config.maxLightNumber = 8;
-Rn.Config.cgApiDebugConsoleOutput = true;
-
-const engine = Rn.Engine.init({
-  approach: Rn.ProcessApproach.DataTexture,
-  canvas: document.getElementById('world')
-};
+const engine = await Rn.Engine.init({
+  approach: Rn.ProcessApproach.WebGL2,
+  canvas: document.getElementById('world') as HTMLCanvasElement,
+  config: new Rn.Config({
+    maxLightNumber: 8,
+    cgApiDebugConsoleOutput: true,
+  }),
+});
 ```
 
-The following is a list of properties and their meanings.
+The following is a list of the main properties and their meanings.
 
-| Property Name | Meaning |
-|:-----------|------------|
-| boneDataType | The data type used in skeletal animation processing. Specify one of Rn.BoneDataType.Mat43x1, Rn.BoneDataType.Vec4x2, Rn.BoneDataType.Vec4x2Old, Rn.BoneDataType.Vec4x1. Usually the default Rn.BoneDataType.Mat43x1 is fine. |
-| cacheWebGpuRenderBundles | Whether to cache render bundles in WebGPU. Usually true is fine. |
-| cgApiDebugConsoleOutput | Whether to output WebGL/WebGPU debug information to the console |
-| eventTargetDom | The DOM element that the mouse event targets. The default is the canvas element to draw to. |
-| isMobile | Whether it is a mobile device |
-| isUboEnabled | Whether to enable UBO. Recommended to be false. The default is false. |
-| scenegraphComponentCountPerBufferView | The number of SceneGraph components to allocate memory contiguously when allocating memory. This is a trade-off between performance and memory usage. The default is 10. |
-| cameraComponentCountPerBufferView | The number of Camera components to allocate memory contiguously when allocating memory. This is a trade-off between performance and memory usage. The default is 1. |
-| lightComponentCountPerBufferView | The number of Light components to allocate memory contiguously when allocating memory. This is a trade-off between performance and memory usage. The default is 1. |
-| materialCountPerBufferView | The number of Material components to allocate memory contiguously when allocating memory. This is a trade-off between performance and memory usage. The default is 3. |
-| maxLightNumber | The maximum number of lights that Rhodonite can handle |
-| maxSkeletalBoneNumberForUniformMode | The maximum number of bones for each skeletal that can be handled simultaneously in Uniform mode |
-| maxBoneNumberForMemoryBoostMode | The maximum number of bones for each skeletal that can be handled simultaneously in MemoryBoost mode |
-| multiViewForWebVR | Whether to enable the WebVR multi-view extension |
-| physicsTimeIntervalScale | The scale value of the time interval of the physics calculation |
-| bufferSizeDivisionRatiosForGPUInstanceDataUsage | The ratio of the buffer size for GPU instance data usage. Normally, this does not need to be changed. |
+| Property Name | Default | Meaning |
+|:-----------|:-----------|------------|
+| boneDataType | undefined | Forces the bone data type of all SkeletalComponents. Specify one of `Rn.BoneDataType.Mat43x1`, `Rn.BoneDataType.Vec4x2`, `Rn.BoneDataType.Vec4x1`. When undefined, each SkeletalComponent uses its own type (the importers choose Vec4x1 or Vec4x2 automatically), so usually you don't need to set this. |
+| cacheWebGpuRenderBundles | true | Whether to cache render bundles in WebGPU. Usually true is fine. |
+| cgApiDebugConsoleOutput | false | Whether to output WebGL/WebGPU debug information (such as detailed shader compile errors) to the console |
+| eventTargetDom | (the canvas) | The DOM element that the mouse event targets. The default is the canvas element to draw to. |
+| isMobile | false | Whether it is a mobile device |
+| isUboEnabled | false | Whether to enable UBO. Recommended to be false. |
+| logLevel | `Rn.LogLevel.Warn` | The minimum log level to output. See [Logger](#logger). |
+| maxLightNumber | 6 | The maximum number of lights that can cast shadows at the same time. 0 disables the shadow map slots for lights. (This is not the limit of the number of lights in the scene. See `maxLightListLength`.) |
+| maxLightListLength | 1024 | The maximum number of enabled lights that are shaded. Other lights are ignored. |
+| scenegraphComponentCountPerBufferView | 1000 | The number of SceneGraph components to allocate memory contiguously. This is a trade-off between performance and memory usage. |
+| skeletalComponentCountPerBufferView | 100 | The number of Skeletal components to allocate memory contiguously. |
+| cameraComponentCountPerBufferView | 1 | The number of Camera components to allocate memory contiguously. |
+| lightComponentCountPerBufferView | 64 | The number of Light components to allocate memory contiguously. |
+| materialCountPerBufferView | 100 | The number of instances of each material type to be placed contiguously in memory. This does not limit the number of material instances that can be created. |
+| multiViewForWebVR | false | Whether to enable the multi-view extension for WebXR (VR) rendering |
+| physicsTimeIntervalScale | 1 | The scale value of the time interval of the physics calculation |
+| bufferSizeDivisionRatiosForGPUInstanceDataUsage | [1/32, 5/32, 6/32, 12/32] | The ratio of the buffer size for GPU instance data usage. Normally, this does not need to be changed. |
+| isMultiDrawEnabled | true | Whether to enable WebGL multi-draw rendering (`WEBGL_multi_draw`). Primitives sharing a source buffer are merged and drawn together. |
+| isDepthPrepassEnabled | false | Whether to render a depth prepass for opaque primitives (WebGPU only). Effective for scenes with a lot of overdraw. |
+| isClusteredForwardEnabled | true | Whether to enable Clustered Forward rendering. See below. |
+| clusteredForwardBuildMode | 'auto' | Where the light clusters are built. `'auto'`: compute shaders in WebGPU, CPU in WebGL2. `'cpu'`: CPU in both. |
+| clusteredForwardGridSize | [48, 27, 48] | The number of clusters along the screen X, screen Y and view depth axes |
+| clusteredForwardMaxViewNumber | 4 | The maximum number of cameras whose light clusters are built in one frame |
+| clusteredForwardLightCapacityPerCluster | 96 | The maximum number of lights in the list of each cluster |
+| clusteredForwardMinLocalLightNumber | 1 | The light clusters are built only when the number of cullable local lights is at least this value |
+| lightAutoRangeThreshold | 0 | When greater than 0, point and spot lights without a range get an effective range where their intensity falls to this value, so that they can be culled by Clustered Forward rendering. |
+| lightRangeScale | 1 | Scales the effective range of point and spot lights (in (0, 1]) and raises their intensity to compensate. Smaller values reduce the shading cost. |
 
-## MemoryBoost Mode
+### Clustered Forward Rendering
 
-MemoryBoost Mode is a mode that uses a lot of memory to improve performance.
-By allocating a lot of components in memory contiguously, performance is improved.
-In this mode, there is a limit on the number of bones that can be used for skeletal animation.
-The limit is set by `maxBoneNumberForMemoryBoostMode`.
+Rhodonite uses Clustered Forward rendering by default.
+The view frustum is divided into clusters (froxels), and each fragment evaluates only the lights whose range reaches its cluster.
+This keeps the rendering cost low even in scenes with many point and spot lights.
+Directional lights and lights without a range limit are always evaluated.
 
-```typescript
-Rn.setUpAsMemoryBoostMode();
-Rn.Config.maxBoneNumberForMemoryBoostMode = 1000;
-
-const engine = Rn.Engine.init({
-  approach: Rn.ProcessApproach.DataTexture,
-  canvas: document.getElementById('world')
-};
-```
-
-The `setUpAsMemoryBoostMode` method simply changes several Config values at once.
-
-```typescript
-export function setUpAsMemoryBoostMode() {
-  Config.bufferSizeDivisionRatiosForGPUInstanceDataUsage = [1 / 4, 1 / 4, 1 / 4, 1 / 4];
-  Config.skeletalComponentCountPerBufferView = 100;
-  Config.scenegraphComponentCountPerBufferView = 1000;
-  Config.materialCountPerBufferView = 30;
-}
-```
-
-In MemoryBoost mode, a lot of components are allocated in memory contiguously to improve performance.
-This mode has a limit on the number of bones that can be used for skeletal animation.
-The limit is set by `maxBoneNumberForMemoryBoostMode`.
+To make point and spot lights without a `range` cullable, set `lightAutoRangeThreshold` (e.g. `0.001`).
 
 ```typescript
-Rn.setUpAsMemoryBoostMode();
-Rn.Config.maxBoneNumberForMemoryBoostMode = 1000;
-
-const engine = Rn.Engine.init({
-  approach: Rn.ProcessApproach.DataTexture,
-  canvas: document.getElementById('world')
-};
+const engine = await Rn.Engine.init({
+  approach: Rn.ProcessApproach.WebGPU,
+  canvas: document.getElementById('world') as HTMLCanvasElement,
+  config: new Rn.Config({
+    isClusteredForwardEnabled: true, // default
+    lightAutoRangeThreshold: 0.001,
+  }),
+});
 ```
 
 ## Logger
 
 This configuration is optional.
-`Rn.Logger.loglevel` can be set to the following values.
+The log level can be specified with the `logLevel` property of `Rn.Config`.
+Messages below the specified level are not output. The levels are as follows (from the most verbose).
 
 | Value | Meaning |
 |:-----------|------------|
-| `Rn.LogLevel.Error` | Outputs errors |
-| `Rn.LogLevel.Warn` | Outputs errors and warnings |
-| `Rn.LogLevel.Debug` | Outputs errors, warnings, and debug information |
-| `Rn.LogLevel.Info` | Outputs errors, warnings, debug information, and detailed information |
+| `Rn.LogLevel.Debug` | Outputs all logs including debug information |
+| `Rn.LogLevel.Info` | Outputs information, warnings, and errors |
+| `Rn.LogLevel.Warn` | Outputs warnings and errors (default) |
+| `Rn.LogLevel.Error` | Outputs errors only |
+| `Rn.LogLevel.Assert` | Outputs assertion failures only |
 
 ```typescript
-Rn.Logger.loglevel = Rn.LogLevel.Info;
+const engine = await Rn.Engine.init({
+  approach: Rn.ProcessApproach.WebGL2,
+  canvas: document.getElementById('world') as HTMLCanvasElement,
+  config: new Rn.Config({ logLevel: Rn.LogLevel.Info }),
+});
+
+// The log level can also be changed after initialization
+engine.logger.logLevel = Rn.LogLevel.Debug;
 ```
 
 Setting this will output the desired level of log to the browser's developer console.
@@ -132,8 +143,14 @@ Setting this will output the desired level of log to the browser's developer con
 Especially, by setting the following, detailed shader error information can be output when the shader build fails.
 
 ```typescript
-Rn.Config.cgApiDebugConsoleOutput = true;
-Rn.Logger.loglevel = Rn.LogLevel.Info;
+const engine = await Rn.Engine.init({
+  approach: Rn.ProcessApproach.WebGL2,
+  canvas: document.getElementById('world') as HTMLCanvasElement,
+  config: new Rn.Config({
+    cgApiDebugConsoleOutput: true,
+    logLevel: Rn.LogLevel.Info,
+  }),
+});
 ```
 
 ## Summary

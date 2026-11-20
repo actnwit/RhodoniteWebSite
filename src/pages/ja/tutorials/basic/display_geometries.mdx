@@ -16,7 +16,7 @@ import DocLayout from '../../../../components/tutorials_layouts/DocLayout.astro'
 const primitive = new Rn.Plane(engine);
 primitive.generate({
   width: 1, height: 1, uSpan: 1, vSpan: 1, isUVRepeat: false,
-  material: Rn.MaterialHelper.createPbrUberMaterial();
+  material: Rn.MaterialHelper.createPbrUberMaterial(engine),
 });
 const mesh = new Rn.Mesh(engine);
 mesh.addPrimitive(primitive);
@@ -27,7 +27,7 @@ mesh.addPrimitive(primitive);
 meshがセットアップできたら、Meshを持たせたいEntityのMeshComponentにmeshを追加します。
 
 ```typescript
-const meshEntity = Rn.EntityHelper.createMeshEntity(engine);
+const meshEntity = Rn.createMeshEntity(engine);
 const meshComponent = meshEntity.getMesh();
 meshComponent.setMesh(mesh);
 ```
@@ -58,27 +58,33 @@ engine.startRenderLoop(()=>{
 
 ## MeshHelperを使って簡単にMeshを生成する
 
-[MeshHelper](https://actnwit.github.io/RhodoniteTS/api/variables/MeshHelper.html)オブジェクトを使って、いくつかの基本形状を作ることができます。これらの関数は作成した基本形状のentityを返します。
+[MeshHelper](https://actnwit.github.io/RhodoniteTS/api/variables/default.MeshHelper.html)オブジェクトを使って、いくつかの基本形状を作ることができます。これらの関数は作成した基本形状のentityを返します。
 
 ```typescript
 const cubeEntity = Rn.MeshHelper.createCube(engine);
-cubeEntity.eulerAngles = Rn.Vector3.fromCopy3(90, 0, 0);
+cubeEntity.eulerAngles = Rn.Vector3.fromCopy3(Math.PI / 2, 0, 0); // ラジアン
 cubeEntity.position = Rn.Vector3.fromCopy3(0, 3, 0);
 ```
 
 以下の基本形状が用意されています。
 
-* Plane - [Rn.MeshHelper.createPlane()](https://github.com/actnwit/RhodoniteTS/blob/4219ddad/src/foundation/helpers/MeshHelper.ts#L14)
-* Grid - [Rn.MeshHelper.createGrid()](https://github.com/actnwit/RhodoniteTS/blob/4219ddad/src/foundation/helpers/MeshHelper.ts#L42)
-* Cube - [Rn.MeshHelper.createCube()](https://github.com/actnwit/RhodoniteTS/blob/4219ddad/src/foundation/helpers/MeshHelper.ts#L57)
-* Axis - [Rn.MeshHelper.createAxis()](https://github.com/actnwit/RhodoniteTS/blob/4219ddad/src/foundation/helpers/MeshHelper.ts#L88)
-* Joint - [Rn.MeshHelper.createJoint()](https://github.com/actnwit/RhodoniteTS/blob/4219ddad/src/foundation/helpers/MeshHelper.ts#L81)
-* Line - [Rn.MeshHelper.createLine()](https://github.com/actnwit/RhodoniteTS/blob/4219ddad/src/foundation/helpers/MeshHelper.ts#L29)
-* Sphere - [Rn.MeshHelper.creteSphere()](https://github.com/actnwit/RhodoniteTS/blob/4219ddad/src/foundation/helpers/MeshHelper.ts#L68)
+* Plane - `Rn.MeshHelper.createPlane(engine)`
+* Grid - `Rn.MeshHelper.createGrid(engine)`
+* Cube - `Rn.MeshHelper.createCube(engine)`
+* Cubes（複数の立方体） - `Rn.MeshHelper.createCubes(engine)`
+* Sphere - `Rn.MeshHelper.createSphere(engine)`
+* Spheres（複数の球） - `Rn.MeshHelper.createSpheres(engine)`
+* Cone - `Rn.MeshHelper.createCone(engine)`
+* Cylinder - `Rn.MeshHelper.createCylinder(engine)`
+* Capsule - `Rn.MeshHelper.createCapsule(engine)`
+* Ring - `Rn.MeshHelper.createRing(engine)`
+* Axis - `Rn.MeshHelper.createAxis(engine)`
+* Joint - `Rn.MeshHelper.createJoint(engine)`
+* Line - `Rn.MeshHelper.createLine(engine)`
 
 参考となるサンプルです。
 
-- [Primitives](https://github.com/actnwit/RhodoniteTS/blob/master/samples/test_e2e/Primitives/main.ts)
+- [Primitives](https://github.com/actnwit/RhodoniteTS/blob/main/samples/test_e2e/Primitives/main.ts)
 
 ![image](https://user-images.githubusercontent.com/3821214/205436440-8f9d271b-c083-41f4-8b61-04fe9b09eecc.png)
 
@@ -87,9 +93,9 @@ cubeEntity.position = Rn.Vector3.fromCopy3(0, 3, 0);
 各種生成関数では、引数にマテリアルを渡せます。
 
 ```typescript
-const material = Rn.MaterialHelper.createClassicUberMaterial();
-material.setParameter(Rn.ShaderSemantics.DiffuseColorFactor, Rn.Vector4.fromCopy4(1, 0, 0, 1));
-const cube = Rn.MeshHelper.createCube({
+const material = Rn.MaterialHelper.createClassicUberMaterial(engine);
+material.setParameter('diffuseColorFactor', Rn.Vector4.fromCopy4(1, 0, 0, 1));
+const cube = Rn.MeshHelper.createCube(engine, {
     material: material
 });
 ```
@@ -100,7 +106,7 @@ const cube = Rn.MeshHelper.createCube({
 定義した頂点データはPrimitiveクラスに設定します。
 
 ```typescript
-function readyBasicVerticesData() {
+function readyBasicVerticesData(engine: Rn.Engine) {
 
     const positions = new Float32Array([
          0.0,  0.5, 0.0, // v0
@@ -132,7 +138,7 @@ function readyBasicVerticesData() {
 コード全体を以下に示します。
 
 ```typescript
-function readyBasicVerticesData() {
+function readyBasicVerticesData(engine: Rn.Engine) {
 
     const positions = new Float32Array([
          0.0,  0.5, 0.0, // v0
@@ -150,7 +156,7 @@ function readyBasicVerticesData() {
         0, 1, 2
     ]);
 
-    const primitive = Rn.Primitive.createPrimitive({
+    const primitive = Rn.Primitive.createPrimitive(engine, {
         indices: indices,
         attributeSemantics: [Rn.VertexAttribute.Position.XYZ, Rn.VertexAttribute.Color0.XYZ],
         attributes: [positions, colors],
@@ -161,9 +167,9 @@ function readyBasicVerticesData() {
 }
 
 const load = async function () {
-    const c = document.getElementById('world');
-    const engine = Rn.Engine.init({
-      approach: Rn.ProcessApproach.DataTexture,
+    const c = document.getElementById('world') as HTMLCanvasElement;
+    const engine = await Rn.Engine.init({
+      approach: Rn.ProcessApproach.WebGL2,
       canvas: c
     });
 
@@ -176,15 +182,15 @@ const load = async function () {
     function resizeCanvas() {
         c.width = window.innerWidth;
         c.height = window.innerHeight;
-        system.resizeCanvas(c.width, c.height);
+        engine.resizeCanvas(c.width, c.height);
     }
 
-    const primitive = readyBasicVerticesData();
+    const primitive = readyBasicVerticesData(engine);
 
     const originalMesh = new Rn.Mesh(engine);
     originalMesh.addPrimitive(primitive);
 
-    const firstEntity = Rn.EntityHelper.createMeshEntity(engine);
+    const firstEntity = Rn.createMeshEntity(engine);
 
     const meshComponent = firstEntity.getMesh();
     meshComponent.setMesh(originalMesh);
@@ -197,7 +203,7 @@ const load = async function () {
 document.body.onload = load;
 ```
 
-jsfiddle版はこちらです。
+jsfiddle版はこちらです（古いバージョンのRhodoniteを使用している可能性があります）。
 
 https://jsfiddle.net/emadurandal/xgw9e3y7/4/
 

@@ -34,12 +34,12 @@ Rhodoniteでは、この2つのシェーダー機構どちらを使ってもシ�
 Rhodoniteで現在主流のシェーダー作成方法になります。
 Rhodoniteとは別プロジェクトとして開発しているShaderユーティリティライブラリ「[Shaderity](https://github.com/actnwit/shaderity)」を利用してシェーダーを構築する機構です。
 Shaderityとは、シェーダーのインポート機能によるコード結合機能と、コード変換等のユーティリティ機能を備えたシェーダー開発支援ライブラリです。
-Shaderityベースでは通常のGLSLファイルを作成し、それをShaderityのesbuild向けローダーを使って、Rhodoniteライブラリ内に取り込むことでシェーダーを生成します。
+Shaderityベースでは通常のシェーダーファイル（WebGL2向けはGLSL、WebGPU向けはWGSL）を作成し、それをShaderityのesbuild向けローダーを使って、Rhodoniteライブラリ内に取り込むことでシェーダーを生成します。
 その際に、Shaderityのインポート機能を使うことで、複数のGLSLコード断片のファイルからシェーダーを構築できます。
 
 ### ShaderityベースのGLSLの書き方
 
-以下はRhodoniteのClassicシェーダーのピクセルシェーダーの内容です。
+以下はRhodoniteのClassicシェーダーの頂点シェーダー（GLSL）の内容です。
 
 ```glsl
 
@@ -119,7 +119,7 @@ void main()
 /* shaderity: @{getters} */
 ```
 
-また、以下のuniform変数宣言は、レンダリングアプローチにDataTextureを用いている場合、実際にはUniformではなく浮動小数点テクスチャ経由のパラメーター渡しに変換されます。また、宣言の後ろにコメントでさまざまな付加情報を与えることができます。
+また、以下のuniform変数宣言は、実際にはUniform変数ではなく、浮動小数点テクスチャ（WebGL2モード）またはストレージバッファ（WebGPUモード）経由のパラメーター渡しに変換されます。また、宣言の後ろにコメントでさまざまな付加情報を与えることができます。
 
 ```
 uniform int u_shadingModel; // initialValue=0
@@ -142,7 +142,18 @@ Shaderity独自の構文はpragmaまたはコメント形式で記述される�
 
 ## ノードエディタ
 
-Rhodoniteは独自のノードシステムを搭載しており、ノード編集によってシェーダーのリアルタイム構築が可能です（開発中です）。
+Rhodoniteは独自のノードシステムを搭載しており、ノード編集によってシェーダーのリアルタイム構築が可能です。
+基本的な数学・論理・テクスチャ系のノードに加えてPBRシェーディング用のノードも用意されており、さらにポリゴン描画と統合可能なノードベースのレイマーチングシステムも備えています。
+
+ノードエディタが出力するシェーダーノードグラフ（JSON）から、以下のようにマテリアルを生成できます。
+
+```typescript
+const result = Rn.MaterialHelper.createNodeBasedCustomMaterial(engine, shaderNodeJson);
+const material = result?.material;
+```
+
+レイマーチング用には`Rn.MaterialHelper.createNodeBasedRaymarchingCustomMaterial`を使います。
+ノードベースのマテリアルは、`RHODONITE_materials_node`拡張としてglTFファイルに保存することもできます。
 
 ![Node Editor](../../../../assets/screenshot_shader_node_editor.jpg)
 

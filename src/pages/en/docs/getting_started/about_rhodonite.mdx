@@ -44,6 +44,25 @@ Even in the case of non-instance rendering, the system avoids heavy setUniform-t
 
 It is also suitable for cases where shaders must access complex and large amounts of data, such as in games.
 
+In WebGPU mode, the same memory pool is sent to the GPU as storage buffers instead of a texture.
+
+### WebGL2 and WebGPU Support
+
+Rhodonite supports both WebGL2 and WebGPU. You can switch between them just by changing the process approach (`Rn.ProcessApproach.WebGL2` / `Rn.ProcessApproach.WebGPU`) at initialization.
+
+### Clustered Forward Rendering
+
+Rhodonite uses Clustered Forward rendering by default. Each fragment evaluates only the lights that reach it, so scenes with a large number of point and spot lights can be rendered efficiently.
+
+### Other Features
+
+- Node-based shader system (with a shader node editor)
+- Node-based raymarching system (integrated with polygon rendering)
+- Physics simulation using [Rapier](https://rapier.rs/) (including the glTF `KHR_physics_rigid_bodies` extension and a character controller)
+- Support for [Draco compression](https://google.github.io/draco/), [Basis Universal](https://github.com/BinomialLLC/basis_universal) and [KTX2](http://github.khronos.org/KTX-Specification/)
+- Particle effects with [Effekseer](https://effekseer.github.io/en/) (in both WebGL2 and WebGPU)
+- WebXR (VR) support (in both WebGL2 and WebGPU, with the multiview extension)
+
 ## PBR (Physically Based Rendering) Support
 
 Rhodonite supports PBR (Physically Based Rendering).
@@ -73,9 +92,12 @@ Rhodonite supports the following extensions of glTF2:
 - [x] KHR_materials_specular
 - [x] KHR_materials_transmission
 - [x] KHR_materials_unlit
-- [x] KHR_materials_variant
+- [x] KHR_materials_variants
 - [x] KHR_materials_volume
 - [x] KHR_materials_diffuse_transmission
+- [x] KHR_node_visibility
+- [x] KHR_physics_rigid_bodies
+- [x] KHR_implicit_shapes
 - [x] KHR_texture_basisu
 - [x] KHR_texture_transform
 
@@ -98,9 +120,9 @@ The following Listing 1-1 shows the minimum code for polygon display in Rhodonit
 import Rn from "rhodonite";
 
 (async () => {
-  // Initialize Rhodonite. Specify the drawing method (Uniform in this case) and the canvas to draw on
-  const engine = Rn.Engine.init({
-    approach: Rn.ProcessApproach.DataTexture,
+  // Initialize Rhodonite. Specify the drawing method (WebGL2 in this case) and the canvas to draw on
+  const engine = await Rn.Engine.init({
+    approach: Rn.ProcessApproach.WebGL2,
     canvas: document.getElementById("world") as HTMLCanvasElement,
   });
 
@@ -131,7 +153,7 @@ import Rn from "rhodonite";
 
   // Add the Primitive to the Mesh component of the entity
   const meshComponent = firstEntity.getMesh();
-  const mesh = new Rn.Mesh();
+  const mesh = new Rn.Mesh(engine);
   mesh.addPrimitive(primitive);
   meshComponent.setMesh(mesh);
 

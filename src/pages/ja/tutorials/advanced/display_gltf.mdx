@@ -8,15 +8,15 @@ import DocLayout from '../../../../components/tutorials_layouts/DocLayout.astro'
 <DocLayout>
 
 RhodoniteでのglTFの表示のやり方を説明します。
-RhodoniteはglTF1とglTF2、VRMをサポートしています。
+RhodoniteはglTF2（.gltf / .glb）とVRM（VRM0.x / VRM1.0）をサポートしています。
 
 ## glTFのインポート方法
 
 ### GltfImporterを使う
 一番簡単な方法は、GltfImporterクラスを使うことです。
-このクラスはglTF1とglTF2、VRMを自動的に判定して適切にロードします。
+このクラスはファイルの種類（glTF2、GLB、VRMなど）を自動的に判定して適切にロードします。
 このクラスのimportFromUrlメソッドはawaitを使って呼び出すとExpression型のオブジェクトを返します。
-このexpressionはそのままSystemクラスのprocessメソッドに渡して描画できます。
+このexpressionはそのまま`engine.process`メソッドに渡して描画できます。
 
 ```typescript
 const expression = await Rn.GltfImporter.importFromUrl(engine, gltfUrl, loadOption);
@@ -29,14 +29,14 @@ const expression = await Rn.GltfImporter.importFromUrl(engine, gltfUrl, loadOpti
      sandbox="allow-forms allow-modals allow-popups allow-presentation allow-same-origin allow-scripts"
    ></iframe>
 
-## Gltf1ImporterまたはGltf2Importerを使う
+## Gltf2Importerを使う
 
-バージョンを決めうちしたImporterもあります。Gltf1ImporterまたはGltf2Importerです。これらはexpressionではなく、[RnM2](https://github.com/actnwit/RhodoniteTS/blob/master/src/types/RnM2.ts)という独自形式のデータをResultオブジェクトに包んで返します。
+glTF2に決めうちしたGltf2Importerもあります。これはexpressionではなく、[RnM2](https://github.com/actnwit/RhodoniteTS/blob/main/src/types/RnM2.ts)という独自形式のデータを返します。
 RnMはglTF2の各項目のインデックスで結ばれた論理的な接続関係を、実際のオブジェクトの参照として解決した状態のglTFデータです。
 これをModelConverterに渡すことで読み込んだglTFのシーングラフのルートのEntityを得ます。
 
 ```typescript
-    const rnm = await Rn.Gltf2Importer.importFromUrl(engine,
+    const rnm = await Rn.Gltf2Importer.importFromUrl(
       '../../../assets/gltf/glTF-Sample-Models/2.0/BoxAnimated/glTF/BoxAnimated.gltf'
     );
     const rootGroup = await Rn.ModelConverter.convertToRhodoniteObject(engine, rnm);
@@ -58,12 +58,12 @@ RnMはglTF2の各項目のインデックスで結ばれた論理的な接続関
 
 ## AssetLoaderを使う
 
-AssetLoaderを使うと、複数のアセットを一括で読み込むことができます。
+[AssetLoader](/ja/docs/core_concepts/asset_loader/)を使うと、複数のアセットを一括で読み込むことができます。`Rn.defaultAssetLoader`はグローバルに利用できるAssetLoaderのインスタンスです。
 
 ```typescript
-const assets = await Rn.AssetLoader.load({
-  gltf: Rn.GltfImporter.importFromUrl(gltfUrl, loadOption),
-  vrm: Rn.GltfImporter.importFromUrl(vrmUrl, loadOption),
+const assets = await Rn.defaultAssetLoader.load({
+  gltf: Rn.GltfImporter.importFromUrl(engine, gltfUrl, loadOption),
+  vrm: Rn.GltfImporter.importFromUrl(engine, vrmUrl, loadOption),
 });
 
 const expressions = [
@@ -71,7 +71,7 @@ const expressions = [
   assets.vrm,
 ];
 
-Rn.System.process(expressions);
+engine.process(expressions);
 ```
 
 <iframe src="https://codesandbox.io/embed/y3l2d9?view=preview&module=%2Fsrc%2Findex.ts"
@@ -83,15 +83,15 @@ Rn.System.process(expressions);
 
 ### AssetLoader.loadArrayを使う
 
-AssetLoader.loadArrayを使うと、複数のアセットを配列形式で受け取ることができます。
+AssetLoaderのloadArrayメソッドを使うと、複数のアセットを配列形式で受け取ることができます。
 
 ```typescript
-const expressions = await Rn.AssetLoader.loadArray([
-  Rn.GltfImporter.importFromUrl(gltfUrl, loadOption),
-  Rn.GltfImporter.importFromUrl(vrmUrl, loadOption),
+const expressions = await Rn.defaultAssetLoader.loadArray([
+  Rn.GltfImporter.importFromUrl(engine, gltfUrl, loadOption),
+  Rn.GltfImporter.importFromUrl(engine, vrmUrl, loadOption),
 ]);
 
-Rn.System.process(expressions);
+engine.process(expressions);
 ```
 
 <iframe src="https://codesandbox.io/embed/yf7752?view=preview"
@@ -103,8 +103,8 @@ Rn.System.process(expressions);
 
 ## 参考サンプル
 
-- [glTFImporter](https://github.com/actnwit/RhodoniteTS/tree/master/samples/test_e2e/GltfImporter-draco-extension)
-- [glTF1Importer Sample](https://github.com/actnwit/RhodoniteTS/tree/master/samples/test_e2e/Gltf1Importer)
-- [glTF2Importer Sample](https://github.com/actnwit/RhodoniteTS/tree/master/samples/test_e2e/Gltf2Importer)
+- [GltfImporterのサンプル](https://github.com/actnwit/RhodoniteTS/tree/main/samples/test_e2e/GltfImporter)
+- [GltfImporter（Draco拡張）のサンプル](https://github.com/actnwit/RhodoniteTS/tree/main/samples/test_e2e/GltfImporter-draco-extension)
+- [Gltf2Importer + ModelConverterのサンプル](https://github.com/actnwit/RhodoniteTS/tree/main/samples/test_e2e/Gltf2Importer-MSAA)
 
 </DocLayout>

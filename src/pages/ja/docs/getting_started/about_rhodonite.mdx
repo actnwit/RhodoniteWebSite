@@ -44,6 +44,25 @@ WebGLではUniform変数の更新が常に性能上の大きなボトルネッ�
 
 また、ゲームなどのように、複雑かつ大量のデータにシェーダーがアクセスしなければならない場合にも適しています。
 
+なお、WebGPUモードでは、同じメモリプールがテクスチャではなくストレージバッファとしてGPUに送られます。
+
+### WebGL2とWebGPUへの対応
+
+RhodoniteはWebGL2とWebGPUの両方に対応しています。初期化時のプロセスアプローチ（`Rn.ProcessApproach.WebGL2` / `Rn.ProcessApproach.WebGPU`）を切り替えるだけで、どちらでも動作します。
+
+### Clustered Forwardレンダリング
+
+RhodoniteはデフォルトでClustered Forwardレンダリングを使用します。各フラグメントは自分に届くライトだけを評価するため、大量のポイントライトやスポットライトを含むシーンも効率的に描画できます。
+
+### その他の機能
+
+- ノードベースのシェーダーシステム（シェーダーノードエディター付き）
+- ノードベースのレイマーチングシステム（ポリゴン描画との統合）
+- [Rapier](https://rapier.rs/)を用いた物理シミュレーション（glTFの`KHR_physics_rigid_bodies`拡張やキャラクターコントローラーに対応）
+- [Draco圧縮](https://google.github.io/draco/)、[Basis Universal](https://github.com/BinomialLLC/basis_universal)、[KTX2](http://github.khronos.org/KTX-Specification/)のサポート
+- [Effekseer](https://effekseer.github.io/)によるパーティクルエフェクト（WebGL2・WebGPUの両方に対応）
+- WebXR(VR)対応（WebGL2・WebGPUの両方、マルチビュー拡張にも対応）
+
 ## 高度なPBR(物理ベースレンダリング)への対応
 
 Rhodoniteは物理ベースレンダリングに対応しています。
@@ -73,9 +92,12 @@ RhodoniteはglTF2の以下の拡張形式をサポートしています
 - [x] KHR_materials_specular
 - [x] KHR_materials_transmission
 - [x] KHR_materials_unlit
-- [x] KHR_materials_variant
+- [x] KHR_materials_variants
 - [x] KHR_materials_volume
 - [x] KHR_materials_diffuse_transmission
+- [x] KHR_node_visibility
+- [x] KHR_physics_rigid_bodies
+- [x] KHR_implicit_shapes
 - [x] KHR_texture_basisu
 - [x] KHR_texture_transform
 
@@ -98,9 +120,9 @@ RhodoniteはVRM0.xとVRM1.0の両方をサポートしています。
 import Rn from "rhodonite";
 
 (async () => {
-  // Rhodoniteの初期化。描画処理方法（今回はUniform）と描画先canvasを指定
-  const engine = Rn.Engine.init({
-    approach: Rn.ProcessApproach.DataTexture,
+  // Rhodoniteの初期化。描画処理方法（今回はWebGL2）と描画先canvasを指定
+  const engine = await Rn.Engine.init({
+    approach: Rn.ProcessApproach.WebGL2,
     canvas: document.getElementById("world") as HTMLCanvasElement,
   });
 
@@ -131,7 +153,7 @@ import Rn from "rhodonite";
 
   // EntityのMeshコンポーネントにPrimitiveを追加
   const meshComponent = firstEntity.getMesh();
-  const mesh = new Rn.Mesh();
+  const mesh = new Rn.Mesh(engine);
   mesh.addPrimitive(primitive);
   meshComponent.setMesh(mesh);
 
