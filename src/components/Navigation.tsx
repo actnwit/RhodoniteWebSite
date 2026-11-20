@@ -53,7 +53,7 @@ export const Navigation: React.FC<NavigationProps> = ({ lang }) => {
 
   return (
     <div className="relative">
-      <nav className="bg-white shadow sticky top-0 z-50">
+      <nav className="bg-white shadow-sm sticky top-0 z-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between h-16">
             <div className="flex-shrink-0 flex items-center">
@@ -67,7 +67,7 @@ export const Navigation: React.FC<NavigationProps> = ({ lang }) => {
               <LanguageSwitcher />
               <button
                 type="button"
-                className="inline-flex items-center justify-center p-2 rounded-md text-gray-600 hover:text-gray-900 hover:bg-gray-100 focus:outline-none"
+                className="inline-flex items-center justify-center p-2 rounded-md text-gray-600 hover:text-gray-900 hover:bg-gray-100 focus:outline-hidden"
                 aria-expanded="false"
                 onClick={toggleMenu}
               >
@@ -153,7 +153,7 @@ export const Navigation: React.FC<NavigationProps> = ({ lang }) => {
       {/* オーバーレイ */}
       {isMenuOpen && (
         <div
-          className="fixed inset-0 bg-black bg-opacity-50 z-30"
+          className="fixed inset-0 bg-black/50 z-30"
           onClick={() => setIsMenuOpen(false)}
         />
       )}
