@@ -40,6 +40,64 @@ document.body.onload = async function load() {
 }
 ```
 
+### Tree shaking and bundle size
+
+The ESModule builds (`dist/esm` and `dist/esmdev`) keep one file per source module, and the package declares its side effects only for the shared dependency chunks. Bundlers such as Vite, Rollup, Rolldown, webpack and esbuild can therefore leave out the parts of Rhodonite that your application does not use. Import the APIs you use by name.
+
+```ts
+// main.ts
+import { Engine, MeshHelper, ProcessApproach, Vector3 } from 'rhodonite';
+
+document.body.onload = async function load() {
+  const engine = await Engine.init({
+    approach: ProcessApproach.WebGL2,
+    canvas: document.getElementById('world') as HTMLCanvasElement,
+  });
+
+  const planeEntity = MeshHelper.createPlane(engine);
+  planeEntity.eulerAngles = Vector3.fromCopy3(Math.PI * 0.5, 0, 0);
+};
+```
+
+The default export `Rn` references every export, so `import Rn from 'rhodonite'` always bundles the whole library. `MaterialHelper` likewise references every material factory; import the factory functions directly instead (for example `import { createPbrUberMaterial } from 'rhodonite'`).
+
+Node-based materials and MToon are exported from the `rhodonite/optional-materials` subpath, so applications that only use other materials do not bundle them.
+
+```ts
+import { createMToon1Material } from 'rhodonite/optional-materials';
+```
+
+With named imports, two optional features must be enabled explicitly (the default `Rn` export enables them automatically).
+
+```ts
+import { Engine, ProcessApproach, registerGizmos } from 'rhodonite';
+
+// Gizmos (isTranslationGizmoVisible, isLightGizmoVisible, ...)
+registerGizmos();
+
+// WebXR / WebAR support. It can also be enabled later with `await engine.enableXR()`
+const engine = await Engine.init({
+  approach: ProcessApproach.WebGL2,
+  canvas: document.getElementById('world') as HTMLCanvasElement,
+  xr: true,
+});
+```
+
+To drop the shaders of the rendering backend your application does not use, define a flag in the bundler. `__RN_WEBGPU__: false` builds a WebGL2-only bundle, and `__RN_WEBGL__: false` builds a WebGPU-only bundle. Without the flags, the shaders of both backends are included.
+
+```js
+// vite.config.js (WebGL2 only)
+export default {
+  define: { __RN_WEBGPU__: false },
+};
+```
+
+`esbuild` accepts the same `define` option, and webpack takes `new webpack.DefinePlugin({ __RN_WEBGPU__: false })`. `Engine.init` throws an error when the excluded process approach is requested.
+
+Component classes are registered when they are first added to an entity, not when the library is imported. `EntityRepository.tryToAddComponentToEntityByTID()` finds only the core component classes (Transform, SceneGraph, Mesh, MeshRenderer, Camera, CameraController, Light and Animation) plus the classes added before; for any other component, pass the class to `EntityRepository.addComponentToEntity()`.
+
+> **Note:** The unbundled ESModule build and the `rhodonite/optional-materials` subpath are part of the latest RhodoniteTS development. With an older npm release, `import Rn from 'rhodonite'` remains the entry point.
+
 ### Using without bundler
 
 You can you Rhodonite without Bundler. The following is an example in TypeScript.

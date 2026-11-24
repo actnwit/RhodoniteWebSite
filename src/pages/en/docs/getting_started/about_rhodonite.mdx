@@ -54,10 +54,14 @@ Rhodonite supports both WebGL2 and WebGPU. You can switch between them just by c
 
 Rhodonite uses Clustered Forward rendering by default. Each fragment evaluates only the lights that reach it, so scenes with a large number of point and spot lights can be rendered efficiently.
 
+### Tree-shakable ES Modules
+
+Rhodonite ships unbundled ESModule builds with named exports, so modern bundlers can remove the parts of the library that an application does not use. Optional features such as WebXR, the Draco decoder, the Rapier physics backend, KTX2 textures, the light cluster system and raymarching are loaded only when they are needed. Applications can also drop the shaders of the rendering backend they do not use at build time.
+
 ### Other Features
 
 - Node-based shader system (with a shader node editor)
-- Node-based raymarching system (integrated with polygon rendering)
+- Node-based raymarching system (integrated with polygon rendering, with SDF shadows and torus, capsule and round box presets)
 - Physics simulation using [Rapier](https://rapier.rs/) (including the glTF `KHR_physics_rigid_bodies` extension and a character controller)
 - Support for [Draco compression](https://google.github.io/draco/), [Basis Universal](https://github.com/BinomialLLC/basis_universal) and [KTX2](http://github.khronos.org/KTX-Specification/)
 - Particle effects with [Effekseer](https://effekseer.github.io/en/) (in both WebGL2 and WebGPU)

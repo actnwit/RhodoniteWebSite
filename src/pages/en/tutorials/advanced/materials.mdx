@@ -15,6 +15,18 @@ Rhodonite has many material classes. To generate them, use the [MaterialHelper o
 const material = Rn.MaterialHelper.createPbrUberMaterial(engine);
 ```
 
+### Importing material factories for tree shaking
+
+`MaterialHelper` references every material factory, so using it keeps all materials in the bundle. To let a bundler leave out the materials you do not use, import the factory function directly.
+
+```typescript
+import { createPbrUberMaterial } from 'rhodonite';
+
+const material = createPbrUberMaterial(engine);
+```
+
+Node-based materials and MToon are exported from the `rhodonite/optional-materials` subpath (for example, `import { createMToon1Material } from 'rhodonite/optional-materials'`).
+
 ## Setting shader parameters to Material
 
 Shader parameters are done for the Material class that holds the shader.
