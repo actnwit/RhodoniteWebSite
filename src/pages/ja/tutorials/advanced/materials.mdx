@@ -15,6 +15,18 @@ Rhodoniteには多くのマテリアルクラスがあります。これらを�
 const material = Rn.MaterialHelper.createPbrUberMaterial(engine);
 ```
 
+### ツリーシェイキングのためのマテリアルファクトリのimport
+
+`MaterialHelper`はすべてのマテリアルファクトリを参照するため、これを使うとすべてのマテリアルがバンドルに含まれます。使用しないマテリアルをバンドラーに除外させるには、ファクトリ関数を直接importしてください。
+
+```typescript
+import { createPbrUberMaterial } from 'rhodonite';
+
+const material = createPbrUberMaterial(engine);
+```
+
+ノードベースのマテリアルとMToonは`rhodonite/optional-materials`サブパスからエクスポートされています（例: `import { createMToon1Material } from 'rhodonite/optional-materials'`）。
+
 ## Materialへのシェーダーパラメーター設定
 
 シェーダーパラメータの設定は、そのシェーダーを保持している[Material](https://actnwit.github.io/RhodoniteTS/api/classes/default.Material.html)クラスに対して行います。

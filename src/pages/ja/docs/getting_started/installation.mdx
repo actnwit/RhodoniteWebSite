@@ -40,6 +40,64 @@ document.body.onload = async function load() {
 }
 ```
 
+### ツリーシェイキングとバンドルサイズ
+
+ESModule版（`dist/esm`、`dist/esmdev`）はソースモジュールごとに1ファイルを保持し、パッケージの`sideEffects`は共有依存チャンクのみを宣言しています。そのため、Vite、Rollup、Rolldown、webpack、esbuildなどのバンドラーは、アプリケーションが使用しないRhodoniteの部分をバンドルから除外できます。使用するAPIは名前付きでimportします。
+
+```ts
+// main.ts
+import { Engine, MeshHelper, ProcessApproach, Vector3 } from 'rhodonite';
+
+document.body.onload = async function load() {
+  const engine = await Engine.init({
+    approach: ProcessApproach.WebGL2,
+    canvas: document.getElementById('world') as HTMLCanvasElement,
+  });
+
+  const planeEntity = MeshHelper.createPlane(engine);
+  planeEntity.eulerAngles = Vector3.fromCopy3(Math.PI * 0.5, 0, 0);
+};
+```
+
+デフォルトエクスポートの`Rn`はすべてのエクスポートを参照するため、`import Rn from 'rhodonite'`は常にライブラリ全体をバンドルします。同様に`MaterialHelper`はすべてのマテリアルファクトリを参照するので、代わりにファクトリ関数を直接importしてください（例: `import { createPbrUberMaterial } from 'rhodonite'`）。
+
+ノードベースのマテリアルとMToonは`rhodonite/optional-materials`サブパスからエクスポートされるため、それらを使わないアプリケーションのバンドルには含まれません。
+
+```ts
+import { createMToon1Material } from 'rhodonite/optional-materials';
+```
+
+名前付きimportを使う場合、次の2つのオプション機能は明示的に有効化する必要があります（デフォルトエクスポートの`Rn`を使う場合は自動的に有効になります）。
+
+```ts
+import { Engine, ProcessApproach, registerGizmos } from 'rhodonite';
+
+// ギズモ（isTranslationGizmoVisible、isLightGizmoVisibleなど）
+registerGizmos();
+
+// WebXR / WebAR対応。後から`await engine.enableXR()`で有効化することもできます
+const engine = await Engine.init({
+  approach: ProcessApproach.WebGL2,
+  canvas: document.getElementById('world') as HTMLCanvasElement,
+  xr: true,
+});
+```
+
+アプリケーションが使用しないレンダリングバックエンドのシェーダーを除外するには、バンドラーでフラグを定義します。`__RN_WEBGPU__: false`でWebGL2専用のバンドルを、`__RN_WEBGL__: false`でWebGPU専用のバンドルを生成できます。フラグを指定しない場合、両方のバックエンドのシェーダーが含まれます。
+
+```js
+// vite.config.js (WebGL2のみ)
+export default {
+  define: { __RN_WEBGPU__: false },
+};
+```
+
+`esbuild`も同じ`define`オプションを受け付け、webpackでは`new webpack.DefinePlugin({ __RN_WEBGPU__: false })`を使います。除外したプロセスアプローチを要求すると、`Engine.init`はエラーを投げます。
+
+コンポーネントクラスはライブラリのimport時ではなく、エンティティに最初に追加されたときに登録されます。`EntityRepository.tryToAddComponentToEntityByTID()`が見つけられるのは、コアのコンポーネントクラス（Transform、SceneGraph、Mesh、MeshRenderer、Camera、CameraController、Light、Animation）と、それ以前に追加されたクラスだけです。それ以外のコンポーネントは、クラスを`EntityRepository.addComponentToEntity()`に渡してください。
+
+> **注:** 非バンドル形式のESModuleビルドと`rhodonite/optional-materials`サブパスは、最新のRhodoniteTS開発版に含まれます。それ以前のnpmリリースでは、`import Rn from 'rhodonite'`がエントリーポイントです。
+
 ### Bundlerを使わない場合
 
 Bundlerを使わないで利用することもできます。以下はTypeScriptでの例です。
