@@ -39,6 +39,10 @@ const markdownProcessor = unified({
 export default defineConfig({
   markdown: {
     processor: markdownProcessor,
+    shikiConfig: {
+      // サイトのピンク系ダーク配色に合わせたテーマ
+      theme: 'rose-pine',
+    },
   },
   integrations: [
     react(),

@@ -1,162 +1,179 @@
 import React, { useState, useEffect } from 'react';
-import { useTranslations } from '../i18n/utils';
+import { getDocsLang, useTranslations, type Lang } from '../i18n/utils';
 import { LanguageSwitcher } from './LanguageSwitcher';
+import { DISCORD_URL, GITHUB_URL } from '../consts';
+import { CloseIcon, DiscordIcon, ExternalIcon, GitHubIcon, MenuIcon, RhodoniteMark } from './icons';
 
 interface NavigationProps {
-  lang: 'en' | 'ja' | 'tr';
+  lang: Lang;
+  /** Current pathname (from Astro.url) so that SSR and client render the same active state. */
+  pathname: string;
 }
 
-export const Navigation: React.FC<NavigationProps> = ({ lang }) => {
+type NavSection = 'home' | 'docs' | 'tutorials' | 'api';
+
+function getActiveSection(pathname: string): NavSection | null {
+  const rest = '/' + pathname.split('/').slice(2).join('/');
+  if (rest === '/' || rest === '') return 'home';
+  if (rest.startsWith('/docs')) return 'docs';
+  if (rest.startsWith('/tutorials')) return 'tutorials';
+  if (rest.startsWith('/api')) return 'api';
+  return null;
+}
+
+export const Navigation: React.FC<NavigationProps> = ({ lang, pathname }) => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const t = useTranslations(lang);
+  const docsLang = getDocsLang(lang);
+  const active = getActiveSection(pathname);
 
-  // メニューが開いた時にbodyに特定のクラスを追加して、メインコンテンツのスタイルを制御
+  // メニューが開いている間はスクロールを止める
   useEffect(() => {
-    const body = document.body;
-    if (isMenuOpen) {
-      body.classList.add('menu-open');
-    } else {
-      body.classList.remove('menu-open');
-    }
-
-    // クリーンアップ関数
-    return () => {
-      body.classList.remove('menu-open');
-    };
+    document.body.classList.toggle('menu-open', isMenuOpen);
+    return () => document.body.classList.remove('menu-open');
   }, [isMenuOpen]);
 
-  const toggleMenu = () => {
-    setIsMenuOpen(!isMenuOpen);
-  };
+  useEffect(() => {
+    const onKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') setIsMenuOpen(false);
+    };
+    window.addEventListener('keydown', onKeyDown);
+    return () => window.removeEventListener('keydown', onKeyDown);
+  }, []);
 
-  const getUrl = (path: string) => {
-    return `/${lang}${path}`;
-  };
+  const navItems: { id: NavSection; href: string; label: string }[] = [
+    { id: 'home', href: `/${lang}/`, label: t('nav.home') },
+    { id: 'docs', href: `/${docsLang}/docs/`, label: t('nav.docs') },
+    { id: 'tutorials', href: `/${docsLang}/tutorials/`, label: t('nav.tutorials') },
+    { id: 'api', href: `/${lang}/api`, label: t('nav.api') },
+  ];
 
-  // ナビゲーション項目を配列として定義
-  const navItems = [
-    { href: getUrl('/'), label: t('nav.home') },
-    { href: getUrl('/docs/'), label: t('nav.docs') },
-    { href: getUrl('/tutorials/'), label: t('nav.tutorials') },
-    { href: getUrl('/api'), label: t('nav.api') },
-    {
-      href: 'https://github.com/actnwit/RhodoniteTS',
-      label: t('nav.github'),
-      icon: (
-        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="inline">
-          <path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22"></path>
-        </svg>
-      ),
-      external: true
-    }
+  const externalItems = [
+    { href: GITHUB_URL, label: t('nav.github'), Icon: GitHubIcon },
+    { href: DISCORD_URL, label: t('nav.discord'), Icon: DiscordIcon },
   ];
 
   return (
-    <div className="relative">
-      <nav className="bg-white shadow-sm sticky top-0 z-50">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between h-16">
-            <div className="flex-shrink-0 flex items-center">
-              <a href={getUrl('/')} className="text-xl font-bold text-gray-800">
-                RhodoniteTS
-              </a>
-            </div>
+    <div data-site-header className="sticky top-0 z-50">
+      <header className="border-b border-line bg-ink-900/70 backdrop-blur-xl backdrop-saturate-150">
+        <div className="mx-auto flex h-16 max-w-7xl items-center justify-between gap-4 px-4 sm:px-6 lg:px-8">
+          <a href={`/${lang}/`} className="group flex items-center gap-2.5 rounded-md" aria-label="RhodoniteTS">
+            <RhodoniteMark className="h-7 w-auto transition-transform duration-300 ease-out group-hover:-rotate-6 group-hover:scale-105" />
+            <span className="font-display text-[1.0625rem] font-semibold tracking-tight text-fg">
+              Rhodonite
+            </span>
+            <span className="rounded-md border border-line-strong px-1.5 py-px font-mono text-[10px] font-medium text-muted">
+              TS
+            </span>
+          </a>
 
-            {/* ハンバーガーメニューボタン（モバイル用） */}
-            <div className="md:hidden flex items-center gap-2">
-              <LanguageSwitcher />
-              <button
-                type="button"
-                className="inline-flex items-center justify-center p-2 rounded-md text-gray-600 hover:text-gray-900 hover:bg-gray-100 focus:outline-hidden"
-                aria-expanded="false"
-                onClick={toggleMenu}
-              >
-                <span className="sr-only">{t('nav.toggleMenu')}</span>
-                {/* ハンバーガーアイコン */}
-                <svg
-                  className={`${isMenuOpen ? 'hidden' : 'block'} h-6 w-6`}
-                  xmlns="http://www.w3.org/2000/svg"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
-                  aria-hidden="true"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth="2"
-                    d="M4 6h16M4 12h16M4 18h16"
-                  />
-                </svg>
-                {/* 閉じるアイコン */}
-                <svg
-                  className={`${isMenuOpen ? 'block' : 'hidden'} h-6 w-6`}
-                  xmlns="http://www.w3.org/2000/svg"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
-                  aria-hidden="true"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth="2"
-                    d="M6 18L18 6M6 6l12 12"
-                  />
-                </svg>
-              </button>
-            </div>
-
-            {/* PC用ナビゲーションリンク */}
-            <div className="hidden md:flex md:items-center md:space-x-6">
-              {navItems.map((item, index) => (
+          {/* Desktop */}
+          <nav className="hidden items-center gap-1 md:flex" aria-label="Main">
+            {navItems.map((item) => {
+              const isActive = active === item.id;
+              return (
                 <a
-                  key={`desktop-${index}`}
+                  key={item.id}
                   href={item.href}
-                  className="text-gray-600 hover:text-indigo-600 text-base font-medium transition-colors flex items-center gap-1"
-                  {...(item.external ? { target: "_blank", rel: "noopener" } : {})}
+                  aria-current={isActive ? 'page' : undefined}
+                  className={`relative rounded-lg px-3 py-2 text-sm font-medium transition-colors ${
+                    isActive ? 'text-fg' : 'text-muted hover:bg-white/[0.04] hover:text-fg'
+                  }`}
                 >
                   {item.label}
-                  {item.icon}
+                  {isActive && (
+                    <span className="absolute inset-x-3 -bottom-[13px] h-px bg-gradient-to-r from-transparent via-rhodo-400 to-transparent" />
+                  )}
                 </a>
-              ))}
-              <LanguageSwitcher />
-            </div>
+              );
+            })}
+
+            <span className="mx-2 h-5 w-px bg-line-strong" aria-hidden="true" />
+
+            <LanguageSwitcher lang={lang} pathname={pathname} />
+
+            {externalItems.map(({ href, label, Icon }) => (
+              <a
+                key={href}
+                href={href}
+                target="_blank"
+                rel="noopener"
+                aria-label={label}
+                title={label}
+                className="grid h-9 w-9 place-items-center rounded-lg text-muted transition-colors hover:bg-white/[0.06] hover:text-fg"
+              >
+                <Icon className="h-[18px] w-[18px]" />
+              </a>
+            ))}
+          </nav>
+
+          {/* Mobile */}
+          <div className="flex items-center gap-1 md:hidden">
+            <LanguageSwitcher lang={lang} pathname={pathname} />
+            <button
+              type="button"
+              className="grid h-10 w-10 place-items-center rounded-lg text-muted transition-colors hover:bg-white/[0.06] hover:text-fg"
+              aria-expanded={isMenuOpen}
+              aria-controls="mobile-menu"
+              onClick={() => setIsMenuOpen((open) => !open)}
+            >
+              <span className="sr-only">{t('nav.toggleMenu')}</span>
+              {isMenuOpen ? <CloseIcon className="h-6 w-6" /> : <MenuIcon className="h-6 w-6" />}
+            </button>
           </div>
         </div>
-      </nav>
+      </header>
 
-      {/* モバイル用メニュー（スライドイン/アウトアニメーション） */}
+      {/* Mobile menu */}
       <div
-        className={`
-          md:hidden fixed top-16 left-0 w-full bg-white shadow-lg transform transition-transform duration-300 ease-in-out z-40
-          ${isMenuOpen ? 'translate-y-0' : '-translate-y-[100vh]'}
-          ${isMenuOpen ? 'pointer-events-auto' : 'pointer-events-none'}
-        `}
+        id="mobile-menu"
+        className={`absolute inset-x-0 top-full z-40 border-b border-line bg-ink-900/95 backdrop-blur-xl transition-all duration-200 ease-out md:hidden ${
+          isMenuOpen ? 'translate-y-0 opacity-100' : 'pointer-events-none -translate-y-2 opacity-0'
+        }`}
       >
-        <div className="pt-4 pb-3 space-y-1">
-          {navItems.map((item, index) => (
+        <nav className="mx-auto max-w-7xl space-y-1 px-4 py-4" aria-label="Mobile">
+          {navItems.map((item) => {
+            const isActive = active === item.id;
+            return (
+              <a
+                key={item.id}
+                href={item.href}
+                aria-current={isActive ? 'page' : undefined}
+                onClick={() => setIsMenuOpen(false)}
+                className={`flex items-center rounded-lg px-3 py-3 text-base font-medium transition-colors ${
+                  isActive ? 'bg-rhodo-500/10 text-rhodo-300' : 'text-body hover:bg-white/[0.04] hover:text-fg'
+                }`}
+              >
+                {item.label}
+              </a>
+            );
+          })}
+          <div className="my-2 h-px bg-line" />
+          {externalItems.map(({ href, label, Icon }) => (
             <a
-              key={`mobile-${index}`}
-              href={item.href}
-              className="block pl-3 pr-4 py-2 text-base font-medium text-gray-600 hover:text-gray-900 hover:bg-gray-50 flex items-center gap-1"
-              {...(item.external ? { target: "_blank", rel: "noopener" } : {})}
+              key={href}
+              href={href}
+              target="_blank"
+              rel="noopener"
               onClick={() => setIsMenuOpen(false)}
+              className="flex items-center gap-3 rounded-lg px-3 py-3 text-base font-medium text-body transition-colors hover:bg-white/[0.04] hover:text-fg"
             >
-              {item.label}
-              {item.icon}
+              <Icon className="h-5 w-5" />
+              {label}
+              <ExternalIcon className="ml-auto h-4 w-4 text-subtle" />
             </a>
           ))}
-        </div>
+        </nav>
       </div>
 
-      {/* オーバーレイ */}
-      {isMenuOpen && (
-        <div
-          className="fixed inset-0 bg-black/50 z-30"
-          onClick={() => setIsMenuOpen(false)}
-        />
-      )}
+      {/* Overlay */}
+      <div
+        className={`fixed inset-x-0 bottom-0 top-16 -z-10 bg-black/60 transition-opacity duration-200 md:hidden ${
+          isMenuOpen ? 'opacity-100' : 'pointer-events-none opacity-0'
+        }`}
+        onClick={() => setIsMenuOpen(false)}
+        aria-hidden="true"
+      />
     </div>
   );
 };

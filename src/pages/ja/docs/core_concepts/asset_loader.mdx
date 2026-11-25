@@ -5,7 +5,7 @@ description: RhodoniteのAssetLoaderについて
 
 import DocLayout from '../../../../components/docs_layouts/DocLayout.astro';
 
-<DocLayout>
+<DocLayout title={frontmatter.title} description={frontmatter.description}>
 
 AssetLoaderは、Rhodoniteで様々なPromiseを型安全に読み込むためのユーティリティクラスです。従来のPromise.allを使った読み込み方法と比較して、以下の利点があります：
 

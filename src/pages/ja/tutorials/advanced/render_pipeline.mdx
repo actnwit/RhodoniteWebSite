@@ -5,7 +5,7 @@ description: Rhodoniteでレンダーパイプラインを使う方法
 
 import DocLayout from '../../../../components/tutorials_layouts/DocLayout.astro';
 
-<DocLayout>
+<DocLayout title={frontmatter.title} description={frontmatter.description}>
 
 Rhodoniteでは屈折表現やMSAAなどの込み入った表現ができますが、本来そのためには複雑なレンダリングパスの設定を行う必要があります。
 それには一般的なリアルタイムレンダリングの知識が要求され、誰にでも容易にできることではありません。

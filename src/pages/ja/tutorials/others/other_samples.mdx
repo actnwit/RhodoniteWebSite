@@ -5,7 +5,7 @@ description: Rhodoniteのサンプルについて
 
 import DocLayout from '../../../../components/tutorials_layouts/DocLayout.astro';
 
-<DocLayout>
+<DocLayout title={frontmatter.title} description={frontmatter.description}>
 
 チュートリアルは以上ですが、もっと参考となるコードが欲しい場合は、Rhodoniteプロジェクトの[samples](https://github.com/actnwit/RhodoniteTS/tree/main/samples)ディレクトリを覗いてください。様々なサンプルのソースコードがあるのでコーディングの際の参考となるでしょう。
 

@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import TOCComponent from './TOCComponent';
 import ContentStyles from './ContentStyles';
 import { getLangFromUrl, useTranslations } from '../../i18n/utils';
+import { CloseIcon, MenuIcon } from '../icons';
 
 // TOCItemの型定義（TOCComponentと同じ）
 interface TOCItem {
@@ -23,102 +24,85 @@ interface ContentLayoutProps {
 }
 
 const ContentLayout: React.FC<ContentLayoutProps> = ({ tocItems, children }) => {
-  // 状態管理
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const [isMobile, setIsMobile] = useState(true);
   const lang = getLangFromUrl(new URL(window.location.href));
   const t = useTranslations(lang);
 
-  // 画面サイズの変更を監視
+  // ドロワーが開いている間は背面のスクロールを止める
   useEffect(() => {
-    function checkMobile() {
-      if (typeof window !== 'undefined') {
-        setIsMobile(window.innerWidth < 768);
-      }
-    }
+    document.body.classList.toggle('menu-open', isMenuOpen);
+    return () => document.body.classList.remove('menu-open');
+  }, [isMenuOpen]);
 
-    // 初期チェック
-    checkMobile();
-
-    // リサイズイベントの登録
-    window.addEventListener('resize', checkMobile);
-    return () => window.removeEventListener('resize', checkMobile);
+  useEffect(() => {
+    const onKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') setIsMenuOpen(false);
+    };
+    window.addEventListener('keydown', onKeyDown);
+    return () => window.removeEventListener('keydown', onKeyDown);
   }, []);
 
-  // サイドバーボタンのハンドラー
-  function handleMenuClick() {
-    setIsMenuOpen(prev => !prev);
-  }
-
-  // デスクトップ表示
-  if (!isMobile) {
-    return (
-      <div className="max-w-7xl mx-auto px-4 py-8 grid grid-cols-[280px_1fr] gap-8">
-        <aside className="sticky top-8 h-[calc(100vh-4rem)] overflow-y-auto pr-4 border-r border-[var(--border-color)]">
-          <TOCComponent tocItems={tocItems} />
-        </aside>
-        <main className="min-w-0 w-full overflow-x-auto">
-          <ContentStyles>{children}</ContentStyles>
-        </main>
-      </div>
-    );
-  }
-
-  // モバイル表示
   return (
-    <div className="w-full relative">
-      {/* メインコンテンツ */}
-      <main className="w-full px-4 py-8 overflow-x-hidden">
-        <div className="max-w-full mx-auto">
-          <ContentStyles>{children}</ContentStyles>
-        </div>
-      </main>
-
-      {/* メニューボタン */}
-      <button
-        type="button"
-        className="fixed left-4 bottom-4 z-[9999] w-14 h-14 rounded-full bg-pink-600 text-white flex items-center justify-center shadow-lg"
-        onClick={handleMenuClick}
-        aria-label={t('nav.toggleMenu')}
-      >
-        <span className="text-2xl">
-          {isMenuOpen ? (
-            <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-            </svg>
-          ) : (
-            <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
-            </svg>
-          )}
-        </span>
-      </button>
-
-      {/* オーバーレイ（メニューが開いているときのみ表示） */}
+    // 注意: ここで stacking context（isolate 等）を作ると、モバイルのドロワーがヘッダーの下に潜るので作らない
+    <div className="relative">
       <div
-        className={`fixed inset-0 bg-black/50 z-[9000] transition-opacity duration-300 ease-in-out ${
-          isMenuOpen ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'
-        }`}
-        onClick={() => setIsMenuOpen(false)}
+        className="pointer-events-none absolute inset-x-0 top-0 h-80 bg-gradient-to-b from-rhodo-500/[0.07] to-transparent"
+        aria-hidden="true"
       />
 
-      {/* サイドバー（常に存在し、トランスフォームで位置を制御） */}
+      <div className="relative mx-auto max-w-7xl px-4 sm:px-6 md:grid md:grid-cols-[230px_minmax(0,1fr)] md:gap-10 lg:grid-cols-[260px_minmax(0,1fr)] lg:gap-16 lg:px-8">
+        {/* Desktop sidebar */}
+        <aside className="hidden md:block">
+          <div className="sticky top-[var(--header-h)] max-h-[calc(100vh-var(--header-h))] overflow-y-auto py-10 pr-2">
+            <TOCComponent tocItems={tocItems} />
+          </div>
+        </aside>
+
+        <main className="min-w-0 pb-28 pt-10 md:pt-12">
+          <article className="max-w-3xl">
+            <ContentStyles>{children}</ContentStyles>
+          </article>
+        </main>
+      </div>
+
+      {/* Mobile: TOC button */}
+      <button
+        type="button"
+        className="fixed bottom-5 left-5 z-[60] flex h-12 items-center gap-2 rounded-full bg-rhodo-500 pl-4 pr-5 text-sm font-semibold text-white shadow-[0_10px_30px_-8px_rgba(233,97,143,0.8)] transition-colors hover:bg-rhodo-400 md:hidden"
+        onClick={() => setIsMenuOpen((open) => !open)}
+        aria-expanded={isMenuOpen}
+        aria-controls="toc-drawer"
+        aria-label={t('nav.toggleMenu')}
+      >
+        <MenuIcon className="h-5 w-5" />
+        {t('toc.title')}
+      </button>
+
+      {/* Mobile: overlay */}
       <div
-        className={`fixed top-0 left-0 h-full w-[280px] z-[9500] bg-white overflow-y-auto p-4 shadow-lg transform transition-transform duration-300 ease-in-out ${
+        className={`fixed inset-0 z-[65] bg-black/60 backdrop-blur-sm transition-opacity duration-300 md:hidden ${
+          isMenuOpen ? 'opacity-100' : 'pointer-events-none opacity-0'
+        }`}
+        onClick={() => setIsMenuOpen(false)}
+        aria-hidden="true"
+      />
+
+      {/* Mobile: drawer */}
+      <div
+        id="toc-drawer"
+        className={`fixed left-0 top-0 z-[70] h-full w-[300px] max-w-[85vw] overflow-y-auto border-r border-line bg-ink-850 px-5 py-6 shadow-2xl shadow-black/60 transition-transform duration-300 ease-out md:hidden ${
           isMenuOpen ? 'translate-x-0' : '-translate-x-full'
         }`}
       >
-        <div className="flex justify-between items-center mb-4">
-          <TOCComponent tocItems={tocItems} />
-          <button
-            type="button"
-            className="p-2 text-xl block absolute top-4 right-4"
-            onClick={() => setIsMenuOpen(false)}
-            aria-label={t('toc.collapse')}
-          >
-            ✕
-          </button>
-        </div>
+        <button
+          type="button"
+          className="absolute right-3 top-4 grid h-9 w-9 place-items-center rounded-lg text-muted transition-colors hover:bg-white/[0.06] hover:text-fg"
+          onClick={() => setIsMenuOpen(false)}
+          aria-label={t('toc.collapse')}
+        >
+          <CloseIcon className="h-5 w-5" />
+        </button>
+        <TOCComponent tocItems={tocItems} />
       </div>
     </div>
   );
