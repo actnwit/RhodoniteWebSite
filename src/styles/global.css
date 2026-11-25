@@ -99,8 +99,62 @@
     scrollbar-color: var(--color-ink-500) transparent;
   }
 
-  body.menu-open {
+  body.menu-open,
+  body:has(#mobile-menu:popover-open) {
     overflow: hidden;
+  }
+}
+
+/*
+ * モバイルメニュー（Navigation.tsx）。Popover API で開閉するので、
+ * 状態に応じた見た目は :popover-open を使って CSS 側で切り替える。
+ * Tailwind のユーティリティ（背景・枠線など）が勝つよう components レイヤーに置く。
+ */
+@layer components {
+  .mobile-menu {
+    position: fixed;
+    inset: calc(var(--header-h) + 1px) 0 auto 0;
+    width: 100%;
+    max-width: none;
+    max-height: calc(100dvh - var(--header-h) - 1px);
+    margin: 0;
+    padding: 0;
+    border-width: 0;
+    overflow-y: auto;
+    opacity: 0;
+    translate: 0 -0.5rem;
+    transition:
+      opacity 0.2s ease-out,
+      translate 0.2s ease-out,
+      overlay 0.2s ease-out allow-discrete,
+      display 0.2s ease-out allow-discrete;
+  }
+
+  .mobile-menu:popover-open {
+    opacity: 1;
+    translate: 0 0;
+  }
+
+  @starting-style {
+    .mobile-menu:popover-open {
+      opacity: 0;
+      translate: 0 -0.5rem;
+    }
+  }
+
+  /* ヘッダーは覆わず、その下だけを暗くする（ハンバーガーボタンで閉じられるように） */
+  .mobile-menu::backdrop {
+    inset: calc(var(--header-h) + 1px) 0 0 0;
+    background: rgb(0 0 0 / 0.6);
+  }
+
+  .mobile-menu-icon-close,
+  [data-site-header]:has(#mobile-menu:popover-open) .mobile-menu-icon-open {
+    display: none;
+  }
+
+  [data-site-header]:has(#mobile-menu:popover-open) .mobile-menu-icon-close {
+    display: block;
   }
 }
 

@@ -8,6 +8,8 @@ interface HeroProps {
   lang: Lang;
   videoSrc: string;
   posterSrc: string;
+  /** Label shown in the viewport's title bar. */
+  videoLabel: string;
   /** Slot for the (hydrated) install command. */
   children?: React.ReactNode;
 }
@@ -16,7 +18,7 @@ const Corner: React.FC<{ className: string }> = ({ className }) => (
   <span className={`pointer-events-none absolute h-5 w-5 border-rhodo-300/70 ${className}`} aria-hidden="true" />
 );
 
-export const Hero: React.FC<HeroProps> = ({ lang, videoSrc, posterSrc, children }) => {
+export const Hero: React.FC<HeroProps> = ({ lang, videoSrc, posterSrc, videoLabel, children }) => {
   const t = useTranslations(lang);
   const docsLang = getDocsLang(lang);
 
@@ -84,18 +86,24 @@ export const Hero: React.FC<HeroProps> = ({ lang, videoSrc, posterSrc, children 
           <div className="overflow-hidden rounded-2xl border border-line-strong bg-ink-800 shadow-2xl shadow-black/60">
             <div className="flex items-center gap-3 border-b border-line px-4 py-3">
               <WindowDots />
-              <span className="ml-1 truncate font-mono text-xs text-muted">Polly · glTF 2.0</span>
+              <span className="ml-1 truncate font-mono text-xs text-muted">{videoLabel}</span>
             </div>
             <div className="relative">
+              {/*
+                初期表示ではポスター画像だけを出し、動画は読み込まない（src は data-src に置く）。
+                ページの load 後に Welcome.astro のスクリプトが読み込み・再生を始めるので、
+                動画のダウンロードがナビゲーションなどの JS と帯域を奪い合わない。
+              */}
               <video
                 id="hero-video"
-                src={videoSrc}
+                data-src={videoSrc}
                 poster={posterSrc}
-                autoPlay
+                width={1280}
+                height={720}
                 loop
                 muted
                 playsInline
-                preload="metadata"
+                preload="none"
                 aria-hidden="true"
                 className="block aspect-video w-full object-cover"
               />
@@ -105,17 +113,6 @@ export const Hero: React.FC<HeroProps> = ({ lang, videoSrc, posterSrc, children 
               <Corner className="bottom-3 right-3 border-b-2 border-r-2" />
             </div>
           </div>
-          <figcaption className="mt-3 text-right text-xs text-subtle">
-            {t('hero.credit')}{' '}
-            <a
-              href="https://github.com/KhronosGroup/glTF-Blender-Exporter"
-              target="_blank"
-              rel="noopener"
-              className="underline decoration-line-strong underline-offset-2 transition-colors hover:text-muted"
-            >
-              KhronosGroup/glTF-Blender-Exporter
-            </a>
-          </figcaption>
         </figure>
       </div>
     </section>

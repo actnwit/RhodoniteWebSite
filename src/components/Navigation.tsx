@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import { getDocsLang, useTranslations, type Lang } from '../i18n/utils';
 import { LanguageSwitcher } from './LanguageSwitcher';
 import { DISCORD_URL, GITHUB_URL } from '../consts';
@@ -21,25 +21,16 @@ function getActiveSection(pathname: string): NavSection | null {
   return null;
 }
 
+/** 同一ページ内リンクや別タブで開くリンクを押したときにメニューを閉じる */
+const closeMobileMenu = () => {
+  const menu = document.getElementById('mobile-menu');
+  if (menu?.matches(':popover-open')) menu.hidePopover();
+};
+
 export const Navigation: React.FC<NavigationProps> = ({ lang, pathname }) => {
-  const [isMenuOpen, setIsMenuOpen] = useState(false);
   const t = useTranslations(lang);
   const docsLang = getDocsLang(lang);
   const active = getActiveSection(pathname);
-
-  // メニューが開いている間はスクロールを止める
-  useEffect(() => {
-    document.body.classList.toggle('menu-open', isMenuOpen);
-    return () => document.body.classList.remove('menu-open');
-  }, [isMenuOpen]);
-
-  useEffect(() => {
-    const onKeyDown = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') setIsMenuOpen(false);
-    };
-    window.addEventListener('keydown', onKeyDown);
-    return () => window.removeEventListener('keydown', onKeyDown);
-  }, []);
 
   const navItems: { id: NavSection; href: string; label: string }[] = [
     { id: 'home', href: `/${lang}/`, label: t('nav.home') },
@@ -110,15 +101,19 @@ export const Navigation: React.FC<NavigationProps> = ({ lang, pathname }) => {
           {/* Mobile */}
           <div className="flex items-center gap-1 md:hidden">
             <LanguageSwitcher lang={lang} pathname={pathname} />
+            {/*
+              ブラウザ標準の Popover API で開閉する。React のハイドレーション（JS の到着）を待たずに
+              SSR された HTML のままタップに反応できる。Esc キー・外側タップでの close もブラウザが行う。
+            */}
             <button
               type="button"
               className="grid h-10 w-10 place-items-center rounded-lg text-muted transition-colors hover:bg-white/[0.06] hover:text-fg"
-              aria-expanded={isMenuOpen}
+              popoverTarget="mobile-menu"
               aria-controls="mobile-menu"
-              onClick={() => setIsMenuOpen((open) => !open)}
             >
               <span className="sr-only">{t('nav.toggleMenu')}</span>
-              {isMenuOpen ? <CloseIcon className="h-6 w-6" /> : <MenuIcon className="h-6 w-6" />}
+              <MenuIcon className="mobile-menu-icon-open h-6 w-6" />
+              <CloseIcon className="mobile-menu-icon-close h-6 w-6" />
             </button>
           </div>
         </div>
@@ -127,9 +122,8 @@ export const Navigation: React.FC<NavigationProps> = ({ lang, pathname }) => {
       {/* Mobile menu */}
       <div
         id="mobile-menu"
-        className={`absolute inset-x-0 top-full z-40 border-b border-line bg-ink-900/95 backdrop-blur-xl transition-all duration-200 ease-out md:hidden ${
-          isMenuOpen ? 'translate-y-0 opacity-100' : 'pointer-events-none -translate-y-2 opacity-0'
-        }`}
+        popover="auto"
+        className="mobile-menu border-b border-line bg-ink-900/95 text-fg backdrop-blur-xl md:hidden"
       >
         <nav className="mx-auto max-w-7xl space-y-1 px-4 py-4" aria-label="Mobile">
           {navItems.map((item) => {
@@ -139,7 +133,7 @@ export const Navigation: React.FC<NavigationProps> = ({ lang, pathname }) => {
                 key={item.id}
                 href={item.href}
                 aria-current={isActive ? 'page' : undefined}
-                onClick={() => setIsMenuOpen(false)}
+                onClick={closeMobileMenu}
                 className={`flex items-center rounded-lg px-3 py-3 text-base font-medium transition-colors ${
                   isActive ? 'bg-rhodo-500/10 text-rhodo-300' : 'text-body hover:bg-white/[0.04] hover:text-fg'
                 }`}
@@ -155,7 +149,7 @@ export const Navigation: React.FC<NavigationProps> = ({ lang, pathname }) => {
               href={href}
               target="_blank"
               rel="noopener"
-              onClick={() => setIsMenuOpen(false)}
+              onClick={closeMobileMenu}
               className="flex items-center gap-3 rounded-lg px-3 py-3 text-base font-medium text-body transition-colors hover:bg-white/[0.04] hover:text-fg"
             >
               <Icon className="h-5 w-5" />
@@ -166,14 +160,6 @@ export const Navigation: React.FC<NavigationProps> = ({ lang, pathname }) => {
         </nav>
       </div>
 
-      {/* Overlay */}
-      <div
-        className={`fixed inset-x-0 bottom-0 top-16 -z-10 bg-black/60 transition-opacity duration-200 md:hidden ${
-          isMenuOpen ? 'opacity-100' : 'pointer-events-none opacity-0'
-        }`}
-        onClick={() => setIsMenuOpen(false)}
-        aria-hidden="true"
-      />
     </div>
   );
 };

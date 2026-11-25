@@ -11,8 +11,8 @@ import { Showcase } from './home/Showcase';
 import { EditorCta } from './home/EditorCta';
 import { Community } from './home/Community';
 
-import pollyVideo from '../assets/polly.mp4';
-import pollyPoster from '../assets/polly_poster.jpg';
+import demoVideo from '../assets/RhodoniteDemos.mp4';
+import demoPoster from '../assets/rhodonite_demos_poster.jpg';
 import editorImage from '../assets/RhodoniteEditor.jpg';
 import pbrImage from '../assets/screenshot_pbr.jpg';
 import vrmImage from '../assets/screenshot_vrm.jpg';
@@ -30,7 +30,7 @@ const toWebp = async (src: ImageMetadata, width: number) => {
 };
 
 const [poster, editor, pbr, vrm, shader] = await Promise.all([
-	toWebp(pollyPoster, 1280),
+	toWebp(demoPoster, 1280),
 	toWebp(editorImage, 1600),
 	toWebp(pbrImage, 800),
 	toWebp(vrmImage, 800),
@@ -56,7 +56,7 @@ engine.startRenderLoop(() => {
 ---
 
 <main>
-	<Hero lang={lang} videoSrc={pollyVideo} posterSrc={poster.src}>
+	<Hero lang={lang} videoSrc={demoVideo} posterSrc={poster.src} videoLabel="Rhodonite · Demos">
 		<CopyCommand client:idle lang={lang} />
 	</Hero>
 	<FeatureGrid lang={lang} />
@@ -69,10 +69,31 @@ engine.startRenderLoop(() => {
 </main>
 
 <script>
-	// 「視覚効果を減らす」設定のユーザーには、動画を自動再生しない
+	// ヒーロー動画は、ページの読み込み（JS・フォント・画像）が終わってから読み込み・再生を始める。
+	// 「視覚効果を減らす」設定やデータセーバーが有効な場合は、ポスター画像のままにする。
 	const video = document.getElementById('hero-video') as HTMLVideoElement | null;
-	if (video && window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
-		video.removeAttribute('autoplay');
-		video.pause();
+	const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+	const saveData = (navigator as Navigator & { connection?: { saveData?: boolean } }).connection?.saveData === true;
+
+	if (video?.dataset.src && !reduceMotion && !saveData) {
+		const src = video.dataset.src;
+		const start = () => {
+			video.src = src;
+			video.play().catch(() => {
+				// 自動再生がブロックされた場合はポスター表示のままにする
+			});
+		};
+		const schedule = () => {
+			if ('requestIdleCallback' in window) {
+				window.requestIdleCallback(start, { timeout: 2000 });
+			} else {
+				setTimeout(start, 200);
+			}
+		};
+		if (document.readyState === 'complete') {
+			schedule();
+		} else {
+			window.addEventListener('load', schedule, { once: true });
+		}
 	}
 </script>
