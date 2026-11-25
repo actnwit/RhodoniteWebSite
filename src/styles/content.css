@@ -1,79 +1,84 @@
-/* マークダウンコンテンツ用のグローバルスタイル */
+/*
+ * マークダウンコンテンツ（Docs / Tutorials）用のスタイル
+ * 色は global.css で定義したトークン（CSS変数）を参照する。
+ */
 .content-wrapper {
   width: 100%;
   max-width: 100%;
+  color: var(--text-color);
+  font-size: 1rem;
+  line-height: 1.8;
   overflow-wrap: break-word;
-  word-break: break-word;
+}
+
+.content-wrapper > :first-child,
+.content-wrapper > * > :first-child,
+.content-wrapper > * > * > :first-child {
+  margin-top: 0;
+}
+
+/* ---------- Headings ---------- */
+.content-wrapper h1,
+.content-wrapper h2,
+.content-wrapper h3,
+.content-wrapper h4,
+.content-wrapper h5 {
+  position: relative;
+  color: var(--heading-color);
+  font-family: var(--font-display);
+  letter-spacing: -0.02em;
+  line-height: 1.3;
+  scroll-margin-top: calc(var(--header-h) + 1.5rem);
 }
 
 .content-wrapper h1 {
   font-size: 2.5rem;
   font-weight: 700;
   margin-bottom: 1.5rem;
-  color: var(--heading-color);
-}
-
-@media (max-width: 768px) {
-  .content-wrapper h1 {
-    font-size: 2rem;
-  }
+  letter-spacing: -0.03em;
 }
 
 .content-wrapper h2 {
-  font-size: 1.875rem;
+  font-size: 1.75rem;
   font-weight: 600;
-  margin: 2rem 0 1rem;
-  color: var(--heading-color);
-}
-
-@media (max-width: 768px) {
-  .content-wrapper h2 {
-    font-size: 1.5rem;
-  }
+  margin: 3.5rem 0 1.25rem;
+  padding-bottom: 0.75rem;
+  border-bottom: 1px solid var(--border-color);
 }
 
 .content-wrapper h3 {
-  font-size: 1.5rem;
+  font-size: 1.3rem;
   font-weight: 600;
-  margin: 1.5rem 0 1rem;
-  color: var(--heading-color);
-}
-
-@media (max-width: 768px) {
-  .content-wrapper h3 {
-    font-size: 1.25rem;
-  }
+  margin: 2.5rem 0 0.75rem;
 }
 
 .content-wrapper h4 {
-  font-size: 1.25rem;
+  font-size: 1.1rem;
   font-weight: 600;
-  margin: 1.25rem 0 0.75rem;
-  color: var(--heading-color);
-}
-
-@media (max-width: 768px) {
-  .content-wrapper h4 {
-    font-size: 1rem;
-  }
+  margin: 2rem 0 0.5rem;
 }
 
 .content-wrapper h5 {
-  font-size: 1.1rem;
+  font-size: 1rem;
   font-weight: 600;
-  margin: 1rem 0 0.5rem;
-  color: var(--heading-color);
+  margin: 1.5rem 0 0.5rem;
+  color: var(--text-muted);
 }
 
 @media (max-width: 768px) {
-  .content-wrapper h5 {
-    font-size: 0.9rem;
-  }
+  .content-wrapper h1 { font-size: 2rem; }
+  .content-wrapper h2 { font-size: 1.5rem; margin-top: 2.75rem; }
+  .content-wrapper h3 { font-size: 1.2rem; }
 }
 
+/* ---------- Text ---------- */
 .content-wrapper p {
-  margin: 1rem 0;
-  line-height: 1.7;
+  margin: 1.1rem 0;
+}
+
+.content-wrapper strong {
+  color: var(--heading-color);
+  font-weight: 600;
 }
 
 .content-wrapper .lead {
@@ -81,87 +86,152 @@
   color: var(--text-muted);
 }
 
-.content-wrapper .steps {
-  margin: 2rem 0;
+.content-wrapper a {
+  color: var(--color-rhodo-300);
+  text-decoration: underline;
+  text-decoration-color: rgb(245 159 184 / 0.35);
+  text-underline-offset: 3px;
+  text-decoration-thickness: 1px;
+  transition: color 0.15s ease, text-decoration-color 0.15s ease;
 }
 
-.content-wrapper .step {
-  margin: 1.5rem 0;
-  padding: 1.5rem;
-  background: var(--bg-secondary);
-  border-radius: 0.5rem;
+.content-wrapper a:hover {
+  color: var(--color-rhodo-200);
+  text-decoration-color: currentColor;
+}
+
+.content-wrapper hr {
+  margin: 3rem 0;
+  border: 0;
+  border-top: 1px solid var(--border-color);
+}
+
+/* ---------- Lists ---------- */
+.content-wrapper ul,
+.content-wrapper ol {
+  margin: 1.1rem 0;
+  padding-left: 1.5rem;
+}
+
+.content-wrapper ul { list-style-type: disc; }
+.content-wrapper ol { list-style-type: decimal; }
+
+.content-wrapper li {
+  margin: 0.4rem 0;
+  padding-left: 0.25rem;
+  display: list-item;
+}
+
+.content-wrapper li::marker {
+  color: var(--color-rhodo-400);
+}
+
+.content-wrapper ol > li::marker {
+  font-family: var(--font-mono);
+  font-size: 0.85em;
+}
+
+/* GFM task list */
+.content-wrapper li:has(> input[type="checkbox"]) {
+  list-style: none;
+  margin-left: -1.25rem;
+}
+
+.content-wrapper input[type="checkbox"] {
+  accent-color: var(--color-rhodo-500);
+  margin-right: 0.5rem;
+  transform: translateY(1px);
+}
+
+/* ---------- Code ---------- */
+.content-wrapper code {
+  font-family: var(--font-mono);
+  font-size: 0.86em;
+}
+
+.content-wrapper :not(pre) > code {
+  padding: 0.15em 0.4em;
+  border: 1px solid var(--border-color);
+  border-radius: 6px;
+  background: rgb(255 255 255 / 0.05);
+  color: var(--color-rhodo-200);
+  white-space: break-spaces;
 }
 
 .content-wrapper pre {
-  background: var(--bg-code);
-  padding: 1rem;
-  border-radius: 0.375rem;
-  overflow-x: auto;
-  margin: 1rem 0;
+  position: relative;
+  margin: 1.5rem 0;
+  padding: 1.1rem 1.25rem;
   max-width: 100%;
-  white-space: pre-wrap;
-  word-wrap: break-word;
+  overflow-x: auto;
+  border: 1px solid var(--border-color);
+  border-radius: 12px;
+  background-color: var(--bg-code) !important;
+  font-size: 0.85rem;
+  line-height: 1.7;
+  white-space: pre;
 }
 
-.content-wrapper code {
-  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
-  font-size: 0.875rem;
+.content-wrapper pre code {
+  font-size: inherit;
 }
 
+/* ---------- Media ---------- */
 .content-wrapper img {
+  display: block;
   max-width: 100%;
   height: auto;
-  display: block;
+  margin: 1.75rem 0;
+  border: 1px solid var(--border-color);
+  border-radius: 12px;
 }
 
-.content-wrapper table {
-  width: 100%;
-  border-collapse: collapse;
-  overflow-x: auto;
-  display: table;
+.content-wrapper iframe {
   max-width: 100%;
-  margin-bottom: 1.5rem;
-  table-layout: auto;
+  border: 1px solid var(--border-color) !important;
+  border-radius: 12px !important;
+}
+
+/* ---------- Tables ---------- */
+.content-wrapper table {
+  display: block;
+  width: max-content;
+  max-width: 100%;
+  overflow-x: auto;
+  margin: 1.5rem 0;
+  border-collapse: separate;
+  border-spacing: 0;
+  border: 1px solid var(--border-color);
+  border-radius: 12px;
+  font-size: 0.92rem;
 }
 
 .content-wrapper th,
 .content-wrapper td {
-  border: 1px solid var(--border-color, #e2e8f0);
-  padding: 0.75rem;
+  padding: 0.65rem 1rem;
   text-align: left;
   min-width: 7rem;
   white-space: normal;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.content-wrapper th + th,
+.content-wrapper td + td {
+  border-left: 1px solid var(--border-color);
+}
+
+.content-wrapper tr:last-child td {
+  border-bottom: 0;
 }
 
 .content-wrapper th {
-  background-color: var(--bg-secondary, #f8fafc);
+  background-color: var(--bg-secondary);
+  color: var(--heading-color);
   font-weight: 600;
 }
 
-.content-wrapper .note {
-  margin: 1.5rem 0;
-  padding: 1rem;
-  background: var(--bg-info);
-  border-left: 4px solid var(--info-color);
-  border-radius: 0.375rem;
-}
-
-.content-wrapper ul {
-  margin: 1rem 0;
-  padding-left: 1.5rem;
-  list-style-type: disc;
-}
-
-.content-wrapper li {
-  margin: 0.5rem 0;
-  line-height: 1.7;
-  display: list-item;
-}
-
-.content-wrapper ol {
-  margin: 1rem 0;
-  padding-left: 1.5rem;
-  list-style-type: decimal;
+.content-wrapper tbody tr:hover td {
+  background-color: rgb(255 255 255 / 0.02);
 }
 
 .content-wrapper .table-container {
@@ -170,14 +240,36 @@
   display: block;
 }
 
-/* ヘッダーアンカーリンクのスタイル */
-.content-wrapper h2,
-.content-wrapper h3,
-.content-wrapper h4,
-.content-wrapper h5 {
-  position: relative;
+/* ---------- Callouts ---------- */
+.content-wrapper blockquote,
+.content-wrapper .note {
+  margin: 1.75rem 0;
+  padding: 0.9rem 1.25rem;
+  border: 1px solid rgb(233 97 143 / 0.2);
+  border-left: 3px solid var(--info-color);
+  border-radius: 10px;
+  background: var(--bg-info);
+  color: var(--text-color);
 }
 
+.content-wrapper blockquote > :first-child,
+.content-wrapper .note > :first-child { margin-top: 0; }
+.content-wrapper blockquote > :last-child,
+.content-wrapper .note > :last-child { margin-bottom: 0; }
+
+.content-wrapper .steps {
+  margin: 2rem 0;
+}
+
+.content-wrapper .step {
+  margin: 1.5rem 0;
+  padding: 1.5rem;
+  border: 1px solid var(--border-color);
+  border-radius: 12px;
+  background: var(--bg-secondary);
+}
+
+/* ---------- Heading anchors ---------- */
 .content-wrapper h2 .heading-anchor,
 .content-wrapper h3 .heading-anchor,
 .content-wrapper h4 .heading-anchor,
@@ -185,7 +277,7 @@
   position: absolute;
   visibility: hidden;
   margin-left: 0.5rem;
-  color: var(--primary-color, #d946ef);
+  color: var(--color-rhodo-400);
   text-decoration: none;
   opacity: 0;
   transition: opacity 0.2s, visibility 0.2s;
@@ -194,23 +286,14 @@
 .content-wrapper h2:hover .heading-anchor,
 .content-wrapper h3:hover .heading-anchor,
 .content-wrapper h4:hover .heading-anchor,
-.content-wrapper h5:hover .heading-anchor {
+.content-wrapper h5:hover .heading-anchor,
+.content-wrapper .heading-anchor:focus-visible {
   visibility: visible;
   opacity: 1;
 }
 
 .content-wrapper .heading-anchor .anchor-icon {
-  font-size: 0.85em;
+  font-family: var(--font-mono);
+  font-size: 0.8em;
   vertical-align: middle;
-}
-
-.content-wrapper a {
-  color: #0066cc;
-  text-decoration: underline;
-  transition: color 0.2s ease;
-}
-
-.content-wrapper a:hover {
-  color: #004c99;
-  text-decoration: underline;
 }

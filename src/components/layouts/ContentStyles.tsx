@@ -4,13 +4,9 @@ interface ContentStylesProps {
   children: React.ReactNode;
 }
 
-// 改良したスタイリングラッパー：Tailwindクラスを使用
+// 本文のラッパー。タイポグラフィは DocLayout.astro 側の .content-wrapper（content.css）で適用する
 const ContentStyles: React.FC<ContentStylesProps> = ({ children }) => {
-  return (
-    <div className="content-wrapper max-w-full overflow-hidden break-words">
-      {children}
-    </div>
-  );
+  return <div className="max-w-full">{children}</div>;
 };
 
 export default ContentStyles;

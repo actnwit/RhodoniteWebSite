@@ -5,7 +5,7 @@ description: How to use the render pipeline in Rhodonite
 
 import DocLayout from '../../../../components/tutorials_layouts/DocLayout.astro';
 
-<DocLayout>
+<DocLayout title={frontmatter.title} description={frontmatter.description}>
 
 Rhodonite allows for intricate rendering such as refraction and MSAA, but this inherently requires complex rendering pass settings.
 This requires general real-time rendering knowledge and is not easy for everyone to do.

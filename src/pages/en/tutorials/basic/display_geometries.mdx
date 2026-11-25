@@ -5,7 +5,7 @@ description: How to display geometries in Rhodonite
 
 import DocLayout from '../../../../components/tutorials_layouts/DocLayout.astro';
 
-<DocLayout>
+<DocLayout title={frontmatter.title} description={frontmatter.description}>
 
 ## Structure of the geometry-related classes
 The class that stores the actual vertex data is the Primitive class.The Mesh class is the class that brings together multiple Primitive classes. Each Primitive class owns an instance of the Material class.

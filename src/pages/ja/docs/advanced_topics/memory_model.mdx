@@ -5,7 +5,7 @@ description: Rhodoniteのメモリモデルについて
 
 import DocLayout from '../../../../components/docs_layouts/DocLayout.astro';
 
-<DocLayout>
+<DocLayout title={frontmatter.title} description={frontmatter.description}>
 
 　Rhodoniteで使用するメモリーの多くは、Bufferと呼ばれる巨大なメモリプールとして確保されており、各コンポーネントとマテリアルに対して、以下のように割り振られています。
 

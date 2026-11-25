@@ -5,7 +5,7 @@ description: RhodoniteのEntityとComponentについて
 
 import DocLayout from '../../../../components/docs_layouts/DocLayout.astro';
 
-<DocLayout>
+<DocLayout title={frontmatter.title} description={frontmatter.description}>
 
 RhodoniteではUnityやUnreal Engineでも見られる、コンポーネントシステムを採用しています。
 ３D空間上のオブジェクトを意味するEntityに１つ以上のコンポーネントを搭載させることで、そのEntityは搭載したコンポーネントの機能を獲得します。

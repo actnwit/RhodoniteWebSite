@@ -5,7 +5,7 @@ description: About Entity and Component in Rhodonite
 
 import DocLayout from '../../../../components/docs_layouts/DocLayout.astro';
 
-<DocLayout>
+<DocLayout title={frontmatter.title} description={frontmatter.description}>
 
 Rhodonite uses the component system, which is also found in Unity and Unreal Engine.
 By loading one or more components onto an Entity, meaning an object in 3D space, the Entity acquires the functionality of the loaded component.

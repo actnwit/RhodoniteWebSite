@@ -6,7 +6,7 @@ const lang = getLangFromUrl(Astro.url);
 const t = useTranslations(lang);
 ---
 
-<Layout>
+<Layout hideFooter>
   <div class="api-container">
     <iframe src="https://actnwit.github.io/RhodoniteTS/api/" class="api-iframe"></iframe>
   </div>
@@ -15,7 +15,7 @@ const t = useTranslations(lang);
 <style>
   .api-container {
     width: 100%;
-    height: calc(100vh - 72px); /* デフォルト値、JavaScriptで上書きされます */
+    height: calc(100vh - 64px); /* デフォルト値、JavaScriptで上書きされます */
     overflow: hidden;
   }
 
@@ -30,7 +30,7 @@ const t = useTranslations(lang);
 <script>
   // ナビゲーションバーの高さを測り、iframeの高さを動的に調整する
   function adjustIframeHeight() {
-    const navbar = document.querySelector('.navbar') as HTMLElement;
+    const navbar = document.querySelector('[data-site-header]') as HTMLElement;
     const apiContainer = document.querySelector('.api-container') as HTMLElement;
 
     if (navbar && apiContainer) {
